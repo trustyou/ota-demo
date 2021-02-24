@@ -116,7 +116,7 @@
 	});
 
 	var otaHealthCheckRequest = $.ajax({
-		url: "http://mine.analytics.trustyou.com:8080/health-check",
+		url: "https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/health-check",
 	}).fail(function() {
 		console.log("OTA Demo API is down!");
 	});
