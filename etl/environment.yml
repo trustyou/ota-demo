@@ -1,0 +1,10 @@
+annels:
+  - conda-forge
+dependencies:
+  - python=3.9.2
+  - conda-pack=0.6.0
+  - pyspark=3.0.2
+  - pyarrow=3.0.0
+  - pandas=1.2.2
+  - psycopg2=2.8.6
+  - jupyter=1.0.0
