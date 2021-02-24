@@ -12,4 +12,5 @@ export SPARK_CONF_DIR=${HOME}/spark-conf
 
 source ${CONDA_SH} && \
 conda activate ${CONDA_ENV} && \
+cd $HOME/ota-demo/etl/notebooks && \
 jupyter notebook
