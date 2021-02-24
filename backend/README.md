@@ -5,7 +5,7 @@ How to run?
 -----------
 1. Create a virtual environment and install python dependencies
 ```
-virtualenv venv -p=python3.9
+virtualenv venv -p python3.9
 source venv/bin/activate
 pip install -r requirements.txt
 ```
