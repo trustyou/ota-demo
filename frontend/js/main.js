@@ -115,9 +115,18 @@
 		throw "Bulk request failed!";
 	});
 
+	var otaHealthCheckRequest = $.ajax({
+		url: "http://mine.analytics.trustyou.com:8080/health-check",
+	}).fail(function() {
+		console.log("OTA Demo API is down!");
+	});
+
 	// when the DOM is ready for rendering, process the API response
 	$(function() {
 		bulkRequest.done(processApiResponse);
+		otaHealthCheckRequest.done(function() {
+			console.log("OTA API available!")
+		});
 
 		// when a tab change occurs
 		$(document).on('shown.bs.tab', 'a[data-toggle="tab"]',function (e) {

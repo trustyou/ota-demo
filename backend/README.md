@@ -51,7 +51,7 @@ How to run in docker?
 
  2. Run the image
 ```
- docker run -p 8080:8080 ota_demo_api:latest
+ docker run -t -i -p 8080:8080 --env DATABASE_URL=$DATABASE_URL ota_demo_api:latest
 ```
 
  3. For the documentation go to:
