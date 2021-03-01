@@ -12,7 +12,7 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=SearchResponse)
+@router.get("/", response_model=SearchResponse)
 async def search_api(item: SearchRequest):
     search_data = jsonable_encoder(item)
     search_service = SearchService()
