@@ -12,9 +12,12 @@ html
 
 body.splashscreens
 	main
-		h1.text-white Where are you traveling to?
-		form.search-form(action="results.html")
-			input.search-location(type="search" placeholder="Type a city name" name="location" required)
+		.container
+			h1.text-white Where are you traveling to?
+			form.search-form(action="results.html")
+				input.search-location(type="search" placeholder="Type a city name" name="location" required)
+				label.search-icon
+					i.ty-icon.ty-icon-search
 
 	// Scripts
 	script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
