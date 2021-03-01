@@ -11,37 +11,39 @@ html
 	link(rel="stylesheet", href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
 
 body
-	header
-		.container
-			form.search-form(action="results.html")
-				input.search-location(type="search" placeholder="Type a city name" name="location" required)
-				label.search-icon
-					i.ty-icon.ty-icon-search
+	header.hero
+		.hero-bg
+		.hero-content
+			.container
+				h1.text-white 1,235 results for #[em#search-location]
+				form.search-form(action="results.html")
+					input.search-location(type="search" placeholder="Try another city?" name="location" required)
+					label.search-icon
+						i.ty-icon.ty-icon-search
 	main
-		.container
-			section.search-results
-				h2 Showing search results for "#[strong#search-location]"
-				- for (var i = 0; i < 5; ++i) {
-					article.hotel
-						.hotel-image
-							img(src="" alt="Photo")
-						.hotel-details
-							h3 Sapphire Hotel & Spa
-							h4 2km from center
-							ul.overall
-								li Match: #[span.pill 85%]
-								li Reviews: 1,235
-								li Score: 8.5
-							ul.categories
-								li #[span.pill 4.5] Cleanliness
-								li #[span.pill 3.7] Rooms
-							ul.badges
-								li #[span.pill Top 3%] Luxury hotel
-								li #[span.pill Top 1%] Romantic hotel
-						.hotel-actions
-							a.action-primary.btn.btn-primary(href="details.html") Book Now
-							a.action-secondary.btn.btn-text(href="details.html") More details
-				- }
+		section.search-results
+			- for (var i = 0; i < 5; ++i) {
+				article.hotel
+					.hotel-image
+						img(src="" alt="Photo")
+					.hotel-details
+						h3 Sapphire Hotel & Spa
+						h4 2km from center
+						ul.overall
+							li Match: #[span.pill 85%]
+							li Reviews: 1,235
+							li Score: 8.5
+						ul.categories
+							li #[span.pill 4.5] Cleanliness
+							li #[span.pill 3.7] Rooms
+						ul.badges
+							li #[span.pill Top 3%] Luxury hotel
+							li #[span.pill Top 1%] Romantic hotel
+					.hotel-actions
+						a.action-primary.btn.btn-primary(href="details.html") Book Now
+						a.action-secondary.btn.btn-text(href="details.html") More details
+			- }
+		section.search-map
 
 	// Scripts
 	script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
