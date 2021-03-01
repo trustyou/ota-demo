@@ -1,0 +1,31 @@
+@import "variables/colors",
+		"variables/elevation",
+		"variables/layout",
+		"variables/typography";
+
+body {
+	background: linear-gradient(to right, #ef8e38, #108dc7);
+}
+
+h1 {
+	width: 100%;
+	margin: auto 0 $space-10;
+	text-shadow: $elevation-medium;
+}
+
+.search-form {
+	margin: 0 0 auto;
+	padding-bottom: $space-10;
+
+	.search-location {
+		transition: all 0.1s ease-in-out;
+		box-shadow: $elevation-medium;
+
+		&:focus {
+			border: none;
+			outline: none;
+			box-shadow: $elevation-high;
+			transform: scale(1.1);
+		}
+	}
+}

@@ -3,17 +3,19 @@ html
 	meta(name="viewport", content="width=device-width,initial-scale=1.0")
 	meta(name="robots", content="noindex, nofollow")
 
-	title TrustYou OTA Demo
+	title Home
 
 	link(rel="stylesheet", type="text/css", href="../css/style.css")
+	link(rel="stylesheet", type="text/css", href="../css/home.css")
 	link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Roboto&display=swap")
 	link(rel="stylesheet", href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
 
-body
-	header
-		nav
-			h1 OTA Demo
+body.splashscreens
 	main
+		h1.text-white Where are you traveling to?
 		form.search-form(action="results.html")
-			input.search-location(type="search")
-			input.search-button(type="submit" value="Search")
+			input.search-location(type="search" placeholder="Type a city name" name="location" required)
+
+	// Scripts
+	script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
+	script(src="js/main.js")

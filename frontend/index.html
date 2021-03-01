@@ -3,21 +3,20 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <meta name="robots" content="noindex, nofollow"/>
-  <title>TrustYou OTA Demo</title>
+  <title>Home</title>
   <link rel="stylesheet" type="text/css" href="../css/style.css"/>
+  <link rel="stylesheet" type="text/css" href="../css/home.css"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display&amp;family=Roboto&amp;display=swap"/>
   <link rel="stylesheet" href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
 </html>
-<body>
-  <header>
-    <nav>
-      <h1>OTA Demo</h1>
-    </nav>
-  </header>
+<body class="splashscreens">
   <main>
+    <h1 class="text-white">Where are you traveling to?</h1>
     <form class="search-form" action="results.html">
-      <input class="search-location" type="search" name="location" />
-      <input class="search-button" type="submit" value="Search"/>
+      <input class="search-location" type="search" placeholder="Type a city name" name="location" required="required"/>
     </form>
   </main>
+  <!-- Scripts-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="js/main.js"></script>
 </body>

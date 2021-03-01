@@ -148,12 +148,4 @@ static
 # env vars
 envvars.sh
 
-frontend/.DS_Store
-
-frontend/_old/.DS_Store
-
-frontend/_old/css/.DS_Store
-
-frontend/css/.DS_Store
-
-frontend/_old/js/.DS_Store
+**/.DS_Store
