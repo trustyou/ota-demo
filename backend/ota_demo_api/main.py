@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 import ota_demo_api.consts as consts
+from ota_demo_api.persistence.database import database
 from ota_demo_api.routers import search
 
 app = FastAPI()
