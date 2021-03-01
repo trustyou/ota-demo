@@ -8,11 +8,13 @@ body {
 	background: #eee;
 }
 
+header,
+main {
+	padding: $space-10;
+}
+
 .search-form {
 }
 
 .search-results {
-	width: 100%;
-	max-width: $container-width;
-	padding: $space-10;
 }
