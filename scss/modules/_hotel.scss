@@ -1,0 +1,35 @@
+.hotel {
+	transition: all 0.1s ease-in-out;
+	background: #fff;
+	box-shadow: $elevation-base;
+	padding: $space-8;
+	margin-bottom: $space-8;
+	border-radius: 4px;
+	display: flex;
+	font-family: $font-sans-serif;
+
+	.hotel-image {
+		flex: 0 0 200px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: $gray-200;
+		text-align: center;
+
+		img {
+			max-width: 100%;
+		}
+	}
+
+	.hotel-details {
+		flex: 1 1 auto;
+	}
+
+	.hotel-actions {
+		margin: 0 0 auto;
+		flex-direction: column;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+}

@@ -1,0 +1,88 @@
+.btn {
+  transition: all 0.1s ease-in-out;
+  font-family: $font-sans-serif;
+  font-size: 1rem;
+  line-height: 1.4rem;
+  border: none;
+  border-radius: 20px;
+  height: 40px;
+  padding: 10px 20px;
+  text-decoration: none;
+  background: $gray-100;
+  color: $gray-500;
+
+  &:hover {
+    background: $gray-50;
+    color: $gray-500;
+  }
+
+  &:active {
+    background: $gray-200;
+    color: $gray-700;
+  }
+
+  &.btn-text {
+    background: transparent;
+    color: $gray-500;
+
+    &:hover {
+      color: $blue-400;
+    }
+
+    &:active {
+      color: $blue-700;
+    }
+  }
+
+  &.btn-primary {
+    color: $white;
+    background: $blue-500;
+
+    &:hover {
+      background: $blue-400;
+    }
+
+    &:active {
+      background: $blue-600;
+    }
+  }
+
+  &.btn-positive {
+    color: $white;
+    background: $green-500;
+
+    &:hover {
+      background: $green-400;
+    }
+
+    &:active {
+      background: $green-600;
+    }
+  }
+
+  &.btn-neutral {
+    color: $white;
+    background: $orange-500;
+
+    &:hover {
+      background: $orange-400;
+    }
+
+    &:active {
+      background: $orange-600;
+    }
+  }
+
+  &.btn-negative {
+    color: $white;
+    background: $red-500;
+
+    &:hover {
+      background: $red-400;
+    }
+
+    &:active {
+      background: $red-600;
+    }
+  }
+}

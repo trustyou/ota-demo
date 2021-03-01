@@ -1,0 +1,28 @@
+h1 {
+	font-size: 2rem;
+	line-height: 2.4rem;
+	text-align: center;
+	font-family: $font-sans-serif;
+	font-weight: 300;
+}
+
+
+/*
+* Text Styles
+*/
+
+.text-positive {
+	color: $green-500;
+}
+
+.text-negative {
+	color: $red-500;
+}
+
+.text-neutral {
+	color: $orange-500;
+}
+
+.text-white {
+	color: #fff;
+}
