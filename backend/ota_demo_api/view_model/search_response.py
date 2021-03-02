@@ -73,6 +73,12 @@ class RelevantNowResponse(BaseModel):
     overall_satisfaction: Optional[OverallSatisfaction]
 
 
+class MatchResponse(BaseModel):
+    score: float
+    language: str
+    trip_type: str
+
+
 class HotelResponse(BaseModel):
     ty_id: str
     name: str
@@ -83,8 +89,7 @@ class HotelResponse(BaseModel):
     badges: Optional[List[BadgeResponse]]
     reviews_distribution: Optional[List[ReviewsDistributionResponse]]
     traveler_types_distribution: Optional[List[TravelerTypesDistributionResponse]]
-    match_score: float
-
+    match: MatchResponse
 
 class SearchResponse(BaseModel):
     hotels: List[HotelResponse]

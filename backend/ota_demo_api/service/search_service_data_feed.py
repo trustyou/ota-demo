@@ -14,7 +14,7 @@ from ota_demo_api.view_model.search_response import (
 )
 from ota_demo_api.view_model.search_response import ReviewsDistributionResponse
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
-from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse
+from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse, MatchResponse
 from ota_demo_api.consts import TRUSTYOU_HOTEL_API_KEY
 
 
@@ -76,8 +76,11 @@ class SearchServiceDataFeed(object):
                     badges=badges,
                     reviews_distribution=reviews_distribution,
                     traveler_types_distribution=traveler_types_distribution,
-                    match_score=ty_clusters[ty_id].match_score if ty_clusters[ty_id] else 0,
-
+                    match=MatchResponse(
+                        score=(ty_clusters[ty_id].match_score if ty_clusters[ty_id] else 0),
+                        language=(ty_clusters[ty_id].language if ty_clusters[ty_id] else "all"),
+                        trip_type=(ty_clusters[ty_id].trip_type if ty_clusters[ty_id] else "all")
+                    )
                 )
             )
 
