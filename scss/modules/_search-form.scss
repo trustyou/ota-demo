@@ -27,6 +27,14 @@ fieldset {
 	border: none;
 }
 
+legend {
+	text-align: center;
+	font-family: $font-sans-serif;
+	font-weight: 400;
+	text-shadow: $elevation-medium;
+	color: $white;
+}
+
 // Primary search: Simple search box
 
 .search-primary {
@@ -39,12 +47,7 @@ fieldset {
 	legend {
 		font-size: 2.4rem;
 		line-height: 2.8rem;
-		text-align: center;
 		margin: $space-8 auto;
-		font-family: $font-sans-serif;
-		font-weight: 400;
-		text-shadow: $elevation-medium;
-		color: $white;
 	}
 
 	.search-box {
@@ -130,10 +133,23 @@ fieldset {
 		transition: all 0.3s ease-in-out;
 		height: 0;
 		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 
 		&.is-open {
 			height: auto;
-			overflow: : auto;
+			overflow: auto;
+		}
+
+		legend {
+			font-size: 1.8rem;
+			line-height: 2.0rem;
+			margin: $space-8 auto;
+		}
+
+		.btn {
+			margin-bottom: $space-10;
 		}
 	}
 }

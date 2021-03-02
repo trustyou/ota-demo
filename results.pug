@@ -12,21 +12,27 @@ html
 
 body
 	header
-		form.search-form(action="results.html")
+		form.search-form#search-form(action="results.html")
 			.search-container
-				fieldset.search-primary
+				fieldset.search-primary#search-primary
 					legend You have 1,235 results for #[em#search-location]
 					.search-box
 						input.search-location(type="search" placeholder="Try another city?" name="location" required)
 						i.ty-icon.ty-icon-search
 				fieldset.search-secondary
-					.search-preferences
+					.search-preferences#search-preferences
 						fielset
-							legend Adjust search preferences
+							legend What is most relevant for your trip?
+							input(type="checkbox")
+						fielset
+							legend What kind of trip did you have in mind?
+							input(type="checkbox")
+						fielset
+							legend Any special occasion for this trip?
 							input(type="checkbox")
 						input.btn.btn-primary(type="submit" value="Apply preferences")
-					.search-toggle
-						| Adjust search preferences
+					.search-toggle#search-toggle
+						span Adjust search preferences
 						i.ty-icon.ty-icon-chevron-down
 	main
 		section.search-results

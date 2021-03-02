@@ -11,23 +11,31 @@
 </html>
 <body>
   <header>
-    <form class="search-form" action="results.html">
+    <form class="search-form" id="search-form" action="results.html">
       <div class="search-container">
-        <fieldset class="search-primary">
+        <fieldset class="search-primary" id="search-primary">
           <legend>You have 1,235 results for <em id="search-location"></em></legend>
           <div class="search-box">
             <input class="search-location" type="search" placeholder="Try another city?" name="location" required="required"/><i class="ty-icon ty-icon-search"></i>
           </div>
         </fieldset>
         <fieldset class="search-secondary">
-          <div class="search-preferences">
+          <div class="search-preferences" id="search-preferences">
             <fielset>
-              <legend>Adjust search preferences</legend>
+              <legend>What is most relevant for your trip?</legend>
+              <input type="checkbox"/>
+            </fielset>
+            <fielset>
+              <legend>What kind of trip did you have in mind?</legend>
+              <input type="checkbox"/>
+            </fielset>
+            <fielset>
+              <legend>Any special occasion for this trip?</legend>
               <input type="checkbox"/>
             </fielset>
             <input class="btn btn-primary" type="submit" value="Apply preferences"/>
           </div>
-          <div class="search-toggle">Adjust search preferences<i class="ty-icon ty-icon-chevron-down"></i></div>
+          <div class="search-toggle" id="search-toggle"><span>Adjust search preferences</span><i class="ty-icon ty-icon-chevron-down"></i></div>
         </fieldset>
       </div>
     </form>
