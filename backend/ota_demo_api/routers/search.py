@@ -29,6 +29,7 @@ async def search_api(
     radius: Optional[float] = None,
     language: Optional[str] = None,
     page: Optional[int] = 0,
+    scale: Optional[int] = 100,
     page_size: Optional[int] = 50,
     use_mock: Optional[int] = 1
 ) -> SearchResponse:
@@ -44,6 +45,7 @@ async def search_api(
             long=long,
             radius=radius,
             language=language,
+            scale=scale,
             page=page,
             page_size=page_size
         )

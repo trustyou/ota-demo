@@ -38,7 +38,7 @@ class CategoryResponseBase(BaseModel):
     count: int
     sentiment: str
     text: str
-    score: int
+    score: float
     relevance: float
     short_text: str
     category_id: str

@@ -20,19 +20,22 @@ class SearchService(object):
 
         cluster_search_results = await self.repository.fetch(search_data)
 
-        hotels_response = SearchServiceDataFeed.search(cluster_search_results)
+        hotels_response = SearchServiceDataFeed.search(search_data, cluster_search_results)
 
         return hotels_response
 
 
-class SearchServiceMock(object):
-    async def search(self, _search_data: SearchRequest) -> SearchResponse:
+class SearchServiceMock(SearchService):
+    def __init__(self) -> None:
+        pass
+
+    async def search(self, search_data: SearchRequest) -> SearchResponse:
         """
-        Filter result from search_data
+        Filter result from search_data.
 
         :param _search_data: SearchRequest object, not used
         :return: Mock data
         """
-        hotels_response = SearchServiceDataFeed.search([], use_mock=True)
+        hotels_response = SearchServiceDataFeed.search(search_data, [], use_mock=True)
 
         return hotels_response

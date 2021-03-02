@@ -13,6 +13,7 @@ from ota_demo_api.view_model.search_response import (
     RelevantTopic
 )
 from ota_demo_api.view_model.search_response import ReviewsDistributionResponse
+from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse, MatchResponse
 from ota_demo_api.consts import TRUSTYOU_HOTEL_API_KEY
@@ -20,10 +21,11 @@ from ota_demo_api.consts import TRUSTYOU_HOTEL_API_KEY
 
 class SearchServiceDataFeed(object):
     @classmethod
-    def search(cls, clusters: List[ClusterSearchResult], use_mock: bool = False) -> SearchResponse:
+    def search(cls, search_data: SearchRequest, clusters: List[ClusterSearchResult], use_mock: bool = False) -> SearchResponse:
         """
         Mock data for API
 
+        :param search_data: SearchRequest object
         :param clusters: Results of the search
         :param use_mock: Mock data or not
         :return: Filtered data
@@ -48,11 +50,11 @@ class SearchServiceDataFeed(object):
 
         hotels = []
         for ty_id in ty_clusters.keys():
-            future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json")
-            future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json")
-            future_seal = request_session.get(f"{ty_api}/{ty_id}/seal.json")
+            future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}")
+            future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json?scale={search_data.scale}")
+            future_seal = request_session.get(f"{ty_api}/{ty_id}/seal.json?scale={search_data.scale}")
             future_relevant_now = request_session.get(
-                f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}"
+                f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}&scale={search_data.scale}"
             )
 
             meta_review = future_meta_review.result().json().get("response")

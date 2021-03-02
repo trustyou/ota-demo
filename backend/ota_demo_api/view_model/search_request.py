@@ -13,6 +13,7 @@ class SearchRequest(BaseModel):
     long: Optional[float]
     radius: Optional[float]
     language: Optional[str]
+    scale: Optional[int] = 100
     page: Optional[int] = 1
     page_size: Optional[int] = 50
 
