@@ -87,11 +87,11 @@ class SearchRepository:
             record_dict = dict(record)
             data_point_scores = list(zip(record_dict["data_points"], record_dict["scores"]))
             record_dict["hotel_types"] = {
-                ("all" if dps[0] == "oall" else dps[0]): dps[1]
+                ("all" if dps[0] == "oall" else dps[0]): round(float(dps[1]))
                 for dps in data_point_scores if dps[0] == "oall" or dps[0].startswith("16")
             }
             record_dict["categories"] = {
-                ("all" if dps[0] == "oall" else dps[0]): dps[1]
+                ("all" if dps[0] == "oall" else dps[0]): round(float(dps[1]))
                 for dps in data_point_scores if dps[0] == "oall" or not dps[0].startswith("16")
             }
             record_dicts.append(record_dict)
