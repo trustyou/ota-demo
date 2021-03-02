@@ -11,14 +11,13 @@ html
 	link(rel="stylesheet", href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
 
 body
-	main.hero
-		.hero-bg
-		.hero-content
-			.container
-				h1.text-white Where are you traveling to?
-				form.search-form(action="results.html")
-					input.search-location(type="search" placeholder="Try another city?" name="location" required)
-					label.search-icon
+	main
+		form.search-form(action="results.html")
+			.search-container
+				fieldset.search-primary
+					legend Where are you traveling to?
+					.search-box
+						input.search-location(type="search" placeholder="Enter your destination..." name="location" required)
 						i.ty-icon.ty-icon-search
 
 	// Scripts

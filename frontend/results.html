@@ -10,18 +10,27 @@
   <link rel="stylesheet" href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
 </html>
 <body>
-  <header class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-content">
-      <div class="container">
-        <h1 class="text-white">You have 1,235 results for <em id="search-location"></em></h1>
-        <form class="search-form" action="results.html">
-          <input class="search-location" type="search" placeholder="Try another city?" name="location" required="required"/>
-          <label class="search-icon"><i class="ty-icon ty-icon-search"></i></label>
-        </form>
-        <div class="hero-trigger"><i class="ty-icon ty-icon-chevron-down"></i></div>
+  <header>
+    <form class="search-form" action="results.html">
+      <div class="search-container">
+        <fieldset class="search-primary">
+          <legend>You have 1,235 results for <em id="search-location"></em></legend>
+          <div class="search-box">
+            <input class="search-location" type="search" placeholder="Try another city?" name="location" required="required"/><i class="ty-icon ty-icon-search"></i>
+          </div>
+        </fieldset>
+        <fieldset class="search-secondary">
+          <div class="search-preferences">
+            <fielset>
+              <legend>Adjust search preferences</legend>
+              <input type="checkbox"/>
+            </fielset>
+            <input class="btn btn-primary" type="submit" value="Apply preferences"/>
+          </div>
+          <div class="search-toggle">Adjust search preferences<i class="ty-icon ty-icon-chevron-down"></i></div>
+        </fieldset>
       </div>
-    </div>
+    </form>
   </header>
   <main>
     <section class="search-results">
