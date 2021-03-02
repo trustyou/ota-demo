@@ -114,16 +114,16 @@ legend {
 		text-shadow: $elevation-low;
 
 		.ty-icon {
+			transition: all 0.1s ease-in-out;
 			color: white;
 			font-size: 24px;
-			margin: $space-2 0 $space-4;
+			margin: $space-2 auto $space-4;
 		}
 
 		&:hover {
 			text-shadow: $elevation-high;
 
 			.ty-icon {
-				transition: all 0.1s ease-in-out;
 				transform: scale(1.3);
 			}
 		}
