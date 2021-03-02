@@ -23,6 +23,10 @@
           <div class="search-preferences" id="search-preferences">
             <fieldset>
               <legend>What is most relevant for your trip?</legend>
+              <!-- This should be replaced with the tag search component-->
+              <div class="search-categories">
+                <input type="search" placeholder="e.g. cleanliness, breakfast, wifi"/>
+              </div>
             </fieldset>
             <fieldset>
               <legend>What kind of trip did you have in mind?</legend>
@@ -60,10 +64,10 @@
                 <input type="checkbox"/><i class="ty-icon ty-icon-crown"></i>Luxury
               </label>
             </fieldset>
-            <input class="btn btn-positive" type="submit" value="Apply changes"/>
-            <div class="reset-preferences">Clear selection</div>
+            <input class="form-submit btn btn-positive btn-lg" type="submit" value="Apply changes"/>
+            <input class="form-reset" type="reset" value="Clear selection"/>
           </div>
-          <div class="search-toggle" id="search-toggle"><span>Adjust search preferences</span><i class="ty-icon ty-icon-chevron-down"></i></div>
+          <div class="search-toggle" id="search-toggle"><span>Customize your search</span><i class="ty-icon ty-icon-chevron-down"></i></div>
         </fieldset>
       </div>
     </form>
@@ -71,7 +75,7 @@
   <main>
     <section class="search-results">
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/1.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h1.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -92,7 +96,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/2.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h2.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -113,7 +117,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/3.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h3.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -134,7 +138,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/4.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h4.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -155,7 +159,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/5.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h5.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -176,7 +180,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/6.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h6.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -197,7 +201,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/7.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h7.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -218,7 +222,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/8.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h8.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -239,7 +243,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/9.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h9.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>
@@ -260,7 +264,7 @@
         <div class="hotel-actions"><a class="action-primary btn btn-primary" href="details.html">Book Now</a><a class="action-secondary btn btn-text" href="details.html">More details</a></div>
       </article>
       <article class="hotel">
-        <div class="hotel-image" style="background-image:url('img/hotels/10.jpg');"></div>
+        <div class="hotel-image" style="background-image:url('img/hotels/h10.jpg');"></div>
         <div class="hotel-details">
           <h3>Sapphire Hotel & Spa</h3>
           <h4>2km from center</h4>

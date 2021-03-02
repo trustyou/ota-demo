@@ -23,6 +23,9 @@ body
 					.search-preferences#search-preferences
 						fieldset
 							legend What is most relevant for your trip?
+							// This should be replaced with the tag search component
+							.search-categories
+								input(type="search" placeholder="e.g. cleanliness, breakfast, wifi")
 						fieldset
 							legend What kind of trip did you have in mind?
 							label
@@ -67,16 +70,16 @@ body
 								input(type="checkbox")
 								i.ty-icon.ty-icon-crown
 								| Luxury
-						input.btn.btn-positive(type="submit" value="Apply changes")
-						.reset-preferences Clear selection
+						input.form-submit.btn.btn-positive.btn-lg(type="submit" value="Apply changes")
+						input.form-reset(type="reset" value="Clear selection")
 					.search-toggle#search-toggle
-						span Adjust search preferences
+						span Customize your search
 						i.ty-icon.ty-icon-chevron-down
 	main
 		section.search-results
 			- for (var i = 0; i < 10; ++i) {
 				article.hotel
-					.hotel-image(style="background-image:url('img/hotels/" + (i+1) + ".jpg');")
+					.hotel-image(style="background-image:url('img/hotels/h" + (i+1) + ".jpg');")
 					.hotel-details
 						h3 Sapphire Hotel & Spa
 						h4 2km from center
