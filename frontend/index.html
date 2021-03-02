@@ -4,13 +4,24 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <meta name="robots" content="noindex, nofollow"/>
   <title>Home</title>
-  <link rel="stylesheet" type="text/css" href="../css/style.css"/>
-  <link rel="stylesheet" type="text/css" href="../css/home.css"/>
+  <link rel="stylesheet" type="text/css" href="css/style.css"/>
+  <link rel="stylesheet" type="text/css" href="css/home.css"/>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display&amp;family=Roboto&amp;display=swap"/>
-  <link rel="stylesheet" href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
+  <link rel="stylesheet" href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
 </html>
 <body>
-  <mainc></mainc>
+  <main>
+    <form class="search-form" id="search-form" action="results.html">
+      <div class="search-container">
+        <fieldset class="search-primary" id="search-primary">
+          <legend>Where are you traveling to?</legend>
+          <div class="search-box">
+            <input class="search-location" type="search" placeholder="Enter your destination..." name="location" required="required"/><i class="ty-icon ty-icon-search"></i>
+          </div>
+        </fieldset>
+      </div>
+    </form>
+  </main>
   <!-- Scripts-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="js/main.js"></script>

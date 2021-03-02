@@ -5,23 +5,35 @@ html
 
 	title Search Results
 
-	link(rel="stylesheet", type="text/css", href="../css/style.css")
-	link(rel="stylesheet", type="text/css", href="../css/results.css")
+	link(rel="stylesheet", type="text/css", href="css/style.css")
+	link(rel="stylesheet", type="text/css", href="css/results.css")
 	link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Roboto&display=swap")
-	link(rel="stylesheet", href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
+	link(rel="stylesheet", href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
 
 body
-	header.hero
-		.hero-bg
-		.hero-content
-			.container
-				h1.text-white You have 1,235 results for #[em#search-location]
-				form.search-form(action="results.html")
-					input.search-location(type="search" placeholder="Try another city?" name="location" required)
-					label.search-icon
+	header
+		form.search-form#search-form(action="results.html")
+			.search-container
+				fieldset.search-primary#search-primary
+					legend You have 1,235 results for #[em#search-location]
+					.search-box
+						input.search-location(type="search" placeholder="Try another city?" name="location" required)
 						i.ty-icon.ty-icon-search
-				.hero-trigger
-					i.ty-icon.ty-icon-chevron-down
+				fieldset.search-secondary
+					.search-preferences#search-preferences
+						fielset
+							legend What is most relevant for your trip?
+							input(type="checkbox")
+						fielset
+							legend What kind of trip did you have in mind?
+							input(type="checkbox")
+						fielset
+							legend Any special occasion for this trip?
+							input(type="checkbox")
+						input.btn.btn-primary(type="submit" value="Apply preferences")
+					.search-toggle#search-toggle
+						span Adjust search preferences
+						i.ty-icon.ty-icon-chevron-down
 	main
 		section.search-results
 			- for (var i = 0; i < 10; ++i) {

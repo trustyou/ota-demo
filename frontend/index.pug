@@ -5,13 +5,20 @@ html
 
 	title Home
 
-	link(rel="stylesheet", type="text/css", href="../css/style.css")
-	link(rel="stylesheet", type="text/css", href="../css/home.css")
+	link(rel="stylesheet", type="text/css", href="css/style.css")
+	link(rel="stylesheet", type="text/css", href="css/home.css")
 	link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Roboto&display=swap")
-	link(rel="stylesheet", href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
+	link(rel="stylesheet", href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
 
 body
-	mainc
+	main
+		form.search-form#search-form(action="results.html")
+			.search-container
+				fieldset.search-primary#search-primary
+					legend Where are you traveling to?
+					.search-box
+						input.search-location(type="search" placeholder="Enter your destination..." name="location" required)
+						i.ty-icon.ty-icon-search
 
 	// Scripts
 	script(src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
