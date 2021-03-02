@@ -5,8 +5,6 @@ from fastapi import APIRouter, Query
 from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.search_response import SearchResponse
 from ota_demo_api.service.search_service import SearchService
-from ota_demo_api.repository.search_repository import SearchRepository
-from ota_demo_api.persistence.database import database
 
 router = APIRouter(
     prefix="/search",
@@ -39,6 +37,6 @@ async def search_api(
         page=page,
         page_size=page_size
     )
-    search_service = SearchService(SearchRepository(database))
+    search_service = SearchService()
 
     return await search_service.search(search_data)
