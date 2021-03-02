@@ -23,7 +23,10 @@ class SearchService(object):
         return hotels_response
 
 
-class SearchServiceMock(object):
+class SearchServiceMock(SearchService):
+    def __init__(self) -> None:
+        pass
+
     async def search(self, search_data: SearchRequest) -> SearchResponse:
         """
         Filter result from search_data
