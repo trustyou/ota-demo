@@ -2,17 +2,24 @@ from ota_demo_api.view_model.search_response import TravelerTypesDistributionRes
 from ota_demo_api.view_model.search_response import ReviewsDistributionResponse
 from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse
+from ota_demo_api.repository.search_repository import SearchRepository
 
 
 class SearchService(object):
+
+    def __init__(self, search_repository: SearchRepository):
+        self.search_repository = search_repository
+
     async def search(self, search_data: SearchRequest) -> SearchResponse:
         """
-        Filter result from search_data
-        TODO Will read DB
-
+        Filter result for criteria from search_data.
         :param search_data: SearchRequest object
-        :return: Filtered data
+        :return: SearchResponse with the results of the search
         """
+
+        # TODO: use the cluster search results
+        cluster_search_results = await self.search_repository.fetch(search_data)
+
         reviews_distribution = [
             ReviewsDistributionResponse(
                 count=50,

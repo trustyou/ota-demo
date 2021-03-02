@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class SearchRequest(BaseModel):
     categories: Optional[List[str]]
-    traveler_type: Optional[str]
+    trip_type: Optional[str]
     hotel_types: Optional[List[str]]
     min_rating: Optional[int]
     city: Optional[str]

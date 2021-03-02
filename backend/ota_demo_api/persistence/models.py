@@ -1,14 +1,18 @@
-# Exmaple of model:
-#
-# from sqlalchemy import Boolean, Column, Integer, String
-# from sqlalchemy.orm import relationship
-#
-# from ota_demo_api.persistence.database import Base
-#
-#
-# class User(Base):
-#     __tablename__ = "users"
-#
-#     id = Column(Integer, primary_key=True, index=True)
-#     email = Column(String, unique=True, index=True)
-#     is_active = Column(Boolean, default=True)
+from sqlalchemy import Column, String, Float, Integer
+from sqlalchemy.dialects.postgresql import UUID
+
+from ota_demo_api.persistence.database import Base
+
+
+class ClusterSearchModel(Base):
+    __tablename__ = "cluster_search"
+
+    ty_id = Column(UUID, primary_key=True)
+    trip_type = Column(String, primary_key=True)
+    language = Column(String, primary_key=True)
+    city = Column(String)
+    latitude = Column(Float)
+    longitude = Column(Float)
+    data_point = Column(String, primary_key=True)
+    score = Column(Float)
+    review_count = Column(Integer)
