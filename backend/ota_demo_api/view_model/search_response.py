@@ -83,6 +83,7 @@ class HotelResponse(BaseModel):
     badges: Optional[List[BadgeResponse]]
     reviews_distribution: Optional[List[ReviewsDistributionResponse]]
     traveler_types_distribution: Optional[List[TravelerTypesDistributionResponse]]
+    match_score: float
 
 
 class SearchResponse(BaseModel):

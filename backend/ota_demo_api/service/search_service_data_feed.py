@@ -39,15 +39,15 @@ class SearchServiceDataFeed(object):
         ty_api = "https://api.trustyou.com/hotels/"
 
         if not use_mock:
-            ty_ids = [str(c.ty_id) for c in clusters]
+            ty_clusters = {str(c.ty_id): c for c in clusters}
         else:
-            ty_ids = [
-                "ae6db065-86a4-4d27-9d59-fcfe9e14c9c7",
-                "ca5b81c8-4cce-483b-9b98-cb0140463339",
-            ]
+            ty_clusters = {
+                "ae6db065-86a4-4d27-9d59-fcfe9e14c9c7": None,
+                "ca5b81c8-4cce-483b-9b98-cb0140463339": None
+            }
 
         hotels = []
-        for ty_id in ty_ids:
+        for ty_id in ty_clusters.keys():
             future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json")
             future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json")
             future_seal = request_session.get(f"{ty_api}/{ty_id}/seal.json")
@@ -75,7 +75,9 @@ class SearchServiceDataFeed(object):
                     categories=categories,
                     badges=badges,
                     reviews_distribution=reviews_distribution,
-                    traveler_types_distribution=traveler_types_distribution
+                    traveler_types_distribution=traveler_types_distribution,
+                    match_score=ty_clusters[ty_id].match_score if ty_clusters[ty_id] else 0,
+
                 )
             )
 
