@@ -1,19 +1,22 @@
 .search-form {
 	border-radius: 4px;
 	position: relative;
+	margin: 0 0 auto;
 
 	.search-location {
 		width: 100%;
 		height: 50px;
 		border-radius: 25px;
-		border: 1px solid transparent;
-		box-shadow: $elevation-base;
+		transition: all 0.1s ease-in-out;
+		border: none;
+		box-shadow: $elevation-medium;
 		font-size: 1rem;
 		padding: $space-5;
 
 		&:focus {
+			border: none;
 			outline: none;
-			border-color: $gray-200;
+			box-shadow: $elevation-high;
 		}
 	}
 
