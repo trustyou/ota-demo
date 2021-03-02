@@ -40,6 +40,7 @@ class SearchServiceDataFeed(object):
         for ty_id in ty_ids:
             future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json")
             future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json")
+            future_seal = request_session.get(f"{ty_api}/{ty_id}/seal.json")
             future_relevant_now = request_session.get(
                 f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}"
             )
@@ -47,6 +48,7 @@ class SearchServiceDataFeed(object):
             meta_review = future_meta_review.result().json().get("response")
             reviews = future_reviews.result().json().get("response")
             relevant_now_data = future_relevant_now.result().json().get("response")
+            seal = future_seal.result().json().get("response")
 
             badges = cls.get_badges(meta_review)
             categories = cls.get_categories(meta_review)
@@ -56,7 +58,7 @@ class SearchServiceDataFeed(object):
             hotels.append(
                 HotelResponse(
                     ty_id=ty_id,
-                    name="Hotel name",
+                    name=seal.get("name"),
                     rating=reviews["score"],
                     reviews_count=reviews["reviews_count"],
                     relevant_now=cls.get_relevant_now(relevant_now_data),
