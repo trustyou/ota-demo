@@ -82,8 +82,8 @@ class SearchServiceDataFeed(object):
                         score=(ty_clusters[ty_id].match_score if ty_clusters[ty_id] else 0),
                         language=(ty_clusters[ty_id].language if ty_clusters[ty_id] else "all"),
                         trip_type=(ty_clusters[ty_id].trip_type if ty_clusters[ty_id] else "all"),
-                        categories=(ty_clusters[ty_id].categories if ty_clusters[ty_id] else "all"),
-                        hotel_types=(ty_clusters[ty_id].hotel_types if ty_clusters[ty_id] else "all")
+                        categories=(ty_clusters[ty_id].categories if ty_clusters[ty_id] else ["all"]),
+                        hotel_types=(ty_clusters[ty_id].hotel_types if ty_clusters[ty_id] else ["all"])
                     )
                 )
             )
