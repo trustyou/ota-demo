@@ -8,6 +8,7 @@ class SearchRequest(BaseModel):
     hotel_types: Optional[List[str]]
     min_rating: Optional[int]
     city: Optional[str]
+    country: Optional[str]
     lat: Optional[float]
     long: Optional[float]
     radius: Optional[float]
@@ -17,11 +18,11 @@ class SearchRequest(BaseModel):
 
     @root_validator
     def check_require_city_or_map_box(cls, values):
-        if not values.get("city") and not cls.is_valid_map_box_request(values):
-            raise ValueError('city or (lat, long, radius) should be included')
+        if not cls.is_valid_city_country_request(values) and not cls.is_valid_map_box_request(values):
+            raise ValueError('(city, country) or (lat, long, radius) should be included')
 
-        if values.get("city") and cls.is_valid_map_box_request(values):
-            raise ValueError('Only city or (lat, long, radius) should be included')
+        if cls.is_valid_city_country_request(values) and cls.is_valid_map_box_request(values):
+            raise ValueError('Only (city, country) or (lat, long, radius) should be included')
 
         return values
 
@@ -30,3 +31,7 @@ class SearchRequest(BaseModel):
         return values.get("lat") \
             and values.get("long") \
             and values.get("radius")
+
+    @classmethod
+    def is_valid_city_country_request(cls, values):
+        return values.get("city") and values.get("country")

@@ -9,14 +9,11 @@ class SearchRepository:
         self.database = database
 
     async def fetch(self, search_data: SearchRequest) -> Optional[List[ClusterSearchResult]]:
-        # TODO: add support for (lat,lng) and radius as alternative for city
-        if not search_data.city:
-            raise ValueError("Required city filter is empty!")
+        is_city_country = all([search_data.city, search_data.country])
+        if not is_city_country:
+            raise ValueError("Required (city, country) filter!")
 
-        query_params = {
-            "city": search_data.city
-        }
-
+        query_params = {}
         query = f"""
             SELECT 
                 ty_id, 
@@ -28,8 +25,14 @@ class SearchRepository:
                 review_count,
                 SUM(score) / COUNT(score) AS match_score
             FROM cluster_search
-            WHERE city = :city
         """
+
+        if is_city_country:
+            query +=  """
+                WHERE lower(city) = lower(:city) AND lower(country) = lower(:country)
+            """
+            query_params["city"] = search_data.city
+            query_params["country"] = search_data.country
 
         if search_data.trip_type:
             query += """
