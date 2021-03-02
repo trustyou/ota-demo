@@ -5,7 +5,8 @@ from ota_demo_api.view_model.search_response import (
     TravelerTypesDistributionResponse,
     BadgeDataModel,
     BadgeResponse,
-    BadgeHighlightModel
+    BadgeHighlightModel,
+    CategoryResponse
 )
 from ota_demo_api.view_model.search_response import ReviewsDistributionResponse
 from ota_demo_api.view_model.search_request import SearchRequest
@@ -34,10 +35,10 @@ class SearchServiceDataFeed(object):
             reviews = requests.get(f"{ty_api}/{ty_id}/reviews.json").json().get("response")
 
             badges = cls.get_badges(meta_review)
+            categories = cls.get_categories(meta_review)
 
             reviews_distribution = cls.get_reviews_distribution(reviews)
             traveler_types_distribution = cls.get_traveler_types_distribution(reviews)
-
             hotels.append(
                 HotelResponse(
                     ty_id=ty_id,
@@ -45,6 +46,7 @@ class SearchServiceDataFeed(object):
                     rating=None,
                     reviews_count=reviews["reviews_count"],
                     relevant_now=None,
+                    categories=categories,
                     badges=badges,
                     reviews_distribution=reviews_distribution,
                     traveler_types_distribution=traveler_types_distribution
@@ -57,6 +59,12 @@ class SearchServiceDataFeed(object):
 
     @classmethod
     def get_badges(cls, meta_review: Any):
+        """
+        Mock badges list, data comes from meta review
+
+        :param meta_review: result of meta_review.json
+        :return: [BadgeResponse]
+        """
         badge_list = meta_review["badge_list"]
         badges = []
 
@@ -77,8 +85,34 @@ class SearchServiceDataFeed(object):
 
     @classmethod
     def get_reviews_distribution(cls, reviews: Any) -> List[ReviewsDistributionResponse]:
+        """
+        Mock reviews_distribution, data comes from reviews
+
+        :param reviews: result of reviews.json
+        :return: List[ReviewsDistributionResponse]
+        """
         return [ReviewsDistributionResponse(**distribution) for distribution in reviews["reviews_distribution"]]
 
     @classmethod
     def get_traveler_types_distribution(cls, reviews: Any) -> List[TravelerTypesDistributionResponse]:
+        """
+        Mock traveler_types_distribution, data comes from reviews
+        :param reviews: result of reviews.json
+        :return: List[TravelerTypesDistributionResponse]
+        """
         return [TravelerTypesDistributionResponse(**distribution) for distribution in reviews["trip_type_distribution"]]
+
+    @classmethod
+    def get_categories(cls, meta_review: Any) -> List[CategoryResponse]:
+        """
+        Mock categories, data comes from meta review
+
+        :param meta_review: result of meta_review.json
+        :return: List[CategoryResponse]
+        """
+        return [
+            CategoryResponse(
+                **category,
+                sub_categories=category["sub_category_list"]
+            ) for category in meta_review["category_list"]
+        ]
