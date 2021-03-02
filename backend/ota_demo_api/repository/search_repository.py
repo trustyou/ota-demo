@@ -24,7 +24,8 @@ class SearchRepository:
                 longitude, 
                 review_count,
                 SUM(score) / COUNT(score) AS match_score,
-                array_agg(datapoint) as data_points
+                array_agg(datapoint) as data_points,
+                array_agg(score) as scores
             FROM cluster_search
         """
 
@@ -84,12 +85,15 @@ class SearchRepository:
         record_dicts = []
         for record in records:
             record_dict = dict(record)
-            record_dict["hotel_types"] = [
-                "all" if dp == "oall" else dp for dp in record["data_points"] if dp == "oall" or dp.startswith("16")
-            ]
-            record_dict["categories"] = [
-                "all" if dp == "oall" else dp for dp in record["data_points"] if dp == "oall" or not dp.startswith("16")
-            ]
+            data_point_scores = list(zip(record_dict["data_points"], record_dict["scores"]))
+            record_dict["hotel_types"] = {
+                ("all" if dps[0] == "oall" else dps[0]): dps[1]
+                for dps in data_point_scores if dps[0] == "oall" or dps[0].startswith("16")
+            }
+            record_dict["categories"] = {
+                ("all" if dps[0] == "oall" else dps[0]): dps[1]
+                for dps in data_point_scores if dps[0] == "oall" or not dps[0].startswith("16")
+            }
             record_dicts.append(record_dict)
 
         results = [ClusterSearchResult(**record_dict) for record_dict in record_dicts]
