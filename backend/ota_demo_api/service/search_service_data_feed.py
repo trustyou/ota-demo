@@ -38,11 +38,11 @@ class SearchServiceDataFeed(object):
 
         hotels = []
         for ty_id in ty_ids:
-            future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json")
-            future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json")
-            future_seal = request_session.get(f"{ty_api}/{ty_id}/seal.json")
+            future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}")
+            future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json?scale={search_data.scale}")
+            future_seal = request_session.get(f"{ty_api}/{ty_id}/seal.json?scale={search_data.scale}")
             future_relevant_now = request_session.get(
-                f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}"
+                f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}&scale={search_data.scale}"
             )
 
             meta_review = future_meta_review.result().json().get("response")

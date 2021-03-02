@@ -1,0 +1,162 @@
+
+<html>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <meta name="robots" content="noindex, nofollow"/>
+  <title>Search Results</title>
+  <link rel="stylesheet" type="text/css" href="css/style.css"/>
+  <link rel="stylesheet" type="text/css" href="css/results.css"/>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display&amp;family=Roboto&amp;display=swap"/>
+  <link rel="stylesheet" href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
+</html>
+<body>
+  <header>
+    <form class="search-form" id="search-form" action="results.html">
+      <div class="search-container">
+        <fieldset class="search-primary" id="search-primary">
+          <legend>You have 1,235 results for <em id="search-location"></em></legend>
+          <div class="search-box">
+            <input class="search-location" type="search" placeholder="Try another city?" name="location" required="required"/><i class="ty-icon ty-icon-search"></i>
+          </div>
+        </fieldset>
+        <fieldset class="search-secondary">
+          <div class="search-preferences" id="search-preferences">
+            <fielset>
+              <legend>What is most relevant for your trip?</legend>
+              <input type="checkbox"/>
+            </fielset>
+            <fielset>
+              <legend>What kind of trip did you have in mind?</legend>
+              <input type="checkbox"/>
+            </fielset>
+            <fielset>
+              <legend>Any special occasion for this trip?</legend>
+              <input type="checkbox"/>
+            </fielset>
+            <input class="btn btn-primary" type="submit" value="Apply preferences"/>
+          </div>
+          <div class="search-toggle" id="search-toggle"><span>Adjust search preferences</span><i class="ty-icon ty-icon-chevron-down"></i></div>
+        </fieldset>
+      </div>
+    </form>
+  </header>
+  <main>
+    <section class="search-results" id="search-results">
+    </section>
+    <section class="search-map"></section>
+  </main>
+
+  <!-- Scripts-->
+  <script type="text/babel">
+    function Loader({}) {
+      return <div id="spinner">
+        <img src="img/ajax-loader.gif" className="center-block"/>
+      </div>;
+    }
+    function HotelCategories({categories}) {
+      return <ul className="categories">
+        {
+          categories.slice(0, 3).map(category => <li key={category.category_id}><span className="pill">{category.score}</span> {category.category_name}</li>)
+        }
+      </ul>;
+    }
+    function HotelBadges({badges}) {
+      return <ul className="badges">
+        {
+          badges.slice(0, 3).map(badge => <li key={badge.badge_type}><span className="pill">{badge.subtext}</span> {badge.badge_data.category_name}</li>)
+        }
+      </ul>;
+    }
+
+    class Hotel extends React.Component {
+      render() {
+        const { hotel } = this.props
+        const imgs = [
+          'img/hotels/1.jpg',
+          'img/hotels/2.jpg',
+          'img/hotels/3.jpg',
+          'img/hotels/4.jpg',
+          'img/hotels/5.jpg',
+          'img/hotels/6.jpg',
+          'img/hotels/7.jpg',
+          'img/hotels/8.jpg',
+          'img/hotels/9.jpg',
+        ]
+        const imgUrl = imgs[Math.floor(Math.random() * imgs.length)];
+        const hotelImage = { backgroundImage: 'url(' + imgUrl + ')', };
+
+        return <article className="hotel">
+          <div className="hotel-image" style={hotelImage}></div>
+          <div className="hotel-details">
+            <h3>{hotel.name}</h3>
+            <h4>2km from center</h4>
+            <ul className="overall">
+              <li>Match: <span className="pill">85%</span></li>
+              <li>Reviews: {hotel.reviews_count.toLocaleString(undefined)}</li>
+              <li>Score: {hotel.rating}</li>
+            </ul>
+            <HotelCategories categories={hotel.categories} />
+            <HotelBadges badges={hotel.badges} />
+          </div>
+          <div className="hotel-actions">
+            <a className="action-primary btn btn-primary" href="details.html">Book Now</a>
+            <a className="action-secondary btn btn-text" href="details.html">More details</a>
+          </div>
+        </article>
+      }
+    }
+
+    class SearchResults extends React.Component {
+      state = {
+        isLoading: true,
+        hotels: [],
+        error: null
+      }
+
+      fetchHotels() {
+        axios({
+            method: 'get',
+            url: 'https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/search/?city=test&scale=5'
+          })
+          .then(response => response.data)
+          .then(data =>
+            this.setState({
+              error: null,
+              hotels: data.hotels,
+              isLoading: false,
+            })
+          )
+          // Catch any errors we hit and update the app
+          .catch(error => this.setState({ error, isLoading: false }));
+      }
+      componentDidMount() {
+        this.setState({
+          isLoading: true,
+        })
+        this.fetchHotels();
+      }
+
+      render() {
+        if (!this.state.isLoading && this.state.error) {
+          return <div> Something wrong happened</div>
+        }
+
+        return this.state.isLoading ?
+          <Loader /> :
+          <div>
+            {this.state.hotels.map(hotel => <Hotel key={hotel.ty_id} hotel={hotel} />)}
+          </div>
+      }
+    }
+
+  ReactDOM.render(<SearchResults />, document.getElementById('search-results'))
+  </script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+  <script src="js/main.js"></script>
+
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+</body>
