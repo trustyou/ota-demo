@@ -13,6 +13,8 @@ class ClusterSearchResult(BaseModel):
     longitude: Optional[float]
     review_count: Optional[int]
     match_score: float
+    categories: List[str]
+    hotel_types: List[str]
 
     class Config:
         orm_mode = True
