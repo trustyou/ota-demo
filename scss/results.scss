@@ -37,8 +37,4 @@ main {
 	position: sticky;
   	top: $space-10;
   	height: calc(100vh - 2 * #{$space-10});
-
-  	&:hover {
-		box-shadow: $elevation-medium;
-  	}
 }

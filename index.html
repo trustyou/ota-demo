@@ -10,17 +10,17 @@
   <link rel="stylesheet" href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
 </html>
 <body>
-  <main class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-content">
-      <div class="container">
-        <h1 class="text-white">Where are you traveling to?</h1>
-        <form class="search-form" action="results.html">
-          <input class="search-location" type="search" placeholder="Try another city?" name="location" required="required"/>
-          <label class="search-icon"><i class="ty-icon ty-icon-search"></i></label>
-        </form>
+  <main>
+    <form class="search-form" action="results.html">
+      <div class="search-container">
+        <fieldset class="search-primary">
+          <legend>Where are you traveling to?</legend>
+          <div class="search-box">
+            <input class="search-location" type="search" placeholder="Enter your destination..." name="location" required="required"/><i class="ty-icon ty-icon-search"></i>
+          </div>
+        </fieldset>
       </div>
-    </div>
+    </form>
   </main>
   <!-- Scripts-->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
