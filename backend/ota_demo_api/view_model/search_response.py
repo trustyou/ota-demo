@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 from pydantic import BaseModel
 
 
@@ -49,11 +49,35 @@ class CategoryResponse(CategoryResponseBase):
     sub_categories: List[CategoryResponseBase]
 
 
+class RelevantTopicCategoryModel(BaseModel):
+    reviews_count: int
+    name: str
+    reviews_with_pos_mentions_count: int
+    text: str
+    last_seen_on: str
+    score: float
+
+
+class RelevantTopic(RelevantTopicCategoryModel):
+    sub_categories: List[RelevantTopicCategoryModel]
+
+
+class OverallSatisfaction(BaseModel):
+    trend: float
+    reviews_count: int
+    score: float
+
+
+class RelevantNowResponse(BaseModel):
+    relevant_topics: Dict[str, RelevantTopic]
+    overall_satisfaction: OverallSatisfaction
+
+
 class HotelResponse(BaseModel):
     ty_id: str
-    rating: Optional[float]
+    rating: Optional[str]
     reviews_count: Optional[int]
-    relevant_now: Optional[str]
+    relevant_now: Optional[RelevantNowResponse]
     categories: Optional[List[CategoryResponse]]
     badges: Optional[List[BadgeResponse]]
     reviews_distribution: Optional[List[ReviewsDistributionResponse]]

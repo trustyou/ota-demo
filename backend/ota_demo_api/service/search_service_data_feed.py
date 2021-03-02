@@ -1,4 +1,5 @@
-import requests
+from requests_futures.sessions import FuturesSession
+
 from typing import Any, List
 
 from ota_demo_api.view_model.search_response import (
@@ -6,11 +7,15 @@ from ota_demo_api.view_model.search_response import (
     BadgeDataModel,
     BadgeResponse,
     BadgeHighlightModel,
-    CategoryResponse
+    CategoryResponse,
+    RelevantNowResponse,
+    OverallSatisfaction,
+    RelevantTopic
 )
 from ota_demo_api.view_model.search_response import ReviewsDistributionResponse
 from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse
+from ota_demo_api.consts import TRUSTYOU_HOTEL_API_KEY
 
 
 class SearchServiceDataFeed(object):
@@ -22,6 +27,8 @@ class SearchServiceDataFeed(object):
         :param search_data: SearchRequest object
         :return: Filtered data
         """
+        request_session = FuturesSession()
+
         ty_api = "https://api.trustyou.com/hotels/"
 
         ty_ids = [
@@ -31,8 +38,15 @@ class SearchServiceDataFeed(object):
 
         hotels = []
         for ty_id in ty_ids:
-            meta_review = requests.get(f"{ty_api}/{ty_id}/meta_review.json").json().get("response")
-            reviews = requests.get(f"{ty_api}/{ty_id}/reviews.json").json().get("response")
+            future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json")
+            future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json")
+            future_relevant_now = request_session.get(
+                f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}"
+            )
+
+            meta_review = future_meta_review.result().json().get("response")
+            reviews = future_reviews.result().json().get("response")
+            relevant_now_data = future_relevant_now.result().json().get("response")
 
             badges = cls.get_badges(meta_review)
             categories = cls.get_categories(meta_review)
@@ -43,9 +57,9 @@ class SearchServiceDataFeed(object):
                 HotelResponse(
                     ty_id=ty_id,
                     name="Hotel name",
-                    rating=None,
+                    rating=reviews["score"],
                     reviews_count=reviews["reviews_count"],
-                    relevant_now=None,
+                    relevant_now=cls.get_relevant_now(relevant_now_data),
                     categories=categories,
                     badges=badges,
                     reviews_distribution=reviews_distribution,
@@ -116,3 +130,24 @@ class SearchServiceDataFeed(object):
                 sub_categories=category["sub_category_list"]
             ) for category in meta_review["category_list"]
         ]
+
+    @classmethod
+    def get_relevant_now(cls, relevant_now: Any) -> RelevantNowResponse:
+        """
+        Mock relevant_now, data comes from relevant_now.json
+
+        :param relevant_now: result of relevant_now.json
+        :return: RelevantNowResponse
+        """
+        relevant_now_item = relevant_now["relevant_now"]
+        relevant_topics = {
+            topic: RelevantTopic(**relevant)
+            for topic, relevant in relevant_now_item["relevant_topics"].items()
+        }
+
+        overall_satisfaction = OverallSatisfaction(**relevant_now_item["overall_satisfaction"])
+
+        return RelevantNowResponse(
+            relevant_topics=relevant_topics,
+            overall_satisfaction=overall_satisfaction
+        )
