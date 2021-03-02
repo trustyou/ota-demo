@@ -21,16 +21,54 @@ body
 						i.ty-icon.ty-icon-search
 				fieldset.search-secondary
 					.search-preferences#search-preferences
-						fielset
+						fieldset
 							legend What is most relevant for your trip?
-							input(type="checkbox")
-						fielset
+						fieldset
 							legend What kind of trip did you have in mind?
-							input(type="checkbox")
-						fielset
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-heart
+								| Romantic
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-suitcase
+								| Business
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-family
+								| Family
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-single
+								| Solo
+						fieldset
 							legend Any special occasion for this trip?
-							input(type="checkbox")
-						input.btn.btn-primary(type="submit" value="Apply preferences")
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-tuxedo
+								| Wedding
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-glass-martini
+								| Bachelor party
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-lotus
+								| Wellness & relaxing
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-snowflake
+								| Wintersports
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-tree-pine
+								| Hiking & outdoors
+							label
+								input(type="checkbox")
+								i.ty-icon.ty-icon-crown
+								| Luxury
+						input.btn.btn-positive(type="submit" value="Apply changes")
+						.reset-preferences Clear selection
 					.search-toggle#search-toggle
 						span Adjust search preferences
 						i.ty-icon.ty-icon-chevron-down
