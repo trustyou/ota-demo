@@ -130,7 +130,6 @@ legend {
 	}
 
 	.search-preferences {
-		transition: all 0.3s ease-in-out;
 		height: 0;
 		overflow: hidden;
 		display: flex;
@@ -142,14 +141,68 @@ legend {
 			overflow: auto;
 		}
 
+		fieldset {
+			margin-bottom: $space-6;
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+		}
+
 		legend {
 			font-size: 1.8rem;
 			line-height: 2.0rem;
 			margin: $space-8 auto;
+			width: 100%;
+		}
+
+		label {
+			border: 2px solid $white;
+			color: $white;
+			display: flex;
+			align-items: center;
+			padding: $space-2 $space-5 $space-2 $space-4;
+			border-radius: $space-9;
+			font-family: $font-sans-serif;
+			font-size: 1rem;
+			line-height: 1rem;
+			margin-bottom: $space-4;
+
+			& + label {
+				margin-left: $space-4;
+			}
+
+			.ty-icon {
+				font-size: 1.4rem;
+				margin-right: $space-1;
+			}
+
+			input {
+				display: none;
+			}
 		}
 
 		.btn {
 			margin-bottom: $space-10;
+			box-shadow: $elevation-medium;
+			margin: $space-8 auto 0;
+			padding: 0 $space-8;
+
+			&:hover {
+				box-shadow: $elevation-high;
+			}
+		}
+		.reset-preferences {
+			transition: all 0.1s ease-in-out;
+			font-family: $font-sans-serif;
+			font-size: 1rem;
+			margin: $space-4 auto $space-10;
+			color: $white;
+			opacity: 0.8;
+			cursor: pointer;
+
+			&:hover {
+				opacity: 1;
+			}
 		}
 	}
 }
