@@ -34,11 +34,27 @@ class BadgeResponse(BaseModel):
     highlight_list: List[BadgeHighlightModel]
 
 
+class CategoryResponseBase(BaseModel):
+    count: int
+    sentiment: str
+    text: str
+    score: int
+    relevance: float
+    short_text: str
+    category_id: str
+    category_name: str
+
+
+class CategoryResponse(CategoryResponseBase):
+    sub_categories: List[CategoryResponseBase]
+
+
 class HotelResponse(BaseModel):
     ty_id: str
     rating: Optional[float]
     reviews_count: Optional[int]
     relevant_now: Optional[str]
+    categories: Optional[List[CategoryResponse]]
     badges: Optional[List[BadgeResponse]]
     reviews_distribution: Optional[List[ReviewsDistributionResponse]]
     traveler_types_distribution: Optional[List[TravelerTypesDistributionResponse]]
