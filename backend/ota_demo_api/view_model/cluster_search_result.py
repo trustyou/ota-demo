@@ -12,7 +12,7 @@ class ClusterSearchResult(BaseModel):
     latitude: Optional[float]
     longitude: Optional[float]
     review_count: Optional[int]
-    search_score: float
+    match_score: float
 
     class Config:
         orm_mode = True

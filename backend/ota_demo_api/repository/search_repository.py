@@ -26,7 +26,7 @@ class SearchRepository:
                 latitude,
                 longitude, 
                 review_count,
-                SUM(score) / COUNT(score) AS search_score
+                SUM(score) / COUNT(score) AS match_score
             FROM cluster_search
             WHERE city = :city
         """
@@ -66,7 +66,7 @@ class SearchRepository:
 
         query += """
             GROUP BY ty_id, trip_type, language, city, latitude, longitude, review_count
-            ORDER BY search_score DESC
+            ORDER BY match_score DESC
             LIMIT :limit OFFSET :offset 
         """
         query_params["limit"] = search_data.page_size
