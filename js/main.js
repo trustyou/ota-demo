@@ -2,7 +2,8 @@ $(document).ready(function(){
 
 	// Ger search location from URL, submitted via search field
 	$searchLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
-	$('#search-location').html($searchLocation);
+	$('#search-location-legend').text($searchLocation);
+	$('#search-location').attr('value', $searchLocation);
 
 	$searchPreferences = $('#search-preferences');
 	$searchToggle = $('#search-toggle');
