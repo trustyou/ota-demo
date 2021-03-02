@@ -1,20 +1,24 @@
 .hotel {
 	transition: all 0.1s ease-in-out;
 	background: #fff;
-	box-shadow: $elevation-base;
-	padding: $space-8;
+	box-shadow: $elevation-low;
 	margin-bottom: $space-8;
 	border-radius: 4px;
 	display: flex;
 	font-family: $font-sans-serif;
 
 	.hotel-image {
-		flex: 0 0 200px;
+		background-color: rgba($black, 0.1);
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: cover;
+		flex: 0 0 300px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		color: $gray-200;
 		text-align: center;
+		border-radius: 4px 0 0 4px;
 
 		img {
 			max-width: 100%;
@@ -22,10 +26,12 @@
 	}
 
 	.hotel-details {
+		padding: $space-8;
 		flex: 1 1 auto;
 	}
 
 	.hotel-actions {
+		padding: $space-8;
 		margin: 0 0 auto;
 		flex-direction: column;
 		display: flex;
