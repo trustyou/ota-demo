@@ -75,6 +75,7 @@ class RelevantNowResponse(BaseModel):
 
 class HotelResponse(BaseModel):
     ty_id: str
+    name: str
     rating: Optional[str]
     reviews_count: Optional[int]
     relevant_now: Optional[RelevantNowResponse]
