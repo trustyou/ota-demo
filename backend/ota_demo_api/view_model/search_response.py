@@ -63,14 +63,14 @@ class RelevantTopic(RelevantTopicCategoryModel):
 
 
 class OverallSatisfaction(BaseModel):
-    trend: float
+    trend: Optional[float]
     reviews_count: int
     score: float
 
 
 class RelevantNowResponse(BaseModel):
-    relevant_topics: Dict[str, RelevantTopic]
-    overall_satisfaction: OverallSatisfaction
+    relevant_topics: Optional[Dict[str, RelevantTopic]]
+    overall_satisfaction: Optional[OverallSatisfaction]
 
 
 class HotelResponse(BaseModel):

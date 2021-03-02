@@ -13,28 +13,38 @@ from ota_demo_api.view_model.search_response import (
     RelevantTopic
 )
 from ota_demo_api.view_model.search_response import ReviewsDistributionResponse
-from ota_demo_api.view_model.search_request import SearchRequest
+from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse
 from ota_demo_api.consts import TRUSTYOU_HOTEL_API_KEY
 
 
 class SearchServiceDataFeed(object):
     @classmethod
-    def search(cls, search_data: SearchRequest) -> SearchResponse:
+    def search(cls, clusters: List[ClusterSearchResult], use_mock: bool = False) -> SearchResponse:
         """
         Mock data for API
 
-        :param search_data: SearchRequest object
+        :param clusters: Results of the search
+        :param use_mock: Mock data or not
         :return: Filtered data
         """
+        if not clusters and not use_mock:
+            hotels = []
+            return SearchResponse(
+                hotels=hotels
+            )
+
         request_session = FuturesSession()
 
         ty_api = "https://api.trustyou.com/hotels/"
 
-        ty_ids = [
-            "ae6db065-86a4-4d27-9d59-fcfe9e14c9c7",
-            "ca5b81c8-4cce-483b-9b98-cb0140463339",
-        ]
+        if not use_mock:
+            ty_ids = [str(c.ty_id) for c in clusters]
+        else:
+            ty_ids = [
+                "ae6db065-86a4-4d27-9d59-fcfe9e14c9c7",
+                "ca5b81c8-4cce-483b-9b98-cb0140463339",
+            ]
 
         hotels = []
         for ty_id in ty_ids:
@@ -141,13 +151,21 @@ class SearchServiceDataFeed(object):
         :param relevant_now: result of relevant_now.json
         :return: RelevantNowResponse
         """
-        relevant_now_item = relevant_now["relevant_now"]
-        relevant_topics = {
-            topic: RelevantTopic(**relevant)
-            for topic, relevant in relevant_now_item["relevant_topics"].items()
-        }
 
-        overall_satisfaction = OverallSatisfaction(**relevant_now_item["overall_satisfaction"])
+        relevant_now_item = relevant_now["relevant_now"]
+
+        relevant_topics = None
+        overall_satisfaction = None
+
+        if "relevant_topics" in relevant_now_item:
+            relevant_topics = {
+                topic: RelevantTopic(**relevant)
+                for topic, relevant in relevant_now_item["relevant_topics"].items()
+            }
+
+
+        if "overall_satisfaction" in relevant_now_item:
+            overall_satisfaction = OverallSatisfaction(**relevant_now_item["overall_satisfaction"])
 
         return RelevantNowResponse(
             relevant_topics=relevant_topics,
