@@ -5,11 +5,11 @@
   line-height: 1.4rem;
   border: none;
   border-radius: 20px;
-  height: 40px;
-  padding: 10px 20px;
+  padding: $space-2 $space-5;
   text-decoration: none;
   background: $gray-100;
   color: $gray-500;
+  cursor: pointer;
 
   &:hover {
     background: $gray-50;
@@ -19,6 +19,13 @@
   &:active {
     background: $gray-200;
     color: $gray-700;
+  }
+
+  &.btn-lg {
+    border-radius: $space-6;
+    padding: $space-4 $space-10;
+    font-size: 1rem;
+    line-height: 1.2rem;
   }
 
   &.btn-text {
