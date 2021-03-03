@@ -46,7 +46,7 @@ class SearchRepository:
                 SUM(score) / COUNT(score) AS match_score,
                 array_agg(datapoint) as data_points,
                 array_agg(score) as scores
-            FROM cluster_search
+            FROM cluster_search_sample
         """
 
         if is_city_country:
