@@ -1,0 +1,54 @@
+/*
+* ---------------------------------------------
+*               Placeholder Box
+* ---------------------------------------------
+*/
+
+.placeholder-box {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	padding: $space-10 $space-2;
+
+	&.placeholder-box-bordered {
+		border-radius: 8px;
+		border: 2px dashed $gray-100;
+		padding: $space-10 $space-2;
+	}
+
+	.placeholder-box-icon {
+		margin: 0 auto 10px;
+		color: $gray-300;
+		font-size: 5.5rem;
+
+		.ty-icon {
+			display: block;
+			color: $gray-300;
+		}
+	}
+
+	.placeholder-box-title,
+	.placeholder-box-subtitle {
+		font-family: $font-sans-serif;
+		margin: 0;
+		text-align: center;
+		max-width: 350px;
+		margin: 0 auto;
+	}
+
+	.placeholder-box-title {
+		font-size: 1.2rem;
+		color: $gray-400;
+	}
+
+	.placeholder-box-subtitle {
+		font-size: 1rem;
+		margin-top: $space-6;
+		color: $gray-300;
+	}
+
+	.btn {
+		margin-top: 15px;
+	}
+}
