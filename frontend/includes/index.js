@@ -20,7 +20,7 @@ class HomePage extends React.Component {
           <fieldset className="search-primary" id="search-primary">
             <legend>Where are you traveling to?</legend>
             <div className="search-box">
-              <SearchLocation handleChange={this.handleChange} placeholder="Enter your destination..." style={{width: 300}}/>
+              <SearchLocation handleChange={this.handleChange} placeholder="Enter your destination..."/>
               <i className="ty-icon ty-icon-search"></i>
             </div>
           </fieldset>

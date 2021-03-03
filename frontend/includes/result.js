@@ -61,7 +61,7 @@ class SearchHeader extends React.Component {
           <fieldset className="search-primary" id="search-primary">
             <legend>You have 1,235 results for <em id="search-location-legend"></em></legend>
             <div className="search-box">
-              <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Enter your destination..." style={{width: 300}}/>
+              <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Try another destination?"/>
               <i className="ty-icon ty-icon-search"></i>
             </div>
           </fieldset>
@@ -314,7 +314,6 @@ class CategoryFilter extends React.Component {
           showSearch
           onChange={this.updateValue}
           value={selected}
-          style={{ width: 300 }}
           filterOption={(input, option) =>
             option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
           }
