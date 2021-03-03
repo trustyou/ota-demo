@@ -13,7 +13,7 @@ class CitySearchRepository:
             raise ValueError("You have to provide at least one char to search for")
 
         query = """
-            SELECT city, country, count FROM public.city_search_sample
+            SELECT city, country, count FROM public.city_search
             WHERE lower(city) LIKE :prefix
             ORDER BY count DESC
             LIMIT :limit;
