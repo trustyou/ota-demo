@@ -22,19 +22,19 @@ $(document).ready(function(){
 		}
 	});
 
-    // Style items when checkboxed are selected
-	$searchPreferences.find(':checkbox').bind('change', function(){
-    	if(this.checked) {
-    		$(this).parent('label').addClass('is-selected');
-    	}
-    	else {
-    		$(this).parent('label').removeClass('is-selected');
-    	}
-	});
+    // // Style items when checkboxed are selected
+	// $searchPreferences.find(':checkbox').bind('change', function(){
+    // 	if(this.checked) {
+    // 		$(this).parent('label').addClass('is-selected');
+    // 	}
+    // 	else {
+    // 		$(this).parent('label').removeClass('is-selected');
+    // 	}
+	// });
 
-	// Remove item styling when resetting form
-	$('#search-form').bind('reset', function(){
-		$searchPreferences.find('label').removeClass('is-selected');
-	});
+	// // Remove item styling when resetting form
+	// $('#search-form').bind('reset', function(){
+	// 	$searchPreferences.find('label').removeClass('is-selected');
+	// });
 
 });
