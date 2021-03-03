@@ -77,8 +77,8 @@ class MatchResponse(BaseModel):
     score: float
     language: str
     trip_type: str
-    categories: Dict[str, int]
-    hotel_types: Dict[str, int]
+    categories: Dict[str, float]
+    hotel_types: Dict[str, float]
 
 
 class HotelResponse(BaseModel):

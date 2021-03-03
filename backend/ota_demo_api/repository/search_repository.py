@@ -4,6 +4,21 @@ from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
 
 
+def scale_score(field: Optional[float], scale: int) -> Optional[float]:
+    """
+    Scale the field from 100 to 5 scale.
+    :param field: The score on 100 scale
+    :param scale: The scale
+    :return: The field on the requested scale
+    """
+    try:
+        result = round(field / 20.0, 1) if scale != 100 else round(field)
+    except TypeError:
+        return None
+    else:
+        return result
+
+
 class SearchRepository:
     def __init__(self, database):
         self.database = database
@@ -85,13 +100,14 @@ class SearchRepository:
         record_dicts = []
         for record in records:
             record_dict = dict(record)
+            record_dict["match_score"] = scale_score(record_dict["match_score"], search_data.scale)
             data_point_scores = list(zip(record_dict["data_points"], record_dict["scores"]))
             record_dict["hotel_types"] = {
-                ("all" if dps[0] == "oall" else dps[0]): round(float(dps[1]))
+                ("all" if dps[0] == "oall" else dps[0]): scale_score(dps[1], search_data.scale)
                 for dps in data_point_scores if dps[0] == "oall" or dps[0].startswith("16")
             }
             record_dict["categories"] = {
-                ("all" if dps[0] == "oall" else dps[0]): round(float(dps[1]))
+                ("all" if dps[0] == "oall" else dps[0]): scale_score(dps[1], search_data.scale)
                 for dps in data_point_scores if dps[0] == "oall" or not dps[0].startswith("16")
             }
             record_dicts.append(record_dict)

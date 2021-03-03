@@ -1,4 +1,5 @@
 from typing import Optional, List
+
 from pydantic import BaseModel, ValidationError, root_validator
 
 
@@ -24,6 +25,9 @@ class SearchRequest(BaseModel):
 
         if cls.is_valid_city_country_request(values) and cls.is_valid_map_box_request(values):
             raise ValueError('Only (city, country) or (lat, long, radius) should be included')
+
+        if values.get("scale") not in [5, 100]:
+            raise ValueError('Only (5, 100) are supported values for scale')
 
         return values
 
