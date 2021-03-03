@@ -58,18 +58,20 @@ class SearchLocation extends React.Component {
   }
 
   setDefault = (value) => {
-    const dataParts = value.split('--')
-    const initData = {
-      city: capitalize(dataParts[0]),
-      country: capitalize(dataParts[1])
-    }
+    const locationData =parseCityCountry(value)
+    if (locationData) {
+      const initData = {
+        city: capitalize(locationData[0]),
+        country: capitalize(locationData[1])
+      }
 
-    this.setState({
-      value: `${initData.city} - ${initData.country}`,
-      data: [
-        initData
-      ],
-    })
+      this.setState({
+        value: `${initData.city} - ${initData.country}`,
+        data: [
+          initData
+        ],
+      })
+    }
   }
 
   render() {
