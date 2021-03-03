@@ -10,10 +10,26 @@
   <link rel="stylesheet" href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
 </html>
 <body>
-  <section class="title">
-    <h1>Hotel Details</h1>
-  </section>
+  <header style="background-image:url('img/hotels/h7.jpg');">
+    <div class="container">
+      <section class="hotel-details">
+        <h1 class="hotel-name">Sapphire Hotel & Spa</h1><a class="hotel-address" href="https://www.google.com/maps/" target="_blank"><i class="ty-icon ty-icon-map-marker"></i>Steinerstr. 15, 81373, Munich, Germany</a>
+      </section>
+    </div>
+  </header>
+  <main>
+    <div class="container">
+      <section class="hotel-relevant-now">
+        <iframe src="https://api.trustyou.com/hotels/674fa44c-1fbd-4275-aa72-a20f262372cd/relevant_now.html?key=765e65ae-967d-4c44-8d6c-4ac69bb620e0&amp;iframe_resizer=true" allowtransparency="true" frameborder="0" width="100%"></iframe>
+      </section>
+    </div>
+    <section class="hotel-meta-review">
+      <iframe src="https://api.trustyou.com/hotels/674fa44c-1fbd-4275-aa72-a20f262372cd/tops_flops.html?key=765e65ae-967d-4c44-8d6c-4ac69bb620e0&amp;iframe_resizer=true" allowtransparency="true" frameborder="0" width="100%"></iframe>
+    </section>
+  </main>
   <!-- Scripts-->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="js/main.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://api.trustyou.com/static/3rdparty/iframe-resizer/js/iframeResizer.min.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
+  <script type="text/javascript">iFrameResize({});</script>
 </body>

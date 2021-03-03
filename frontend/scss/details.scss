@@ -7,3 +7,59 @@
 body {
 	background: #eee;
 }
+
+header {
+	display: flex;
+	flex-wrap: wrap;
+	min-height: 300px;
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+
+main {
+	background: #fafafa;
+}
+
+.container {
+	max-width: 1200px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.hotel-details {
+	background: #fafafa;
+	margin: auto 0 0;
+	width: 100%;
+	padding: $space-10;
+
+	.hotel-name {
+		text-align: left;
+		margin: 0 0 $space-4;
+	}
+
+	.hotel-address {
+		color: $gray-400;
+		font-family: $font-sans-serif;
+		font-size: 1rem;
+		text-decoration: none;
+		border-bottom: 1px dotted $gray-400;
+
+		&:hover {
+			color: $blue-500;
+		}
+
+		&:active {
+			color: $blue-700;
+		}
+	}
+}
+
+.hotel-relevant-now {
+	width: 640px;
+	margin: 0 auto 0 0;
+}
+
+.hotel-meta-review {
+	width: 100%;
+}
