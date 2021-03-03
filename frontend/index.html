@@ -6,23 +6,172 @@
   <title>Home</title>
   <link rel="stylesheet" type="text/css" href="css/style.css"/>
   <link rel="stylesheet" type="text/css" href="css/home.css"/>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display&amp;family=Roboto&amp;display=swap"/>
-  <link rel="stylesheet" href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css2?family=Playfair+Display&amp;family=Roboto&amp;display=swap"/>
+  <link rel="stylesheet" href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
 </html>
 <body>
-  <main>
-    <form class="search-form" id="search-form" action="results.html">
-      <div class="search-container">
-        <fieldset class="search-primary" id="search-primary">
-          <legend>Where are you traveling to?</legend>
-          <div class="search-box">
-            <input class="search-location" type="search" placeholder="Enter your destination..." name="location" required="required"/><i class="ty-icon ty-icon-search"></i>
-          </div>
-        </fieldset>
-      </div>
-    </form>
-  </main>
-  <!-- Scripts-->
-  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <main id="index-page"></main>
+  <script type="text/babel">
+    
+function capitalize(str) {
+  if (!str) {
+    return str
+  }
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function parseCityCountry(cityStr) {
+  if (cityStr) {
+    var cityCountry = cityStr.split('--')
+    if (cityCountry.length < 2 || cityCountry[0].trim() == "" || cityCountry[1].trim() == "") {
+      return null;
+    }
+
+    var city = decodeURI(cityCountry[0].trim()).toLowerCase();
+    var country = decodeURI(cityCountry[1].trim()).toLowerCase();
+
+    return [city, country]
+  }
+  return null;
+}
+    const { Select } = antd;
+
+let timeout;
+let currentValue;
+
+function fetchCities(value, callback) {
+  if (timeout) {
+    clearTimeout(timeout);
+    timeout = null;
+  }
+  currentValue = value;
+
+  function fake() {
+    axios({
+        method: 'get',
+        url: `https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/city_search/?q=${value}`
+      })
+      .then(response => response.data.cities)
+      .then(result => {
+        if (currentValue === value) {
+          callback(result);
+        }
+      });
+  }
+
+  timeout = setTimeout(fake, 800);
+}
+
+class SearchLocation extends React.Component {
+  state = {
+    data: [],
+    value: undefined,
+  };
+
+  handleSearch = value => {
+    if (value) {
+      fetchCities(value, data => this.setState({ data }));
+    } else {
+      this.setState({ data: [] });
+    }
+  };
+
+  handleChange = value => {
+    this.setState({ value });
+    this.props.handleChange(value)
+  };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.value !== this.props.value) {
+      this.setDefault(this.props.value);
+    }
+  }
+
+  componentDidMount() {
+    if (this.props.value) {
+      this.setDefault(this.props.value);
+    }
+  }
+
+  setDefault = (value) => {
+    const locationData =parseCityCountry(value)
+    if (locationData) {
+      const initData = {
+        city: capitalize(locationData[0]),
+        country: capitalize(locationData[1])
+      }
+
+      this.setState({
+        value: `${initData.city} - ${initData.country}`,
+        data: [
+          initData
+        ],
+      })
+    }
+  }
+
+  render() {
+    const options = this.state.data.map(d => <Option key={`${d.city}--${d.country}`}>{d.city} - {d.country}</Option>);
+
+    return (
+      <Select
+        showSearch
+        value={this.state.value}
+        placeholder={this.props.placeholder}
+        style={this.props.style}
+        defaultActiveFirstOption={false}
+        showArrow={false}
+        filterOption={false}
+        onSearch={this.handleSearch}
+        onChange={this.handleChange}
+        notFoundContent={null}
+      >
+        {options}
+      </Select>
+    );
+  }
+}
+    class HomePage extends React.Component {
+  state = {
+    city: ''
+  }
+
+  handleChange = (city) => {
+    this.setState({
+      city
+    })
+  }
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    window.location.href = `results.html?location=${this.state.city.toLowerCase()}`
+  }
+
+  render() {
+    return (<form className="search-form" id="search-form" onSubmit={this.handleSubmit}>
+        <div className="search-container">
+          <fieldset className="search-primary" id="search-primary">
+            <legend>Where are you traveling to?</legend>
+            <div className="search-box">
+              <SearchLocation handleChange={this.handleChange} placeholder="Enter your destination..." style={{width: 300}}/>
+              <i className="ty-icon ty-icon-search"></i>
+            </div>
+          </fieldset>
+        </div>
+      </form>
+    )
+  }
+}
+
+ReactDOM.render(<HomePage />, document.getElementById('index-page'))
+
+  </script>
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/javascript" src="js/main.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/react@17/umd/react.production.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/antd/dist/antd.min.js"></script>
+  <link rel="stylesheet" href="//unpkg.com/antd/dist/antd.min.css"/>
 </body>

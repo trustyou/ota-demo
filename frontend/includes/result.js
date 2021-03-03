@@ -417,7 +417,7 @@ class SearchPage extends React.Component {
 
   componentWillMount() {
     const selectedLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
-    const locationFilter = this.standardizeCityCountry(selectedLocation);
+    const locationFilter = parseCityCountry(selectedLocation);
     const newState = {}
 
     if (locationFilter) {
@@ -435,21 +435,6 @@ class SearchPage extends React.Component {
     this.setState({
       isLoadingHotel: true,
     }, () => this.fetchHotels());
-  }
-
-  standardizeCityCountry(cityStr) {
-    if (cityStr) {
-      var cityCountry = cityStr.split('--')
-      if (cityCountry.length < 2 || cityCountry[0].trim() == "" || cityCountry[1].trim() == "") {
-        return null;
-      }
-
-      var city = cityCountry[0].trim().toLowerCase();
-      var country = cityCountry[1].trim().toLowerCase();
-
-      return [city, country]
-    }
-    return null;
   }
 
   fetchHotels() {
@@ -500,7 +485,7 @@ class SearchPage extends React.Component {
       filterOccasions: data.occasions,
     }
 
-    const locationFilter = this.standardizeCityCountry(data.location);
+    const locationFilter = parseCityCountry(data.location);
     if (locationFilter) {
       newState["filterCity"] = locationFilter[0]
       newState["filterCountry"] = locationFilter[1]
