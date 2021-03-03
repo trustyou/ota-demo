@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import ota_demo_api.consts as consts
 from ota_demo_api.persistence.database import database
-from ota_demo_api.routers import search
+from ota_demo_api.routers import search, city_search
 
 app = FastAPI()
 
@@ -37,4 +37,11 @@ app.include_router(
     search.router,
     prefix="/api/v1",
     tags=["search"],
+)
+
+
+app.include_router(
+    city_search.router,
+    prefix="/api/v1",
+    tags=["city_search"],
 )

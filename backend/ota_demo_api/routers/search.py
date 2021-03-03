@@ -23,13 +23,15 @@ async def search_api(
     hotel_types: Optional[List[str]] = Query(None),
     min_rating: Optional[int] = None,
     city: Optional[str] = None,
+    country: Optional[str] = None,
     lat: Optional[float] = None,
     long: Optional[float] = None,
     radius: Optional[float] = None,
     language: Optional[str] = None,
     page: Optional[int] = 0,
+    scale: Optional[int] = 100,
     page_size: Optional[int] = 50,
-    use_mock: Optional[int] = 1
+    use_mock: Optional[int] = 0
 ) -> SearchResponse:
     try:
         search_data = SearchRequest(
@@ -38,10 +40,12 @@ async def search_api(
             hotel_types=hotel_types,
             min_rating=min_rating,
             city=city,
+            country=country,
             lat=lat,
             long=long,
             radius=radius,
             language=language,
+            scale=scale,
             page=page,
             page_size=page_size
         )

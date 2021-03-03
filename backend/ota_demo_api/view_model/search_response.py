@@ -38,7 +38,7 @@ class CategoryResponseBase(BaseModel):
     count: int
     sentiment: str
     text: str
-    score: int
+    score: float
     relevance: float
     short_text: str
     category_id: str
@@ -63,14 +63,22 @@ class RelevantTopic(RelevantTopicCategoryModel):
 
 
 class OverallSatisfaction(BaseModel):
-    trend: float
+    trend: Optional[float]
     reviews_count: int
     score: float
 
 
 class RelevantNowResponse(BaseModel):
-    relevant_topics: Dict[str, RelevantTopic]
-    overall_satisfaction: OverallSatisfaction
+    relevant_topics: Optional[Dict[str, RelevantTopic]]
+    overall_satisfaction: Optional[OverallSatisfaction]
+
+
+class MatchResponse(BaseModel):
+    score: float
+    language: str
+    trip_type: str
+    categories: Dict[str, float]
+    hotel_types: Dict[str, float]
 
 
 class HotelResponse(BaseModel):
@@ -83,7 +91,7 @@ class HotelResponse(BaseModel):
     badges: Optional[List[BadgeResponse]]
     reviews_distribution: Optional[List[ReviewsDistributionResponse]]
     traveler_types_distribution: Optional[List[TravelerTypesDistributionResponse]]
-
+    match: MatchResponse
 
 class SearchResponse(BaseModel):
     hotels: List[HotelResponse]
