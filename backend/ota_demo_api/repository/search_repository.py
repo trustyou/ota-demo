@@ -59,20 +59,21 @@ class SearchRepository:
 
         query_params = {}
         query = f"""
-            SELECT 
-                ty_id, 
-                FIRST_VALUE (language) OVER ( 
-                    PARTITION BY language, trip_type 
-                    ORDER BY (language != 'all', trip_type != 'all') DESC
-                ) AS language,
-	            FIRST_VALUE (trip_type) OVER ( 
-	                PARTITION BY language, trip_type 
-	                ORDER BY (language != 'all', trip_type != 'all') DESC
-                ) AS trip_type, 
-                SUM(score) / COUNT(score) AS match_score,
-                array_agg(datapoint) as data_points,
-                array_agg(score) as scores
-            FROM cluster_search
+            WITH search_results AS (
+                SELECT 
+                    ty_id, 
+                    FIRST_VALUE (language) OVER ( 
+                        PARTITION BY language, trip_type 
+                        ORDER BY (language != 'all', trip_type != 'all') DESC
+                    ) AS language,
+                    FIRST_VALUE (trip_type) OVER ( 
+                        PARTITION BY language, trip_type 
+                        ORDER BY (language != 'all', trip_type != 'all') DESC
+                    ) AS trip_type, 
+                    SUM(score) / COUNT(score) AS search_score,
+                    array_agg(datapoint) as data_points,
+                    array_agg(score) as scores
+                FROM cluster_search
         """
 
         if is_city_country:
@@ -119,15 +120,27 @@ class SearchRepository:
             data_points += ['oall']
 
         query += """
-            AND datapoint = ANY(:data_points)
+                AND datapoint = ANY(:data_points)
         """
         query_params["data_points"] = data_points
 
         query += """
-            GROUP BY ty_id, trip_type, language
-            HAVING array_length(array_agg(datapoint), 1) = :expected_data_points
-            ORDER BY match_score DESC, ty_id
-            LIMIT :limit OFFSET :offset 
+                GROUP BY ty_id, trip_type, language
+                HAVING array_length(array_agg(datapoint), 1) = :expected_data_points
+            )
+            SELECT 
+                  ty_id,
+                  data_points,
+                  scores, 
+                  language,
+                  trip_type,
+                  search_score - search_score * (
+                    (CASE WHEN language != :language THEN 1 ELSE 0 END) + 
+                    (CASE WHEN trip_type != :trip_type THEN 1 ELSE 0 END)
+                  ) * 10 / 100 as match_score 
+                FROM search_results
+                ORDER BY match_score DESC, ty_id
+                limit :limit offset :offset;
         """
         query_params["expected_data_points"] = len(data_points)
         query_params["limit"] = search_data.page_size
