@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from pydantic import BaseModel, ValidationError, root_validator
+from pydantic import BaseModel, ValidationError, root_validator, confloat
 
 
 class SearchRequest(BaseModel):
@@ -12,7 +12,7 @@ class SearchRequest(BaseModel):
     country: Optional[str]
     lat: Optional[float]
     long: Optional[float]
-    radius: Optional[float]
+    radius: Optional[confloat(ge=0, le=10000)]
     language: Optional[str]
     scale: Optional[int] = 100
     page: Optional[int] = 1

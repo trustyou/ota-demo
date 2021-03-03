@@ -29,7 +29,7 @@ def upgrade():
         trip_type trip_type_enum,
         language character varying(3),
         city character varying(255),
-        country character varying(255)
+        country character varying(255),
         latitude double precision,
         longitude double precision,
         datapoint character varying(4),
@@ -44,7 +44,7 @@ def upgrade():
     CREATE TABLE city_search (
         city character varying(255),
         country character varying(255),
-        count smallint NOT NULL,
+        count smallint NOT NULL
     );
     
     CREATE INDEX city_search_city_prefix ON city_search USING btree (lower(city) text_pattern_ops, count);
