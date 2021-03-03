@@ -31,7 +31,7 @@ async def search_api(
     language: Optional[str] = None,
     page: Optional[int] = 0,
     scale: Optional[int] = 100,
-    page_size: Optional[int] = 50,
+    page_size: Optional[int] = 10,
     use_mock: Optional[int] = 0
 ) -> SearchResponse:
     try:
