@@ -71,8 +71,9 @@ class SearchServiceDataFeed(object):
                 HotelResponse(
                     ty_id=ty_id,
                     name=seal.get("name"),
-                    rating=float(seal.get("score")),
+                    score=float(seal.get("score")),
                     reviews_count=seal.get("reviews_count"),
+                    score_description=seal.get("score_description"),
                     relevant_now=cls.get_relevant_now(relevant_now_data),
                     categories=categories,
                     badges=badges,

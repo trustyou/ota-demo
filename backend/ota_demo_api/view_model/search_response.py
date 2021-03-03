@@ -86,6 +86,7 @@ class HotelResponse(BaseModel):
     name: str
     rating: Optional[float]
     reviews_count: Optional[int]
+    score_description: Optional[str]
     relevant_now: Optional[RelevantNowResponse]
     categories: Optional[List[CategoryResponse]]
     badges: Optional[List[BadgeResponse]]
