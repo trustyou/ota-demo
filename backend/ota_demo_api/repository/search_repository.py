@@ -44,11 +44,7 @@ class SearchRepository:
 	            FIRST_VALUE (trip_type) OVER ( 
 	                PARTITION BY language, trip_type 
 	                ORDER BY (language != 'all', trip_type != 'all') DESC
-                ) AS trip_type,
-                city, 
-                latitude,
-                longitude, 
-                review_count,
+                ) AS trip_type, 
                 SUM(score) / COUNT(score) AS match_score,
                 array_agg(datapoint) as data_points,
                 array_agg(score) as scores
@@ -105,8 +101,8 @@ class SearchRepository:
             """
 
         query += """
-            GROUP BY ty_id, trip_type, language, city, latitude, longitude, review_count
-            ORDER BY match_score DESC
+            GROUP BY ty_id, trip_type, language
+            ORDER BY match_score, ty_id DESC
             LIMIT :limit OFFSET :offset 
         """
         query_params["limit"] = search_data.page_size
