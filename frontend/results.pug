@@ -11,73 +11,7 @@ html
 	link(rel="stylesheet", href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
 
 body
-	header
-		form.search-form#search-form(action="results.html")
-			.search-container
-				fieldset.search-primary#search-primary
-					legend You have 1,235 results for #[em#search-location-legend]
-					.search-box
-						input.search-location#search-location(type="search" placeholder="Try another city?" name="location" required)
-						i.ty-icon.ty-icon-search
-				fieldset.search-secondary
-					.search-preferences#search-preferences
-						fieldset
-							legend What is most relevant for your trip?
-							// This should be replaced with the tag search component
-							.search-categories
-								input(type="search" placeholder="e.g. cleanliness, breakfast, wifi")
-						fieldset
-							legend What kind of trip did you have in mind?
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-heart
-								| Romantic
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-suitcase
-								| Business
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-family
-								| Family
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-single
-								| Solo
-						fieldset
-							legend Any special occasion for this trip?
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-tuxedo
-								| Wedding
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-glass-martini
-								| Bachelor party
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-lotus
-								| Wellness & relaxing
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-snowflake
-								| Wintersports
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-tree-pine
-								| Hiking & outdoors
-							label
-								input(type="checkbox")
-								i.ty-icon.ty-icon-crown
-								| Luxury
-						input.form-submit.btn.btn-positive.btn-lg(type="submit" value="Apply changes")
-						input.form-reset(type="reset" value="Clear selection")
-					.search-toggle#search-toggle
-						span Customize your search
-						i.ty-icon.ty-icon-chevron-down
-	main
-		section.search-results#search-results
-		section.search-map
+	#search-page
 
 	script(type="text/babel")
 		include includes/result.js
@@ -88,4 +22,7 @@ body
 
 	script(src="//unpkg.com/react@17/umd/react.production.min.js")
 	script(src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js")
-	script(src="//unpkg.com/babel-standalone@6.15.0/babel.min.js")
+	script(src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js")
+	script(src="//unpkg.com/antd/dist/antd-with-locales.js")
+	script(src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js")
+	link(rel="stylesheet", href="//unpkg.com/antd/dist/antd.css")
