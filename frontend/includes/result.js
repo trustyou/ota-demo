@@ -5,8 +5,8 @@ function NoResult({}) {
 
 class SearchHeader extends React.Component {
   state = {
-    category: "",
-    location: null,
+    categories: [],
+    location: '',
     tripTypes: [],
     occasions: [],
   }
@@ -15,9 +15,9 @@ class SearchHeader extends React.Component {
     this.props.onApplyChanges(this.state);
   }
 
-  applyCategoryChange = (category) => {
+  applyCategoryChange = (categories) => {
     this.setState({
-      category
+      categories
     })
   }
 
@@ -41,8 +41,7 @@ class SearchHeader extends React.Component {
 
   clearFilter = () => {
     this.setState({
-      category: "",
-      location: null,
+      categories: [],
       tripTypes: [],
       occasions: [],
     });
@@ -68,7 +67,7 @@ class SearchHeader extends React.Component {
           </fieldset>
           <fieldset className="search-secondary">
             <div className="search-preferences" id="search-preferences">
-              <CategoryFilter onChange={this.applyCategoryChange} selected={this.state.category}/>
+              <CategoryFilter onChange={this.applyCategoryChange} selected={this.state.categories}/>
               <TripsFilter onChange={this.applyTripsChange} selected={this.state.tripTypes}/>
               <OccasionsFilter onChange={this.applyOccasionsChange} selected={this.state.occasions}/>
 
@@ -90,13 +89,12 @@ class TripsFilter extends React.Component {
 
   allTrips = () => {
     return [
-      "romantic",
+      "couple",
       "business",
       "family",
       "solo",
     ]
   }
-
   handleClick = (e) => {
     const { name } = e.target
     var selectedItems = this.state.selected.map(a => a)
@@ -309,6 +307,9 @@ class CategoryFilter extends React.Component {
       <legend>What is most relevant for your trip?</legend>
       <div className="search-categories">
         <antd.Select
+          showArrow={false}
+          mode="multiple"
+          allowClear
           placeholder="e.g. cleanliness, breakfast, wifi"
           showSearch
           onChange={this.updateValue}
@@ -409,33 +410,42 @@ class SearchPage extends React.Component {
     error: null,
     filterCity: "stockholm",
     filterCountry: "sweden",
-    filterCategory: "",
+    filterCategories: [],
     filterTrips: [],
     filterOccasions: [],
   }
 
-  componentDidMount() {
+  componentWillMount() {
     const selectedLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
     const locationFilter = this.standardizeCityCountry(selectedLocation);
-    const newState = {
-      isLoadingHotel: true,
-    }
+    const newState = {}
+
     if (locationFilter) {
       newState["filterCity"] = locationFilter[0]
       newState["filterCountry"] = locationFilter[1]
+    } else {
+      window.location.href = "index.html"
+      return false
     }
-    this.setState(newState, () => this.fetchHotels());
+
+    this.setState(newState);
+  }
+
+  componentDidMount() {
+    this.setState({
+      isLoadingHotel: true,
+    }, () => this.fetchHotels());
   }
 
   standardizeCityCountry(cityStr) {
     if (cityStr) {
       var cityCountry = cityStr.split('--')
-      if (cityCountry.length == 0) {
+      if (cityCountry.length < 2 || cityCountry[0].trim() == "" || cityCountry[1].trim() == "") {
         return null;
       }
 
-      var city = cityCountry[0].toLowerCase();
-      var country = cityCountry[1].toLowerCase();
+      var city = cityCountry[0].trim().toLowerCase();
+      var country = cityCountry[1].trim().toLowerCase();
 
       return [city, country]
     }
@@ -447,10 +457,14 @@ class SearchPage extends React.Component {
       isLoadingHotel: true,
     })
 
-    const { filterCountry, filterCity, filterCategory } = this.state
+    const { filterCountry, filterCity, filterCategories } = this.state
 
     const base_url = 'https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/search/?'
-    var url = `${base_url}country=${filterCountry}&city=${filterCity}&category=${filterCategory}`
+    var url = `${base_url}country=${filterCountry}&city=${filterCity}`
+
+    filterCategories.forEach(function(category) {
+      url = `${url}&categories=${category}`
+    });
 
     this.state.filterTrips.forEach(function(trip) {
       url = `${url}&trip_type=${trip}`
@@ -481,7 +495,7 @@ class SearchPage extends React.Component {
   onApplyChangesFilter = (data) => {
     // TODO Filter after change location
     var newState = {
-      filterCategory: data.category,
+      filterCategories: data.categories,
       filterTrips: data.tripTypes,
       filterOccasions: data.occasions,
     }
