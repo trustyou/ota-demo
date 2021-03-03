@@ -1,6 +1,6 @@
 
 function NoResult({}) {
-  return <div>There is no result for this search</div>
+  return <div class="placeholder-box"><div class="placeholder-box-icon"><i class="ty-icon ty-icon-database-search"></i></div><div class="placeholder-box-title">No hotels found</div><div class="placeholder-box-subtitle">This might be due to the selected location or because of invalid search parameters.</div></div>
 }
 
 class SearchHeader extends React.Component {
