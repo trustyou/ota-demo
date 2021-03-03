@@ -37,8 +37,14 @@ class SearchRepository:
         query = f"""
             SELECT 
                 ty_id, 
-                trip_type, 
-                language, 
+                FIRST_VALUE (language) OVER ( 
+                    PARTITION BY language, trip_type 
+                    ORDER BY (language != 'all', trip_type != 'all') DESC
+                ) AS language,
+	            FIRST_VALUE (trip_type) OVER ( 
+	                PARTITION BY language, trip_type 
+	                ORDER BY (language != 'all', trip_type != 'all') DESC
+                ) AS trip_type,
                 city, 
                 latitude,
                 longitude, 
@@ -67,7 +73,7 @@ class SearchRepository:
 
         if search_data.trip_type:
             query += """
-                AND trip_type = :trip_type
+                AND trip_type IN (:trip_type, 'all')
             """
             query_params["trip_type"] = search_data.trip_type
         else:
@@ -77,7 +83,7 @@ class SearchRepository:
 
         if search_data.language:
             query += """
-                AND language = :language
+                AND language IN (:language, 'all')
             """
             query_params["language"] = search_data.language
         else:
