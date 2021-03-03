@@ -84,7 +84,7 @@ class MatchResponse(BaseModel):
 class HotelResponse(BaseModel):
     ty_id: str
     name: str
-    rating: Optional[float]
+    score: Optional[float]
     reviews_count: Optional[int]
     score_description: Optional[str]
     relevant_now: Optional[RelevantNowResponse]
