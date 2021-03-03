@@ -1,10 +1,4 @@
 
-const { Select } = antd;
-
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 function NoResult({}) {
   return <div>There is no result for this search</div>
 }
@@ -12,6 +6,7 @@ function NoResult({}) {
 class SearchHeader extends React.Component {
   state = {
     category: "",
+    location: null,
     tripTypes: [],
     occasions: [],
   }
@@ -38,11 +33,25 @@ class SearchHeader extends React.Component {
     })
   }
 
+  applyLocationChange = (location) => {
+    this.setState({
+      location
+    })
+  }
+
   clearFilter = () => {
     this.setState({
       category: "",
+      location: null,
       tripTypes: [],
       occasions: [],
+    });
+  }
+
+  componentDidMount() {
+    const selectedLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
+    this.setState({
+      location: selectedLocation,
     });
   }
 
@@ -53,7 +62,8 @@ class SearchHeader extends React.Component {
           <fieldset className="search-primary" id="search-primary">
             <legend>You have 1,235 results for <em id="search-location-legend"></em></legend>
             <div className="search-box">
-              <input className="search-location" id="search-location" type="search" placeholder="Try another city?" name="location" required="required"/><i className="ty-icon ty-icon-search"></i>
+              <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Enter your destination..." style={{width: 300}}/>
+              <i className="ty-icon ty-icon-search"></i>
             </div>
           </fieldset>
           <fieldset className="search-secondary">
@@ -292,13 +302,13 @@ class CategoryFilter extends React.Component {
   }
 
   render() {
-    const options = this.state.categories.map(d => <Select.Option key={d.category_id}>{d.name}</Select.Option>);
+    const options = this.state.categories.map(d => <antd.Select.Option key={d.category_id}>{d.name}</antd.Select.Option>);
     const { selected } = this.state;
 
     return <fieldset>
       <legend>What is most relevant for your trip?</legend>
       <div className="search-categories">
-        <Select
+        <antd.Select
           placeholder="e.g. cleanliness, breakfast, wifi"
           showSearch
           onChange={this.updateValue}
@@ -309,7 +319,7 @@ class CategoryFilter extends React.Component {
           }
         >
           {options}
-        </Select>
+        </antd.Select>
       </div>
     </fieldset>
   }
@@ -334,13 +344,12 @@ function HotelCategories({hotelId, categories}) {
 function HotelBadges({hotelId, badges}) {
   return <ul className="badges">
     {
-      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}`}>
+      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}-${badge.subtext}`}>
         <span className="pill">{badge.subtext}</span> {badge.badge_data.category_name}
       </li>)
     }
   </ul>;
 }
-
 
 class Hotel extends React.Component {
 
@@ -406,10 +415,31 @@ class SearchPage extends React.Component {
   }
 
   componentDidMount() {
-    this.setState({
+    const selectedLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
+    const locationFilter = this.standardizeCityCountry(selectedLocation);
+    const newState = {
       isLoadingHotel: true,
-    })
-    this.fetchHotels();
+    }
+    if (locationFilter) {
+      newState["filterCity"] = locationFilter[0]
+      newState["filterCountry"] = locationFilter[1]
+    }
+    this.setState(newState, () => this.fetchHotels());
+  }
+
+  standardizeCityCountry(cityStr) {
+    if (cityStr) {
+      var cityCountry = cityStr.split('--')
+      if (cityCountry.length == 0) {
+        return null;
+      }
+
+      var city = cityCountry[0].toLowerCase();
+      var country = cityCountry[1].toLowerCase();
+
+      return [city, country]
+    }
+    return null;
   }
 
   fetchHotels() {
@@ -449,11 +479,20 @@ class SearchPage extends React.Component {
   }
 
   onApplyChangesFilter = (data) => {
-    this.setState({
+    // TODO Filter after change location
+    var newState = {
       filterCategory: data.category,
       filterTrips: data.tripTypes,
       filterOccasions: data.occasions,
-    }, () => {
+    }
+
+    const locationFilter = this.standardizeCityCountry(data.location);
+    if (locationFilter) {
+      newState["filterCity"] = locationFilter[0]
+      newState["filterCountry"] = locationFilter[1]
+    }
+
+    this.setState(newState, () => {
       this.fetchHotels();
     });
   }
