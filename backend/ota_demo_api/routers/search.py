@@ -21,7 +21,8 @@ async def search_api(
     categories: Optional[List[str]] = Query(None),
     trip_type: Optional[str] = None,
     hotel_types: Optional[List[str]] = Query(None),
-    min_rating: Optional[int] = None,
+    min_score: Optional[float] = None,
+    sort_column: Optional[str] = "match_score",
     city: Optional[str] = None,
     country: Optional[str] = None,
     lat: Optional[float] = None,
@@ -30,7 +31,7 @@ async def search_api(
     language: Optional[str] = None,
     page: Optional[int] = 0,
     scale: Optional[int] = 100,
-    page_size: Optional[int] = 50,
+    page_size: Optional[int] = 10,
     use_mock: Optional[int] = 0
 ) -> SearchResponse:
     try:
@@ -38,7 +39,8 @@ async def search_api(
             categories=categories,
             trip_type=trip_type,
             hotel_types=hotel_types,
-            min_rating=min_rating,
+            min_score=min_score,
+            sort_column=sort_column,
             city=city,
             country=country,
             lat=lat,

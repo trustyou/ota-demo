@@ -19,6 +19,16 @@ def scale_score(field: Optional[float], scale: int) -> Optional[float]:
         return result
 
 
+def normalize_score(field: Optional[float], scale: int) -> Optional[float]:
+    """
+    Normalize to 100 scale the field expressed in scale.
+    :param field: The score field
+    :param scale: The current scale of the score
+    :return: The normalizaed score
+    """
+    return round(field * 100 / scale)
+
+
 def transform_record(record_dict: Dict[str, Any], scale: int) -> Dict[str, Any]:
     """
     Transform the DB record to the expected format.
@@ -59,20 +69,21 @@ class SearchRepository:
 
         query_params = {}
         query = f"""
-            SELECT 
-                ty_id, 
-                FIRST_VALUE (language) OVER ( 
-                    PARTITION BY language, trip_type 
-                    ORDER BY (language != 'all', trip_type != 'all') DESC
-                ) AS language,
-	            FIRST_VALUE (trip_type) OVER ( 
-	                PARTITION BY language, trip_type 
-	                ORDER BY (language != 'all', trip_type != 'all') DESC
-                ) AS trip_type, 
-                SUM(score) / COUNT(score) AS match_score,
-                array_agg(datapoint) as data_points,
-                array_agg(score) as scores
-            FROM cluster_search
+            WITH search_results AS (
+                SELECT 
+                    ty_id, 
+                    FIRST_VALUE (language) OVER ( 
+                        PARTITION BY language, trip_type 
+                        ORDER BY (language != 'all', trip_type != 'all') DESC
+                    ) AS language,
+                    FIRST_VALUE (trip_type) OVER ( 
+                        PARTITION BY language, trip_type 
+                        ORDER BY (language != 'all', trip_type != 'all') DESC
+                    ) AS trip_type, 
+                    SUM(score) / COUNT(score) AS search_score,
+                    array_agg(datapoint) as data_points,
+                    array_agg(score) as scores
+                FROM cluster_search
         """
 
         if is_city_country:
@@ -119,15 +130,39 @@ class SearchRepository:
             data_points += ['oall']
 
         query += """
-            AND datapoint = ANY(:data_points)
+                AND datapoint = ANY(:data_points)
         """
         query_params["data_points"] = data_points
 
         query += """
-            GROUP BY ty_id, trip_type, language
-            HAVING array_length(array_agg(datapoint), 1) = :expected_data_points
-            ORDER BY match_score DESC, ty_id
-            LIMIT :limit OFFSET :offset 
+                GROUP BY ty_id, trip_type, language
+                HAVING array_length(array_agg(datapoint), 1) = :expected_data_points
+            )
+            SELECT 
+                  sr.ty_id,
+                  sr.data_points,
+                  sr.scores, 
+                  sr.language,
+                  sr.trip_type,
+                  sr.search_score - sr.search_score * (
+                    (CASE WHEN sr.language != :language THEN 1 ELSE 0 END) + 
+                    (CASE WHEN sr.trip_type != :trip_type THEN 1 ELSE 0 END)
+                  ) * 10 / 100 as match_score,
+                  cs.score as score
+            FROM search_results sr
+            JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
+            WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all'
+        """
+
+        if search_data.min_score is not None:
+            query += """
+            AND cs.score >= :min_score
+            """
+            query_params["min_score"] = normalize_score(search_data.min_score, search_data.scale)
+
+        query += f"""
+            ORDER BY {search_data.sort_column} DESC, ty_id
+            LIMIT :limit offset :offset;
         """
         query_params["expected_data_points"] = len(data_points)
         query_params["limit"] = search_data.page_size

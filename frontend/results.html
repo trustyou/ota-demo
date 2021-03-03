@@ -12,19 +12,134 @@
 <body>
   <div id="search-page"></div>
   <script type="text/babel">
-const { Select } = antd;
-
+    
 function capitalize(str) {
+  if (!str) {
+    return str
+  }
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function parseCityCountry(cityStr) {
+  if (cityStr) {
+    var cityCountry = cityStr.split('--')
+    if (cityCountry.length < 2 || cityCountry[0].trim() == "" || cityCountry[1].trim() == "") {
+      return null;
+    }
+
+    var city = decodeURI(cityCountry[0].trim()).toLowerCase();
+    var country = decodeURI(cityCountry[1].trim()).toLowerCase();
+
+    return [city, country]
+  }
+  return null;
+}
+    const { Select } = antd;
+
+let timeout;
+let currentValue;
+
+function fetchCities(value, callback) {
+  if (timeout) {
+    clearTimeout(timeout);
+    timeout = null;
+  }
+  currentValue = value;
+
+  function fake() {
+    axios({
+        method: 'get',
+        url: `https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/city_search/?q=${value}`
+      })
+      .then(response => response.data.cities)
+      .then(result => {
+        if (currentValue === value) {
+          callback(result);
+        }
+      });
+  }
+
+  timeout = setTimeout(fake, 800);
+}
+
+class SearchLocation extends React.Component {
+  state = {
+    data: [],
+    value: undefined,
+  };
+
+  handleSearch = value => {
+    if (value) {
+      fetchCities(value, data => this.setState({ data }));
+    } else {
+      this.setState({ data: [] });
+    }
+  };
+
+  handleChange = value => {
+    this.setState({ value });
+    this.props.handleChange(value)
+  };
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.value !== this.props.value) {
+      this.setDefault(this.props.value);
+    }
+  }
+
+  componentDidMount() {
+    if (this.props.value) {
+      this.setDefault(this.props.value);
+    }
+  }
+
+  setDefault = (value) => {
+    const locationData =parseCityCountry(value)
+    if (locationData) {
+      const initData = {
+        city: capitalize(locationData[0]),
+        country: capitalize(locationData[1])
+      }
+
+      this.setState({
+        value: `${initData.city} - ${initData.country}`,
+        data: [
+          initData
+        ],
+      })
+    }
+  }
+
+  render() {
+    const options = this.state.data.map(d => <Option key={`${d.city}--${d.country}`}>{d.city} - {d.country}</Option>);
+
+    return (
+      <Select
+        showSearch
+        value={this.state.value}
+        placeholder={this.props.placeholder}
+        style={this.props.style}
+        defaultActiveFirstOption={false}
+        showArrow={false}
+        filterOption={false}
+        onSearch={this.handleSearch}
+        onChange={this.handleChange}
+        notFoundContent={null}
+      >
+        {options}
+      </Select>
+    );
+  }
+}
+    
 function NoResult({}) {
   return <div>There is no result for this search</div>
 }
 
 class SearchHeader extends React.Component {
   state = {
-    category: "",
+    categories: [],
+    location: '',
     tripTypes: [],
     occasions: [],
   }
@@ -33,9 +148,9 @@ class SearchHeader extends React.Component {
     this.props.onApplyChanges(this.state);
   }
 
-  applyCategoryChange = (category) => {
+  applyCategoryChange = (categories) => {
     this.setState({
-      category
+      categories
     })
   }
 
@@ -51,11 +166,24 @@ class SearchHeader extends React.Component {
     })
   }
 
+  applyLocationChange = (location) => {
+    this.setState({
+      location
+    })
+  }
+
   clearFilter = () => {
     this.setState({
-      category: "",
+      categories: [],
       tripTypes: [],
       occasions: [],
+    });
+  }
+
+  componentDidMount() {
+    const selectedLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
+    this.setState({
+      location: selectedLocation,
     });
   }
 
@@ -66,12 +194,13 @@ class SearchHeader extends React.Component {
           <fieldset className="search-primary" id="search-primary">
             <legend>You have 1,235 results for <em id="search-location-legend"></em></legend>
             <div className="search-box">
-              <input className="search-location" id="search-location" type="search" placeholder="Try another city?" name="location" required="required"/><i className="ty-icon ty-icon-search"></i>
+              <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Enter your destination..." style={{width: 300}}/>
+              <i className="ty-icon ty-icon-search"></i>
             </div>
           </fieldset>
           <fieldset className="search-secondary">
             <div className="search-preferences" id="search-preferences">
-              <CategoryFilter onChange={this.applyCategoryChange} selected={this.state.category}/>
+              <CategoryFilter onChange={this.applyCategoryChange} selected={this.state.categories}/>
               <TripsFilter onChange={this.applyTripsChange} selected={this.state.tripTypes}/>
               <OccasionsFilter onChange={this.applyOccasionsChange} selected={this.state.occasions}/>
 
@@ -93,13 +222,12 @@ class TripsFilter extends React.Component {
 
   allTrips = () => {
     return [
-      "romantic",
+      "couple",
       "business",
       "family",
       "solo",
     ]
   }
-
   handleClick = (e) => {
     const { name } = e.target
     var selectedItems = this.state.selected.map(a => a)
@@ -305,13 +433,16 @@ class CategoryFilter extends React.Component {
   }
 
   render() {
-    const options = this.state.categories.map(d => <Select.Option key={d.category_id}>{d.name}</Select.Option>);
+    const options = this.state.categories.map(d => <antd.Select.Option key={d.category_id}>{d.name}</antd.Select.Option>);
     const { selected } = this.state;
 
     return <fieldset>
       <legend>What is most relevant for your trip?</legend>
       <div className="search-categories">
-        <Select
+        <antd.Select
+          showArrow={false}
+          mode="multiple"
+          allowClear
           placeholder="e.g. cleanliness, breakfast, wifi"
           showSearch
           onChange={this.updateValue}
@@ -322,7 +453,7 @@ class CategoryFilter extends React.Component {
           }
         >
           {options}
-        </Select>
+        </antd.Select>
       </div>
     </fieldset>
   }
@@ -347,13 +478,12 @@ function HotelCategories({hotelId, categories}) {
 function HotelBadges({hotelId, badges}) {
   return <ul className="badges">
     {
-      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}`}>
+      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}-${badge.subtext}`}>
         <span className="pill">{badge.subtext}</span> {badge.badge_data.category_name}
       </li>)
     }
   </ul>;
 }
-
 
 class Hotel extends React.Component {
 
@@ -413,16 +543,31 @@ class SearchPage extends React.Component {
     error: null,
     filterCity: "stockholm",
     filterCountry: "sweden",
-    filterCategory: "",
+    filterCategories: [],
     filterTrips: [],
     filterOccasions: [],
+  }
+
+  componentWillMount() {
+    const selectedLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
+    const locationFilter = parseCityCountry(selectedLocation);
+    const newState = {}
+
+    if (locationFilter) {
+      newState["filterCity"] = locationFilter[0]
+      newState["filterCountry"] = locationFilter[1]
+    } else {
+      window.location.href = "index.html"
+      return false
+    }
+
+    this.setState(newState);
   }
 
   componentDidMount() {
     this.setState({
       isLoadingHotel: true,
-    })
-    this.fetchHotels();
+    }, () => this.fetchHotels());
   }
 
   fetchHotels() {
@@ -430,10 +575,14 @@ class SearchPage extends React.Component {
       isLoadingHotel: true,
     })
 
-    const { filterCountry, filterCity, filterCategory } = this.state
+    const { filterCountry, filterCity, filterCategories } = this.state
 
     const base_url = 'https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/search/?'
-    var url = `${base_url}country=${filterCountry}&city=${filterCity}&category=${filterCategory}`
+    var url = `${base_url}country=${filterCountry}&city=${filterCity}`
+
+    filterCategories.forEach(function(category) {
+      url = `${url}&categories=${category}`
+    });
 
     this.state.filterTrips.forEach(function(trip) {
       url = `${url}&trip_type=${trip}`
@@ -462,11 +611,20 @@ class SearchPage extends React.Component {
   }
 
   onApplyChangesFilter = (data) => {
-    this.setState({
-      filterCategory: data.category,
+    // TODO Filter after change location
+    var newState = {
+      filterCategories: data.categories,
       filterTrips: data.tripTypes,
       filterOccasions: data.occasions,
-    }, () => {
+    }
+
+    const locationFilter = parseCityCountry(data.location);
+    if (locationFilter) {
+      newState["filterCity"] = locationFilter[0]
+      newState["filterCountry"] = locationFilter[1]
+    }
+
+    this.setState(newState, () => {
       this.fetchHotels();
     });
   }
@@ -486,13 +644,12 @@ class SearchPage extends React.Component {
 ReactDOM.render(<SearchPage />, document.getElementById('search-page'))
 
   </script>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-  <script src="js/main.js"></script>
-  <script src="//unpkg.com/react@17/umd/react.production.min.js"></script>
-  <script src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-  <script src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js"></script>
-  <script src="//unpkg.com/antd/dist/antd-with-locales.js"></script>
-  <script src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js"></script>
-  <link rel="stylesheet" href="//unpkg.com/antd/dist/antd.css"/>
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/javascript" src="js/main.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/react@17/umd/react.production.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js"></script>
+  <script type="text/javascript" src="//unpkg.com/antd/dist/antd.min.js"></script>
+  <link rel="stylesheet" href="//unpkg.com/antd/dist/antd.min.css"/>
 </body>

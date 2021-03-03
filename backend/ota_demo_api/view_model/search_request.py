@@ -1,13 +1,14 @@
 from typing import Optional, List
 
-from pydantic import BaseModel, ValidationError, root_validator, confloat
+from pydantic import BaseModel, ValidationError, root_validator, confloat, conint
 
 
 class SearchRequest(BaseModel):
     categories: Optional[List[str]]
     trip_type: Optional[str]
     hotel_types: Optional[List[str]]
-    min_rating: Optional[int]
+    min_score: Optional[confloat(ge=0, le=100)]
+    sort_column: Optional[str] = "match_score"
     city: Optional[str]
     country: Optional[str]
     lat: Optional[float]
@@ -15,8 +16,8 @@ class SearchRequest(BaseModel):
     radius: Optional[confloat(ge=0, le=10000)]
     language: Optional[str]
     scale: Optional[int] = 100
-    page: Optional[int] = 1
-    page_size: Optional[int] = 50
+    page: Optional[conint(ge=0)] = 1
+    page_size: Optional[conint(gt=0, le=100)] = 10
 
     @root_validator
     def check_require_city_or_map_box(cls, values):
@@ -28,6 +29,12 @@ class SearchRequest(BaseModel):
 
         if values.get("scale") not in [5, 100]:
             raise ValueError('Only (5, 100) are supported values for scale')
+
+        if values.get("min_score") and (values.get("min_score") < 0 or values.get("min_score") > values.get("scale")):
+            raise ValueError('Then min_score filter is outside the supported range')
+
+        if values.get("sort_column") not in ["match_score", "score"]:
+            raise ValueError('Only (match_score, score) are supported values for sort_column')
 
         return values
 
