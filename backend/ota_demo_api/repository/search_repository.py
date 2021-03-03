@@ -129,18 +129,30 @@ class SearchRepository:
                 HAVING array_length(array_agg(datapoint), 1) = :expected_data_points
             )
             SELECT 
-                  ty_id,
-                  data_points,
-                  scores, 
-                  language,
-                  trip_type,
-                  search_score - search_score * (
-                    (CASE WHEN language != :language THEN 1 ELSE 0 END) + 
-                    (CASE WHEN trip_type != :trip_type THEN 1 ELSE 0 END)
-                  ) * 10 / 100 as match_score 
-                FROM search_results
-                ORDER BY match_score DESC, ty_id
-                limit :limit offset :offset;
+                  sr.ty_id,
+                  sr.data_points,
+                  sr.scores, 
+                  sr.language,
+                  sr.trip_type,
+                  sr.search_score - sr.search_score * (
+                    (CASE WHEN sr.language != :language THEN 1 ELSE 0 END) + 
+                    (CASE WHEN sr.trip_type != :trip_type THEN 1 ELSE 0 END)
+                  ) * 10 / 100 as match_score,
+                  cs.score as score
+            FROM search_results sr
+            JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
+            WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all'
+        """
+
+        if search_data.min_score is not None:
+            query += """
+            AND cs.score >= :min_score
+            """
+            query_params["min_score"] = search_data.min_score
+
+        query += f"""
+            ORDER BY {search_data.sort_column} DESC, ty_id
+            LIMIT :limit offset :offset;
         """
         query_params["expected_data_points"] = len(data_points)
         query_params["limit"] = search_data.page_size

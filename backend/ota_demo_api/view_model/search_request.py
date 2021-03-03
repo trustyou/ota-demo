@@ -7,7 +7,8 @@ class SearchRequest(BaseModel):
     categories: Optional[List[str]]
     trip_type: Optional[str]
     hotel_types: Optional[List[str]]
-    min_rating: Optional[int]
+    min_score: Optional[int]
+    sort_column: Optional[str] = "match_score"
     city: Optional[str]
     country: Optional[str]
     lat: Optional[float]
@@ -28,6 +29,9 @@ class SearchRequest(BaseModel):
 
         if values.get("scale") not in [5, 100]:
             raise ValueError('Only (5, 100) are supported values for scale')
+
+        if values.get("sort_column") not in ["match_score", "score"]:
+            raise ValueError('Only (match_score, score) are supported values for sort_column')
 
         return values
 
