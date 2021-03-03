@@ -148,7 +148,7 @@ class SearchResults extends React.Component {
   fetchHotels() {
     axios({
         method: 'get',
-        url: 'https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/search/?city=test&country=us&scale=5'
+        url: 'https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/search/?city=stockholm&country=sweden&scale=5'
       })
       .then(response => response.data)
       .then(data =>
