@@ -25,8 +25,13 @@ class SearchRepository:
 
     async def fetch(self, search_data: SearchRequest) -> Optional[List[ClusterSearchResult]]:
         is_city_country = all([search_data.city, search_data.country])
-        if not is_city_country:
-            raise ValueError("Required (city, country) filter!")
+        is_coordinates = all([search_data.lat, search_data.long, search_data.radius])
+
+        if not is_city_country and not is_coordinates:
+            raise ValueError("Required (city, country) or (lat, long, radius) filter!")
+
+        if is_city_country and is_coordinates:
+            raise ValueError("Both (city, country) or (lat, long, radius) where provided!")
 
         query_params = {}
         query = f"""
@@ -50,6 +55,15 @@ class SearchRepository:
             """
             query_params["city"] = search_data.city
             query_params["country"] = search_data.country
+
+        if is_coordinates:
+            query += """
+                WHERE earth_box(ll_to_earth (:lat, :long), :radius) @> ll_to_earth (latitude, longitude)
+                AND earth_distance(ll_to_earth (:lat, :long), ll_to_earth (latitude, longitude)) < :radius
+            """
+            query_params["lat"] = search_data.lat
+            query_params["long"] = search_data.long
+            query_params["radius"] = search_data.radius
 
         if search_data.trip_type:
             query += """
