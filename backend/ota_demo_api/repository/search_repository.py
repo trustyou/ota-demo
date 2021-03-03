@@ -19,6 +19,16 @@ def scale_score(field: Optional[float], scale: int) -> Optional[float]:
         return result
 
 
+def normalize_score(field: Optional[float], scale: int) -> Optional[float]:
+    """
+    Normalize to 100 scale the field expressed in scale.
+    :param field: The score field
+    :param scale: The current scale of the score
+    :return: The normalizaed score
+    """
+    return round(field * 100 / scale)
+
+
 def transform_record(record_dict: Dict[str, Any], scale: int) -> Dict[str, Any]:
     """
     Transform the DB record to the expected format.
@@ -148,7 +158,7 @@ class SearchRepository:
             query += """
             AND cs.score >= :min_score
             """
-            query_params["min_score"] = search_data.min_score
+            query_params["min_score"] = normalize_score(search_data.min_score, search_data.scale)
 
         query += f"""
             ORDER BY {search_data.sort_column} DESC, ty_id

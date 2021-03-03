@@ -21,7 +21,7 @@ async def search_api(
     categories: Optional[List[str]] = Query(None),
     trip_type: Optional[str] = None,
     hotel_types: Optional[List[str]] = Query(None),
-    min_score: Optional[int] = None,
+    min_score: Optional[float] = None,
     sort_column: Optional[str] = "match_score",
     city: Optional[str] = None,
     country: Optional[str] = None,
