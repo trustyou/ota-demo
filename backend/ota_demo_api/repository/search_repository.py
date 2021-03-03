@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 
 from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
@@ -17,6 +17,30 @@ def scale_score(field: Optional[float], scale: int) -> Optional[float]:
         return None
     else:
         return result
+
+
+def transform_record(record_dict: Dict[str, Any], scale: int) -> Dict[str, Any]:
+    """
+    Transform the DB record to the expected format.
+    :param record_dict: The db record
+    :param scale: The scale to use for scores
+    :return: Dict with result in expected format
+    """
+    record_dict["match_score"] = scale_score(
+        record_dict["match_score"],
+        scale
+    )
+    data_point_scores = list(zip(record_dict["data_points"], record_dict["scores"]))
+    record_dict["hotel_types"] = {
+        ("all" if dps[0] == "oall" else dps[0]): scale_score(dps[1], scale)
+        for dps in data_point_scores if dps[0] == "oall" or dps[0].startswith("16")
+    }
+    record_dict["categories"] = {
+        ("all" if dps[0] == "oall" else dps[0]): scale_score(dps[1], scale)
+        for dps in data_point_scores if dps[0] == "oall" or not dps[0].startswith("16")
+    }
+
+    return record_dict
 
 
 class SearchRepository:
@@ -87,24 +111,25 @@ class SearchRepository:
                 AND language = 'all'
             """
 
+        data_points = []
         if search_data.categories or search_data.hotel_types:
-            data_points = []
             data_points += search_data.categories or []
             data_points += search_data.hotel_types or []
-            query += """
-                AND datapoint = ANY(:data_points)
-            """
-            query_params["data_points"] = data_points
         else:
-            query += """
-                AND datapoint = 'oall'
-            """
+            data_points += ['oall']
+
+        query += """
+            AND datapoint = ANY(:data_points)
+        """
+        query_params["data_points"] = data_points
 
         query += """
             GROUP BY ty_id, trip_type, language
-            ORDER BY match_score, ty_id DESC
+            HAVING array_length(array_agg(datapoint), 1) = :expected_data_points
+            ORDER BY match_score DESC, ty_id
             LIMIT :limit OFFSET :offset 
         """
+        query_params["expected_data_points"] = len(data_points)
         query_params["limit"] = search_data.page_size
         query_params["offset"] = search_data.page_size * search_data.page
 
@@ -113,21 +138,7 @@ class SearchRepository:
         if len(records) == 0:
             return None
 
-        record_dicts = []
-        for record in records:
-            record_dict = dict(record)
-            record_dict["match_score"] = scale_score(record_dict["match_score"], search_data.scale)
-            data_point_scores = list(zip(record_dict["data_points"], record_dict["scores"]))
-            record_dict["hotel_types"] = {
-                ("all" if dps[0] == "oall" else dps[0]): scale_score(dps[1], search_data.scale)
-                for dps in data_point_scores if dps[0] == "oall" or dps[0].startswith("16")
-            }
-            record_dict["categories"] = {
-                ("all" if dps[0] == "oall" else dps[0]): scale_score(dps[1], search_data.scale)
-                for dps in data_point_scores if dps[0] == "oall" or not dps[0].startswith("16")
-            }
-            record_dicts.append(record_dict)
-
+        record_dicts = [transform_record(dict(r), search_data.scale) for r in records]
         results = [ClusterSearchResult(**record_dict) for record_dict in record_dicts]
 
         return results
