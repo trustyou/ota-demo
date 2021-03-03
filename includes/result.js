@@ -376,8 +376,12 @@ function HotelCategories({hotelId, categories}) {
 function HotelBadges({hotelId, badges}) {
   return <ul className="badges">
     {
-      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}-${badge.subtext}`}>
-        <span className="pill">{badge.subtext}</span> {badge.badge_data.category_name}
+      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}-${badge.subtext}`} class="has-tooltip">
+        <div class="tooltip"> {badge.subtext} {badge.badge_data.category_name}</div>
+        <div class="badge">
+            <div class="icon-wrapper"><i class="ty-icon ty-icon-trophy"></i></div>
+            <div class="ribbon-tail"></div>
+        </div>
       </li>)
     }
   </ul>;
@@ -404,17 +408,20 @@ class Hotel extends React.Component {
       return <article className="hotel">
         <div className="hotel-image" style={hotelImage}></div>
         <div className="hotel-details">
-          <h3>{hotel.name}</h3>
-          <h4>2km from center</h4>
-          <ul className="overall">
-            <li>Match: <span className="pill">85%</span></li>
-            <li>Reviews: {hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0}</li>
-            <li>Score: {hotel.rating}</li>
-          </ul>
+          <div class="hotel-name">{hotel.name}</div>
+          <div class="hotel-location"><i class="ty-icon ty-icon-map-marker"></i> 2km from center</div>
+          85% match for you:
           <HotelCategories hotelId={hotel.ty_id} categories={hotel.categories} />
-          <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
         </div>
         <div className="hotel-actions">
+          <div class="trustscore">
+            <div class="score">{hotel.rating}</div>
+            <div class="details">
+              <div class="label">Excellent</div>
+              <div class="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
+            </div>
+          </div>
+          <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
           <a className="action-primary btn btn-primary" href="details.html">Book Now</a>
           <a className="action-secondary btn btn-text" href="details.html">More details</a>
         </div>
