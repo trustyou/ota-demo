@@ -20,6 +20,10 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function getLocationSearchInUrl() {
+  return decodeURI((location.search.split(name + '=')[1] || '').split('&')[0]);
+}
+
 function parseCityCountry(cityStr) {
   if (cityStr) {
     var cityCountry = cityStr.split('--')
