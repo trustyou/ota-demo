@@ -13,7 +13,7 @@ function fetchCities(value, callback) {
   function fake() {
     axios({
         method: 'get',
-        url: `https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/city_search/?q=${value}`
+        url: `${OTA_DEMO_API_URL}/api/v1/city_search/?q=${value}`
       })
       .then(response => response.data.cities)
       .then(result => {

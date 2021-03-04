@@ -24,3 +24,5 @@ function parseCityCountry(cityStr) {
   }
   return null;
 }
+
+const OTA_DEMO_API_URL = "https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net"
