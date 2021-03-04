@@ -6,16 +6,22 @@
 		"base/layout",
 		"base/typography",
 
+		"modules/badge",
 		"modules/button",
 		"modules/hotel",
 		"modules/navbar",
 		"modules/pill",
-		"modules/search-form";
+		"modules/placeholder-box",
+		"modules/search-form",
+		"modules/skeleton",
+		"modules/tooltip",
+		"modules/trustscore";
 
 body {
 	margin: 0;
 	padding: 0;
-	background-color: #eee;
+	background-color: $gray-100;
+	height: 100%;
 	display: flex;
 	justify-content: flex-start;
 	flex-direction: column;

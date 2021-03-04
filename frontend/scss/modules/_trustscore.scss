@@ -1,0 +1,51 @@
+.trustscore {
+		display: flex;
+		align-items: center;
+
+		.score {
+			width: 30px;
+			height: 30px;
+			background-color: $blue-500;
+			color: white;
+			font-family: $font-sans-serif;
+			font-weight: 700;
+			font-size: 1.1rem;
+			letter-spacing: -1px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			position: relative;
+			margin-right: 8px;
+
+			&::after {
+				content: '';
+				position: absolute;
+				top: 100%;
+				left: 0;
+				border-width: 6px;
+				border-style: solid;
+				border-color: $blue-500 transparent transparent $blue-500;
+			}
+		}
+
+		.details {
+			.label {
+				color: #333333;
+				font-family: Roboto;
+				font-size: 1rem;
+				line-height: 1rem;
+				letter-spacing: 0;
+				margin: 0 0 $space-1;
+				font-weight: 500;
+			}
+			.caption {
+				color: #505050;
+				font-family: Roboto;
+				font-size: 0.8rem;
+				line-height: 0.8rem;
+				letter-spacing: 0;
+				margin: 0;
+				font-weight: 500;
+			}
+		}
+	}

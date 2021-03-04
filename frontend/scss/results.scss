@@ -3,28 +3,18 @@
 		"variables/layout",
 		"variables/typography";
 
-
-body {
-	background: #eee;
-}
-
-h1 {
-	margin-top: $space-10*2;
-}
-.search-form {
-	margin-bottom: $space-10*2;
-}
-
 main {
 	padding: $space-10;
 	display: grid;
 	grid-template-columns: 4fr 2fr;
 	row-gap: $space-8;
 	column-gap: $space-8;
-	align-items: start
+	align-items: start;
+	background-color: $gray-100;
 }
 
-.search-results {
+.search-container {
+	padding-top: $space-10;
 }
 
 .search-map {
@@ -37,4 +27,13 @@ main {
 	position: sticky;
   	top: $space-10;
   	height: calc(100vh - 2 * #{$space-10});
+}
+
+@media (max-width: 1100px) {
+	main {
+		grid-template-columns: 1fr;
+	}
+	.search-map {
+		display: none;
+	}
 }

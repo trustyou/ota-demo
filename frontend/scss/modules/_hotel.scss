@@ -1,3 +1,9 @@
+/*
+* ---------------------------------------------
+*               Hotel Search Result
+* ---------------------------------------------
+*/
+
 .hotel {
 	transition: all 0.1s ease-in-out;
 	background: #fff;
@@ -6,6 +12,7 @@
 	border-radius: 4px;
 	display: flex;
 	font-family: $font-sans-serif;
+	min-height: 300px;
 
 	.hotel-image {
 		background-color: rgba($black, 0.1);
@@ -28,14 +35,52 @@
 	.hotel-details {
 		padding: $space-8;
 		flex: 1 1 auto;
+
+		.hotel-name {
+			font-size: 1.4rem;
+			color: $gray-700;
+		}
+
+		.hotel-location {
+			font-size: 0.9rem;
+			color: $gray-400;
+			margin-bottom: $space-4;
+			display: flex;
+			align-items: center;
+
+			.ty-icon {
+				margin-right: $space-1;
+			}
+		}
 	}
 
 	.hotel-actions {
 		padding: $space-8;
-		margin: 0 0 auto;
+		margin: 0;
 		flex-direction: column;
 		display: flex;
-		align-items: center;
-		justify-content: center;
+		align-items: flex-end;
+		justify-content: flex-end;
+
+		.action-primary {
+			margin: auto auto 0;
+		}
+
+		.action-secondary {
+			margin: 0;
+		}
+
+		.trustscore {
+			margin-bottom: $space-6;
+		}
+	}
+
+	.badges {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		justify-content: flex-end;
+		width: 100%;
 	}
 }

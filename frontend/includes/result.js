@@ -1,6 +1,6 @@
 
 function NoResult({}) {
-  return <div>There is no result for this search</div>
+  return <div class="placeholder-box"><div class="placeholder-box-icon"><i class="ty-icon ty-icon-database-search"></i></div><div class="placeholder-box-title">No hotels found</div><div class="placeholder-box-subtitle">This might be due to the selected location or because of invalid search parameters.</div></div>
 }
 
 class SearchHeader extends React.Component {
@@ -61,7 +61,7 @@ class SearchHeader extends React.Component {
           <fieldset className="search-primary" id="search-primary">
             <legend>You have 1,235 results for <em id="search-location-legend"></em></legend>
             <div className="search-box">
-              <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Enter your destination..." style={{width: 300}}/>
+              <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Try another destination?"/>
               <i className="ty-icon ty-icon-search"></i>
             </div>
           </fieldset>
@@ -314,7 +314,6 @@ class CategoryFilter extends React.Component {
           showSearch
           onChange={this.updateValue}
           value={selected}
-          style={{ width: 300 }}
           filterOption={(input, option) =>
             option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
           }
@@ -328,7 +327,39 @@ class CategoryFilter extends React.Component {
 
 function Loader({}) {
   return <div id="spinner">
-    <img src="img/ajax-loader.gif" className="center-block"/>
+    <article className="hotel">
+        <div className="hotel-image"></div>
+        <div className="hotel-details">
+          <div className="placeholder-text"></div>
+          <div className="placeholder-text"></div>
+        </div>
+        <div className="hotel-actions">
+          <div className="placeholder-btn"></div>
+          <div className="placeholder-text"></div>
+        </div>
+      </article>
+      <article className="hotel">
+          <div className="hotel-image"></div>
+          <div className="hotel-details">
+            <div className="placeholder-text"></div>
+            <div className="placeholder-text"></div>
+          </div>
+          <div className="hotel-actions">
+            <div className="placeholder-btn"></div>
+            <div className="placeholder-text"></div>
+          </div>
+        </article>
+      <article className="hotel">
+          <div className="hotel-image"></div>
+          <div className="hotel-details">
+            <div className="placeholder-text"></div>
+            <div className="placeholder-text"></div>
+          </div>
+          <div className="hotel-actions">
+            <div className="placeholder-btn"></div>
+            <div className="placeholder-text"></div>
+          </div>
+        </article>
   </div>;
 }
 
@@ -345,8 +376,12 @@ function HotelCategories({hotelId, categories}) {
 function HotelBadges({hotelId, badges}) {
   return <ul className="badges">
     {
-      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}-${badge.subtext}`}>
-        <span className="pill">{badge.subtext}</span> {badge.badge_data.category_name}
+      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}-${badge.subtext}`} class="has-tooltip">
+        <div class="tooltip"> {badge.subtext} {badge.badge_data.category_name}</div>
+        <div class="badge">
+            <div class="icon-wrapper"><i class="ty-icon ty-icon-trophy"></i></div>
+            <div class="ribbon-tail"></div>
+        </div>
       </li>)
     }
   </ul>;
@@ -373,17 +408,20 @@ class Hotel extends React.Component {
       return <article className="hotel">
         <div className="hotel-image" style={hotelImage}></div>
         <div className="hotel-details">
-          <h3>{hotel.name}</h3>
-          <h4>2km from center</h4>
-          <ul className="overall">
-            <li>Match: <span className="pill">85%</span></li>
-            <li>Reviews: {hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0}</li>
-            <li>Score: {hotel.rating}</li>
-          </ul>
+          <div class="hotel-name">{hotel.name}</div>
+          <div class="hotel-location"><i class="ty-icon ty-icon-map-marker"></i> 2km from center</div>
+          85% match for you:
           <HotelCategories hotelId={hotel.ty_id} categories={hotel.categories} />
-          <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
         </div>
         <div className="hotel-actions">
+          <div class="trustscore">
+            <div class="score">{hotel.rating}</div>
+            <div class="details">
+              <div class="label">Excellent</div>
+              <div class="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
+            </div>
+          </div>
+          <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
           <a className="action-primary btn btn-primary" href="details.html">Book Now</a>
           <a className="action-secondary btn btn-text" href="details.html">More details</a>
         </div>

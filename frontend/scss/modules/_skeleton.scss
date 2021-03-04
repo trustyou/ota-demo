@@ -1,0 +1,24 @@
+/*
+* ---------------------------------------------
+*               Skeleton Screens
+* ---------------------------------------------
+*/
+
+.placeholder-text,
+.placeholder-btn {
+	background: $gray-200;
+	margin-bottom: $space-3;
+}
+
+.placeholder-text {
+	max-width: 300px;
+	width: 100%;
+	height: 12px;
+	border-radius: 6px;
+}
+
+.placeholder-btn {
+	height: 40px;
+	border-radius: 20px;
+	width: 150px;
+}

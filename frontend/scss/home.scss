@@ -3,11 +3,12 @@
 		"variables/layout",
 		"variables/typography";
 
-body {
-}
-
 h1 {
 	width: 100%;
 	margin: auto 0 $space-10;
 	text-shadow: $elevation-medium;
+}
+
+.search-primary {
+	padding-bottom: $space-10*2;
 }
