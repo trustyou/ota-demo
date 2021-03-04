@@ -1,12 +1,6 @@
 class HomePage extends React.Component {
-  state = {
-    city: ''
-  }
-
   handleChange = (city) => {
-    this.setState({
-      city
-    })
+    window.location.href = `results.html?location=${city.toLowerCase()}`
   }
 
   handleSubmit = (event) => {
