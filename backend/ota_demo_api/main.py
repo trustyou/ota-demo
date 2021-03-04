@@ -1,3 +1,4 @@
+import requests
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,6 +17,7 @@ app.add_middleware(
 )
 
 
+@app.get("/")
 @app.get("/health-check")
 async def health_check():
     return {
@@ -45,3 +47,9 @@ app.include_router(
     prefix="/api/v1",
     tags=["city_search"],
 )
+
+
+@app.get("/hotels/categories")
+async def categories():
+    # Attempt to wrap hotel api categories
+    return requests.get("https://api.trustyou.com/hotels/categories").json()
