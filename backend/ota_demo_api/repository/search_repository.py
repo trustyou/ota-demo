@@ -72,17 +72,12 @@ class SearchRepository:
             WITH search_results AS (
                 SELECT 
                     ty_id, 
-                    FIRST_VALUE (language) OVER ( 
-                        PARTITION BY language, trip_type 
-                        ORDER BY (language != 'all', trip_type != 'all') DESC
-                    ) AS language,
-                    FIRST_VALUE (trip_type) OVER ( 
-                        PARTITION BY language, trip_type 
-                        ORDER BY (language != 'all', trip_type != 'all') DESC
-                    ) AS trip_type, 
+                    language,
+                    trip_type, 
                     SUM(score) / COUNT(score) AS search_score,
                     array_agg(datapoint) as data_points,
-                    array_agg(score) as scores
+                    array_agg(score) as scores,
+                    ROW_NUMBER() OVER (PARTITION BY ty_id ORDER BY (language != 'all', trip_type != 'all') DESC) AS rn
                 FROM cluster_search
         """
 
@@ -144,6 +139,7 @@ class SearchRepository:
                   sr.scores, 
                   sr.language,
                   sr.trip_type,
+                  sr.rn,
                   sr.search_score - sr.search_score * (
                     (CASE WHEN sr.language != :language THEN 1 ELSE 0 END) + 
                     (CASE WHEN sr.trip_type != :trip_type THEN 1 ELSE 0 END)
@@ -151,7 +147,7 @@ class SearchRepository:
                   cs.score as score
             FROM search_results sr
             JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
-            WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all'
+            WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
         """
 
         if search_data.min_score is not None:
