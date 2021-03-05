@@ -1,18 +1,40 @@
 
 function NoResult({}) {
-  return <div class="placeholder-box"><div class="placeholder-box-icon"><i class="ty-icon ty-icon-database-search"></i></div><div class="placeholder-box-title">No hotels found</div><div class="placeholder-box-subtitle">This might be due to the selected location or because of invalid search parameters.</div></div>
+  return <div class="placeholder-box">
+    <div class="placeholder-box-icon">
+      <i class="ty-icon ty-icon-database-search"></i>
+    </div>
+    <div class="placeholder-box-title">No hotels found</div>
+    <div class="placeholder-box-subtitle">This might be due to the selected location or because of invalid search parameters.</div>
+  </div>
+}
+
+function ErrorOccur({}) {
+  return <div class="placeholder-box">
+    <div class="placeholder-box-icon">
+      <i class="ty-icon ty-icon-database-search"></i>
+    </div>
+    <div class="placeholder-box-title">There is an error occurred</div>
+    <div class="placeholder-box-subtitle">Please try again.</div>
+  </div>
 }
 
 class SearchHeader extends React.Component {
   state = {
     categories: [],
     location: '',
+    city: '',
+    country: '',
     tripTypes: [],
     occasions: [],
+    isSearching: false,
+    isOpen: false,
   }
 
   applyFilter = () => {
-    this.props.onApplyChanges(this.state);
+    if (!this.state.isSearching) {
+      this.props.onApplyChanges(this.state);
+    }
   }
 
   applyCategoryChange = (categories) => {
@@ -34,9 +56,12 @@ class SearchHeader extends React.Component {
   }
 
   applyLocationChange = (location) => {
-    this.setState({
-      location
-    })
+    if (location !== this.state.location) {
+      this.setState({
+        location
+      });
+      this.props.onApplyLocationChange(location);
+    }
   }
 
   clearFilter = () => {
@@ -47,11 +72,28 @@ class SearchHeader extends React.Component {
     });
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.isOpen !== this.props.isOpen) {
+      this.setState({
+        isOpen: this.props.isOpen,
+      })
+    }
+  }
+
   componentDidMount() {
-    const selectedLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
-    this.setState({
-      location: selectedLocation,
-    });
+    const selectedLocation = getLocationSearchInUrl()
+    const locationFilter = parseCityCountry(selectedLocation);
+
+    const initState = {
+      isOpen: this.props.isOpen,
+    }
+
+    if (locationFilter) {
+      initState['location'] = selectedLocation;
+      initState['city'] = locationFilter[0];
+      initState['country'] = locationFilter[1];
+    }
+    this.setState(initState)
   }
 
   render() {
@@ -59,7 +101,7 @@ class SearchHeader extends React.Component {
       <form className="search-form" id="search-form" action="results.html">
         <div className="search-container">
           <fieldset className="search-primary" id="search-primary">
-            <legend>You have 1,235 results for <em id="search-location-legend"></em></legend>
+            <legend>You have 1,235 results for <em id="search-location-legend">{capitalize(this.state.city)} - {capitalize(this.state.country)}</em></legend>
             <div className="search-box">
               <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Try another destination?"/>
               <i className="ty-icon ty-icon-search"></i>
@@ -73,15 +115,17 @@ class SearchHeader extends React.Component {
             </div>
           </fieldset>
           <fieldset className="search-secondary">
-            <div className="search-preferences" id="search-preferences">
+            <div className={`search-preferences ${this.state.isOpen ? 'is-open' : ''}`} id="search-preferences">
               <CategoryFilter onChange={this.applyCategoryChange} selected={this.state.categories}/>
               <TripsFilter onChange={this.applyTripsChange} selected={this.state.tripTypes}/>
               <OccasionsFilter onChange={this.applyOccasionsChange} selected={this.state.occasions}/>
-
-              <input className="form-submit btn btn-positive btn-lg" type="button" value="Apply changes" onClick={this.applyFilter}/>
+              <input className="form-submit btn btn-positive btn-lg" type="button" value={this.props.isSearching ? 'Searching...' : 'Apply changes'} onClick={this.applyFilter}/>
               <input className="form-reset" type="reset" value="Clear selection" onClick={this.clearFilter}/>
             </div>
-            <div className="search-toggle" id="search-toggle"><span>Customize your search</span><i className="ty-icon ty-icon-chevron-down"></i></div>
+            <div className="search-toggle" id="search-toggle" onClick={this.props.toggleSearch}>
+              <span>{!this.state.isOpen ? 'Customize your search' : 'Hide preferences' }</span>
+              <i className={`ty-icon ty-icon-chevron-${this.state.isOpen ? 'up' : 'down'}`}></i>
+            </div>
           </fieldset>
         </div>
       </form>
@@ -252,16 +296,7 @@ class CategoryFilter extends React.Component {
   // We will use API data once we fixed CORS issue
   state = {
     error: null,
-    categories: [
-      {
-        category_id:	"11",
-        name:	"Room"
-      },
-      {
-        category_id:	"11a",
-        name:	"Bathroom"
-      },
-    ],
+    categories: [],
     isLoading: false,
     selected: null,
   }
@@ -274,7 +309,7 @@ class CategoryFilter extends React.Component {
   fetchCategories() {
     axios({
         method: 'get',
-        url: 'http://api.trustyou.com/hotels/categories'
+        url: `${OTA_DEMO_API_URL}/hotels/categories`
       })
       .then(response => {
         return response
@@ -458,10 +493,11 @@ class SearchPage extends React.Component {
     filterCategories: [],
     filterTrips: [],
     filterOccasions: [],
+    isOpenSearch: false
   }
 
   componentWillMount() {
-    const selectedLocation = (location.search.split(name + '=')[1] || '').split('&')[0];
+    const selectedLocation = getLocationSearchInUrl();
     const locationFilter = parseCityCountry(selectedLocation);
     const newState = {}
 
@@ -489,7 +525,7 @@ class SearchPage extends React.Component {
 
     const { filterCountry, filterCity, filterCategories } = this.state
 
-    const base_url = 'https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/api/v1/search/?'
+    const base_url = `${OTA_DEMO_API_URL}/api/v1/search/?`
     var url = `${base_url}country=${filterCountry}&city=${filterCity}`
 
     filterCategories.forEach(function(category) {
@@ -516,14 +552,26 @@ class SearchPage extends React.Component {
           error: null,
           hotels: data.hotels,
           isLoadingHotel: false,
+          // isOpenSearch: false,
         })
       )
       // Catch any errors we hit and update the app
       .catch(error => this.setState({ error, isLoadingHotel: false }));
   }
 
+  onApplyLocationChange = (newLocation) => {
+    const locationFilter = parseCityCountry(newLocation);
+    if (locationFilter[0] !== this.state.filterCity || locationFilter[1] !== this.state.filterCountry) {
+      this.setState({
+        filterCity: locationFilter[0],
+        filterCountry: locationFilter[1]
+      }, () => {
+        this.fetchHotels();
+      });
+    }
+  }
+
   onApplyChangesFilter = (data) => {
-    // TODO Filter after change location
     var newState = {
       filterCategories: data.categories,
       filterTrips: data.tripTypes,
@@ -541,11 +589,24 @@ class SearchPage extends React.Component {
     });
   }
 
+  toggleSearch = () => {
+    this.setState({
+      isOpenSearch: !this.state.isOpenSearch,
+    })
+  }
+
   render() {
     return <>
-      <SearchHeader onApplyChanges={this.onApplyChangesFilter}/>
+      <SearchHeader
+        toggleSearch={this.toggleSearch}
+        isOpen={this.state.isOpenSearch}
+        isSearching={this.state.isLoadingHotel}
+        onApplyChanges={this.onApplyChangesFilter}
+        onApplyLocationChange={this.onApplyLocationChange}
+      />
       <main>
-        {!this.state.isLoadingHotel && <SearchResults hotels={this.state.hotels}/>}
+        {!this.state.isLoadingHotel && !this.state.error && <SearchResults hotels={this.state.hotels}/>}
+        {!this.state.isLoadingHotel && this.state.error && <ErrorMessage/>}
         {this.state.isLoadingHotel && <Loader />}
         <section className="search-map"></section>
       </main>

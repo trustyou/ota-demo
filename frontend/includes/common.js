@@ -6,6 +6,10 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function getLocationSearchInUrl() {
+  return decodeURI((location.search.split(name + '=')[1] || '').split('&')[0]);
+}
+
 function parseCityCountry(cityStr) {
   if (cityStr) {
     var cityCountry = cityStr.split('--')
@@ -20,3 +24,5 @@ function parseCityCountry(cityStr) {
   }
   return null;
 }
+
+const OTA_DEMO_API_URL = "https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net"
