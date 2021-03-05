@@ -27,6 +27,7 @@ main {
 	position: sticky;
   	top: $space-10;
   	height: calc(100vh - 2 * #{$space-10});
+  	max-height: 600px;
 }
 
 @media (max-width: 1100px) {
