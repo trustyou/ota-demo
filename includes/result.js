@@ -64,6 +64,13 @@ class SearchHeader extends React.Component {
               <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Try another destination?"/>
               <i className="ty-icon ty-icon-search"></i>
             </div>
+            <div class="search-summary">
+              Your custom preferences:
+              <span class="search-tag">WiFi<i class="ty-icon ty-icon-remove"></i></span>
+              <span class="search-tag">Business<i class="ty-icon ty-icon-remove"></i></span>
+              <span class="search-tag">Solo<i class="ty-icon ty-icon-remove"></i></span>
+              <span class="search-tag">Luxury<i class="ty-icon ty-icon-remove"></i></span>
+            </div>
           </fieldset>
           <fieldset className="search-secondary">
             <div className="search-preferences" id="search-preferences">
