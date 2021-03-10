@@ -10,20 +10,20 @@ html
 	link(rel="stylesheet", href="//fonts.googleapis.com/css2?family=Playfair+Display&family=Roboto&display=swap")
 	link(rel="stylesheet", href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
 
-body
-	main#index-page
+	body
+		main#index-page
 
-	script(type="text/babel")
-		include includes/common.js
-		include includes/location-search.js
-		include includes/index.js
+		script(type="text/javascript" src="js/common.js")
+		script(type="text/babel")
+			include includes/location-search.js
+			include includes/index.js
 
-	script(type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
-	script(type="text/javascript" src="js/main.js")
+		script(type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
+		script(type="text/javascript" src="js/main.js")
 
-	script(type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js")
-	script(type="text/javascript" src="//unpkg.com/react@17/umd/react.production.min.js")
-	script(type="text/javascript" src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js")
-	script(type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js")
-	script(type="text/javascript" src="//unpkg.com/antd/dist/antd.min.js")
-	link(rel="stylesheet", href="//unpkg.com/antd/dist/antd.min.css")
+		script(type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js")
+		script(type="text/javascript" src="//unpkg.com/react@17/umd/react.production.min.js")
+		script(type="text/javascript" src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js")
+		script(type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js")
+		script(type="text/javascript" src="//unpkg.com/antd/dist/antd.min.js")
+		link(rel="stylesheet", href="//unpkg.com/antd/dist/antd.min.css")

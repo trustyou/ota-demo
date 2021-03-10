@@ -10,24 +10,21 @@ html
 	link(rel="stylesheet", href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Roboto&display=swap")
 	link(rel="stylesheet", href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css")
 
-body
-	header(style="background-image:url('img/hotels/h7.jpg');")
-		.container
-			section.hotel-details
-				h1.hotel-name Sapphire Hotel & Spa
-				a.hotel-address(href="https://www.google.com/maps/" target="_blank")
-					i.ty-icon.ty-icon-map-marker
-					| Steinerstr. 15, 81373, Munich, Germany
-	main
-		.container
-			section.hotel-relevant-now
-				iframe(src="https://api.trustyou.com/hotels/674fa44c-1fbd-4275-aa72-a20f262372cd/relevant_now.html?key=765e65ae-967d-4c44-8d6c-4ac69bb620e0&iframe_resizer=true" allowtransparency="true" frameborder="0" width="100%")
-		section.hotel-meta-review
-			iframe(src="https://api.trustyou.com/hotels/674fa44c-1fbd-4275-aa72-a20f262372cd/tops_flops.html?key=765e65ae-967d-4c44-8d6c-4ac69bb620e0&iframe_resizer=true" allowtransparency="true" frameborder="0" width="100%")
+	body
+		#detail-page
+		script(type="text/javascript" src="js/common.js")
+		script(type="text/babel")
+			include includes/detail.js
 
-	// Scripts
-	script(type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
-	script(type="text/javascript" src="https://api.trustyou.com/static/3rdparty/iframe-resizer/js/iframeResizer.min.js")
-	script(type="text/javascript" src="js/main.js")
-	script(type="text/javascript")
-		| iFrameResize({});
+		script(type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js")
+		script(type="text/javascript" src="//api.trustyou.com/static/3rdparty/iframe-resizer/js/iframeResizer.min.js")
+		script(type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js")
+
+		script(type="text/javascript" src="js/main.js")
+
+		script(type="text/javascript" src="//unpkg.com/react@17/umd/react.production.min.js")
+		script(type="text/javascript" src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js")
+		script(type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js")
+
+		script(type="text/javascript")
+			| iFrameResize({});
