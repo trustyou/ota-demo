@@ -1,21 +1,87 @@
 
+const IMAGES_SIZE = 20;
+
+function getRandomImageIndex() {
+  // Random image Index
+  var randomIndex = Math.floor(Math.random() * IMAGES_SIZE);
+  return randomIndex + 1;
+}
+
 function NoResult({}) {
-  return <div class="placeholder-box">
-    <div class="placeholder-box-icon">
-      <i class="ty-icon ty-icon-database-search"></i>
+  return <div className="placeholder-box">
+    <div className="placeholder-box-icon">
+      <i className="ty-icon ty-icon-database-search"></i>
     </div>
-    <div class="placeholder-box-title">No hotels found</div>
-    <div class="placeholder-box-subtitle">This might be due to the selected location or because of invalid search parameters.</div>
+    <div className="placeholder-box-title">No hotels found</div>
+    <div className="placeholder-box-subtitle">This might be due to the selected location or because of invalid search parameters.</div>
   </div>
 }
 
-function ErrorOccur({}) {
-  return <div class="placeholder-box">
-    <div class="placeholder-box-icon">
-      <i class="ty-icon ty-icon-database-search"></i>
+function ErrorMessage({}) {
+  return <div className="placeholder-box">
+    <div className="placeholder-box-icon">
+      <i className="ty-icon ty-icon-database-search"></i>
     </div>
-    <div class="placeholder-box-title">There is an error occurred</div>
-    <div class="placeholder-box-subtitle">Please try again.</div>
+    <div className="placeholder-box-title">There is an error occurred</div>
+    <div className="placeholder-box-subtitle">Please try again.</div>
+  </div>
+}
+
+function SearchSummaryItem({kind, text, value, onClick}) {
+  return <span key={`${kind}-${value}`} className="search-tag">{text}
+    <i className="ty-icon ty-icon-remove" data-kind={kind} data-value={value} onClick={onClick}></i>
+  </span>
+}
+
+function SearchSummary({onItemRemoved, selectedCategories, selectedTripTypes, selectedOccasions}) {
+  var onClick = (e) => {
+    onItemRemoved(
+      e.target.attributes["data-kind"].value,
+      e.target.attributes["data-value"].value
+    );
+  }
+
+  if (selectedCategories.length === 0 && selectedTripTypes.length === 0 &&  selectedOccasions.length === 0) {
+    return <></>
+  }
+
+  return <div className="search-summary">
+    Your custom preferences:
+
+    <>
+    {selectedCategories.map(
+      category => <SearchSummaryItem
+        key={category}
+        kind="category"
+        text={JSON.parse(category).name}
+        value={JSON.parse(category).category_id}
+        onClick={onClick}
+      />
+    )}
+    </>
+
+    <>
+    {selectedTripTypes.map(
+      ({id, name}) => <SearchSummaryItem
+        key={id}
+        kind="tripType"
+        text={name}
+        value={id}
+        onClick={onClick}
+      />
+    )}
+    </>
+    <>
+    {selectedOccasions.map(
+      ({id, name}) => <SearchSummaryItem
+        key={id}
+        kind="occasion"
+        text={name}
+        value={id}
+        onClick={onClick}
+      />
+    )}
+    </>
   </div>
 }
 
@@ -27,12 +93,11 @@ class SearchHeader extends React.Component {
     country: '',
     tripTypes: [],
     occasions: [],
-    isSearching: false,
     isOpen: false,
   }
 
   applyFilter = () => {
-    if (!this.state.isSearching) {
+    if (!this.props.isSearching) {
       this.props.onApplyChanges(this.state);
     }
   }
@@ -61,6 +126,32 @@ class SearchHeader extends React.Component {
         location
       });
       this.props.onApplyLocationChange(location);
+    }
+  }
+
+  onSearchSummaryItemRemoved = (kind, value) => {
+    console.log(`Removing ${kind}=${value}`);
+    var newState = null;
+
+    if (kind === "category") {
+      const newCategories = this.state.categories.filter(x => JSON.parse(x).category_id !== value)
+      newState = {
+        categories: newCategories,
+      };
+    } else if (kind == "tripType") {
+      const newTripTypes = this.state.tripTypes.filter(x => x.id !== value)
+      newState = {
+        tripTypes: newTripTypes,
+      };
+    } else if (kind == "occasion") {
+      const newOccasions = this.state.occasions.filter(x => x.id !== value)
+      newState = {
+        occasions: newOccasions,
+      };
+    }
+    // TODO Check isOpen == false?
+    if (newState && !this.props.isSearching) {
+      this.setState(newState, () => this.props.onApplyChanges(this.state));
     }
   }
 
@@ -106,20 +197,24 @@ class SearchHeader extends React.Component {
               <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Try another destination?"/>
               <i className="ty-icon ty-icon-search"></i>
             </div>
-            <div class="search-summary">
-              Your custom preferences:
-              <span class="search-tag">WiFi<i class="ty-icon ty-icon-remove"></i></span>
-              <span class="search-tag">Business<i class="ty-icon ty-icon-remove"></i></span>
-              <span class="search-tag">Solo<i class="ty-icon ty-icon-remove"></i></span>
-              <span class="search-tag">Luxury<i class="ty-icon ty-icon-remove"></i></span>
-            </div>
+            <SearchSummary
+              selectedCategories={this.state.categories}
+              selectedTripTypes={this.state.tripTypes}
+              selectedOccasions={this.state.occasions}
+              onItemRemoved={this.onSearchSummaryItemRemoved}
+            />
           </fieldset>
           <fieldset className="search-secondary">
             <div className={`search-preferences ${this.state.isOpen ? 'is-open' : ''}`} id="search-preferences">
               <CategoryFilter onChange={this.applyCategoryChange} selected={this.state.categories}/>
               <TripsFilter onChange={this.applyTripsChange} selected={this.state.tripTypes}/>
               <OccasionsFilter onChange={this.applyOccasionsChange} selected={this.state.occasions}/>
-              <input className="form-submit btn btn-positive btn-lg" type="button" value={this.props.isSearching ? 'Searching...' : 'Apply changes'} onClick={this.applyFilter}/>
+              <input
+                className="form-submit btn btn-positive btn-lg"
+                type="button"
+                value={this.props.isSearching ? 'Searching...' : 'Apply changes'}
+                onClick={this.applyFilter}
+              />
               <input className="form-reset" type="reset" value="Clear selection" onClick={this.clearFilter}/>
             </div>
             <div className="search-toggle" id="search-toggle" onClick={this.props.toggleSearch}>
@@ -139,42 +234,58 @@ class TripsFilter extends React.Component {
   }
 
   allTrips = () => {
+    // TODO API call?
     return [
-      "couple",
-      "business",
-      "family",
-      "solo",
+      {
+        id: "couple",
+        name: "Couple"
+      },
+      {
+        id: "business",
+        name: "Business"
+      },
+      {
+        id: "family",
+        name: "Family"
+      },
+      {
+        id: "solo",
+        name: "Solo"
+      },
     ]
   }
+
   handleClick = (e) => {
-    const { name } = e.target
+    const { value } = e.target
     var selectedItems = this.state.selected.map(a => a)
 
-    const index = selectedItems.indexOf(name);
+    const index = selectedItems.indexOf(value);
 
     if (index > -1) {
+      // Remove item if exists
       selectedItems.splice(index, 1);
     } else {
-      selectedItems.push(name)
+      // Add item
+      selectedItems.push(value)
     }
     this.setState({
       selected: selectedItems,
     }, () => {
-      this.props.onChange(selectedItems)
+      this.props.onChange(this.allTrips().filter(t => selectedItems.includes(t.id)))
     })
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.selected !== this.props.selected) {
       this.setState({
-        selected: this.props.selected,
+        selected: this.props.selected.map(a => a.id),
       })
     }
   }
 
   componentDidMount() {
     this.setState({
-      selected: this.props.selected,
+      selected: this.props.selected.map(a => a.id),
     })
   }
 
@@ -184,16 +295,16 @@ class TripsFilter extends React.Component {
     return <fieldset>
       <legend>What kind of trip did you have in mind?</legend>
       {
-        this.allTrips().map(trip => <label key={trip} className={selected.includes(trip) ? "is-selected" : ""}>
+        this.allTrips().map(({id, name}) => <label key={id} className={selected.includes(id) ? "is-selected" : ""}>
           <input
             type="checkbox"
-            defaultChecked={selected.includes(trip)}
+            defaultChecked={selected.includes(id)}
             onClick={this.handleClick}
-            name={trip}
-            value={trip}
+            name={name}
+            value={id}
           />
             <i className="ty-icon ty-icon-heart"></i>
-            {capitalize(trip)}
+            {capitalize(name)}
         </label>)
       }
     </fieldset>
@@ -206,64 +317,70 @@ class OccasionsFilter extends React.Component {
   }
 
   allOccasions = () => {
-    return {
-      "wedding": [
-        "Wedding",
-        "tuxedo"
-      ],
-      "bachelor-party": [
-        "Bachelor party",
-        "glass-martini"
-      ],
-      "wellness-relaxing": [
-        "Wellness & relaxing",
-        "lotus"
-      ],
-      "wintersports": [
-        "Wintersports",
-        "snowflake"
-      ],
-      "hiking-outdoors": [
-        "Hiking & outdoors",
-        "tree-pine"
-      ],
-      "luxury": [
-        "Luxury",
-        "crown"
-      ]
-    }
+    return [
+      {
+        id:  "wedding",
+        name: "Wedding",
+        icon: "tuxedo",
+      },
+      {
+        id:  "bachelor-party",
+        name: "Bachelor party",
+        icon: "glass-martini",
+      },
+      {
+        id:  "wellness-relaxing",
+        name: "Wellness & relaxing",
+        icon: "lotus",
+      },
+      {
+        id:  "wintersports",
+        name: "Wintersports",
+        icon: "snowflake",
+      },
+      {
+        id:  "hiking-outdoors",
+        name: "Hiking & outdoors",
+        icon: "tree-pine",
+      },
+      {
+        id:  "luxury",
+        name: "Luxury",
+        icon: "crown",
+      },
+    ]
   }
 
   handleClick = (e) => {
-    const { name } = e.target
+    const { value } = e.target
     var selectedItems = this.state.selected.map(a => a)
 
-    const index = selectedItems.indexOf(name);
+    const index = selectedItems.indexOf(value);
 
     if (index > -1) {
       selectedItems.splice(index, 1);
     } else {
-      selectedItems.push(name)
+      selectedItems.push(value)
     }
 
     this.setState({
       selected: selectedItems,
     }, () => {
-      this.props.onChange(selectedItems)
+      this.props.onChange(this.allOccasions().filter(t => selectedItems.includes(t.id)))
     })
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.selected !== this.props.selected) {
       this.setState({
-        selected: this.props.selected,
+        selected: this.props.selected.map(i => i.id),
       })
     }
   }
 
   componentDidMount() {
     this.setState({
-      selected: this.props.selected,
+      selected: this.props.selected.map(i => i.id),
     })
   }
 
@@ -273,18 +390,18 @@ class OccasionsFilter extends React.Component {
     return <fieldset>
       <legend>Any special occasion for this trip?</legend>
       {
-        Object.entries(this.allOccasions()).map(
-          ([occasionVal, [occasionName, icon]]) =>
-          <label key={occasionVal} className={selected.includes(occasionVal) ? "is-selected" : ""}>
+        this.allOccasions().map(
+          ({id, name, icon}) =>
+          <label key={id} className={selected.includes(id) ? "is-selected" : ""}>
             <input
               type="checkbox"
-              defaultChecked={selected.includes(occasionVal)}
+              defaultChecked={selected.includes(id)}
               onClick={this.handleClick}
-              name={occasionVal}
-              value={occasionVal}
+              name={name}
+              value={id}
             />
               <i className={`ty-icon ty-icon-${icon}`}></i>
-              {occasionName}
+              {name}
           </label>
         )
       }
@@ -342,7 +459,11 @@ class CategoryFilter extends React.Component {
   }
 
   render() {
-    const options = this.state.categories.map(d => <antd.Select.Option key={d.category_id}>{d.name}</antd.Select.Option>);
+    const options = this.state.categories.map(
+      cat => <antd.Select.Option
+          key={JSON.stringify({category_id: cat.category_id, name: cat.name})}>{cat.name}
+        </antd.Select.Option>
+    );
     const { selected } = this.state;
 
     return <fieldset>
@@ -417,50 +538,41 @@ function HotelCategories({hotelId, categories}) {
 
 function HotelBadges({hotelId, badges}) {
   return <ul className="badges">
-    {
-      badges.slice(0, 3).map(badge => <li key={`${hotelId}-${badge.badge_type}-${badge.subtext}`} class="has-tooltip">
-        <div class="tooltip"> {badge.subtext} {badge.badge_data.category_name}</div>
-        <div class="badge">
-            <div class="icon-wrapper"><i class="ty-icon ty-icon-trophy"></i></div>
-            <div class="ribbon-tail"></div>
+    { badges.slice(0, 3).map(badge => <li
+        key={`${hotelId}-${badge.badge_type}-${badge.badge_data.category_name}-${badge.subtext}`}
+        className="has-tooltip"
+      >
+        <div className="tooltip"> {badge.subtext} {badge.badge_data.category_name}</div>
+        <div className="badge">
+            <div className="icon-wrapper"><i className="ty-icon ty-icon-trophy"></i></div>
+            <div className="ribbon-tail"></div>
         </div>
-      </li>)
-    }
+      </li>
+    )}
   </ul>;
 }
 
 class Hotel extends React.Component {
-
     render() {
-      const { hotel } = this.props
-      const imgs = [
-        'img/hotels/h1.jpg',
-        'img/hotels/h2.jpg',
-        'img/hotels/h3.jpg',
-        'img/hotels/h4.jpg',
-        'img/hotels/h5.jpg',
-        'img/hotels/h6.jpg',
-        'img/hotels/h7.jpg',
-        'img/hotels/h8.jpg',
-        'img/hotels/h9.jpg',
-      ]
-      const imgUrl = imgs[Math.floor(Math.random() * imgs.length)];
-      const hotelImage = { backgroundImage: 'url(' + imgUrl + ')', };
+      const { hotel, randomIndex } = this.props
+      const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
 
       return <article className="hotel">
         <div className="hotel-image" style={hotelImage}></div>
         <div className="hotel-details">
-          <div class="hotel-name">{hotel.name}</div>
-          <div class="hotel-location"><i class="ty-icon ty-icon-map-marker"></i> 2km from center</div>
+          <div className="hotel-name">{hotel.name}</div>
+          <div className="hotel-location">
+            <i className="ty-icon ty-icon-map-marker"></i> 2km from center
+          </div>
           85% match for you:
           <HotelCategories hotelId={hotel.ty_id} categories={hotel.categories} />
         </div>
         <div className="hotel-actions">
-          <div class="trustscore">
-            <div class="score">{hotel.rating}</div>
-            <div class="details">
-              <div class="label">Excellent</div>
-              <div class="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
+          <div className="trustscore">
+            <div className="score">{hotel.score}</div>
+            <div className="details">
+              <div className="label">Excellent</div>
+              <div className="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
             </div>
           </div>
           <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
@@ -478,7 +590,13 @@ class SearchResults extends React.Component {
     }
 
     return <div>
-      {this.props.hotels.map(hotel => <Hotel key={hotel.ty_id} hotel={hotel} />)}
+      {this.props.hotels.map(
+        hotel => <Hotel
+          key={hotel.ty_id}
+          hotel={hotel}
+          randomIndex={getRandomImageIndex()}
+        />)
+      }
     </div>
   }
 }
@@ -488,34 +606,30 @@ class SearchPage extends React.Component {
     isLoadingHotel: true,
     hotels: [],
     error: null,
-    filterCity: "stockholm",
-    filterCountry: "sweden",
+    filterCity: "",
+    filterCountry: "",
     filterCategories: [],
     filterTrips: [],
     filterOccasions: [],
     isOpenSearch: false
   }
 
-  componentWillMount() {
+  componentDidMount() {
     const selectedLocation = getLocationSearchInUrl();
     const locationFilter = parseCityCountry(selectedLocation);
-    const newState = {}
-
-    if (locationFilter) {
-      newState["filterCity"] = locationFilter[0]
-      newState["filterCountry"] = locationFilter[1]
-    } else {
-      window.location.href = "index.html"
-      return false
+    const newState = {
+      isLoadingHotel: true
     }
 
-    this.setState(newState);
-  }
-
-  componentDidMount() {
-    this.setState({
-      isLoadingHotel: true,
-    }, () => this.fetchHotels());
+    if (locationFilter) {
+      if (this.state.filterCity != locationFilter[0] || this.state.filterCountry != locationFilter[1]) {
+        newState["filterCity"] = locationFilter[0]
+        newState["filterCountry"] = locationFilter[1]
+      }
+      this.setState(newState, () => this.fetchHotels());
+    } else {
+      window.location.href = "index.html"
+    }
   }
 
   fetchHotels() {
@@ -529,15 +643,15 @@ class SearchPage extends React.Component {
     var url = `${base_url}country=${filterCountry}&city=${filterCity}`
 
     filterCategories.forEach(function(category) {
-      url = `${url}&categories=${category}`
+      url = `${url}&categories=${JSON.parse(category).category_id}`
     });
 
     this.state.filterTrips.forEach(function(trip) {
-      url = `${url}&trip_type=${trip}`
+      url = `${url}&trip_type=${trip.id}`
     });
 
     this.state.filterOccasions.forEach(function(occasion) {
-      url = `${url}&occasion=${occasion}`
+      url = `${url}&occasion=${occasion.id}`
     });
 
     url = `${url}&page_size=10&page=0`
@@ -552,7 +666,7 @@ class SearchPage extends React.Component {
           error: null,
           hotels: data.hotels,
           isLoadingHotel: false,
-          // isOpenSearch: false,
+          isOpenSearch: false,
         })
       )
       // Catch any errors we hit and update the app
