@@ -8,39 +8,11 @@
   <link rel="stylesheet" type="text/css" href="css/results.css"/>
   <link rel="stylesheet" href="//fonts.googleapis.com/css2?family=Playfair+Display&amp;family=Roboto&amp;display=swap"/>
   <link rel="stylesheet" href="//cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
-</html>
-<body>
-  <div id="search-page"></div>
-  <script type="text/babel">
-    
-function capitalize(str) {
-  if (!str) {
-    return str
-  }
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
-function getLocationSearchInUrl() {
-  return decodeURI((location.search.split(name + '=')[1] || '').split('&')[0]);
-}
-
-function parseCityCountry(cityStr) {
-  if (cityStr) {
-    var cityCountry = cityStr.split('--')
-    if (cityCountry.length < 2 || cityCountry[0].trim() == "" || cityCountry[1].trim() == "") {
-      return null;
-    }
-
-    var city = decodeURI(cityCountry[0].trim()).toLowerCase();
-    var country = decodeURI(cityCountry[1].trim()).toLowerCase();
-
-    return [city, country]
-  }
-  return null;
-}
-
-const OTA_DEMO_API_URL = "https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net"
-    const { Select } = antd;
+  <body>
+    <div id="search-page"></div>
+    <script type="text/javascript" src="js/common.js"></script>
+    <script type="text/babel">
+      const { Select } = antd;
 
 let timeout;
 let currentValue;
@@ -137,15 +109,7 @@ class SearchLocation extends React.Component {
     );
   }
 }
-    
-const IMAGES_SIZE = 20;
-
-function getRandomImageIndex() {
-  // Random image Index
-  var randomIndex = Math.floor(Math.random() * IMAGES_SIZE);
-  return randomIndex + 1;
-}
-
+      
 function NoResult({}) {
   return <div className="placeholder-box">
     <div className="placeholder-box-icon">
@@ -269,7 +233,6 @@ class SearchHeader extends React.Component {
   }
 
   onSearchSummaryItemRemoved = (kind, value) => {
-    console.log(`Removing ${kind}=${value}`);
     var newState = null;
 
     if (kind === "category") {
@@ -311,7 +274,7 @@ class SearchHeader extends React.Component {
   }
 
   componentDidMount() {
-    const selectedLocation = getLocationSearchInUrl()
+    const selectedLocation = getLocationSearchInUrl("location")
     const locationFilter = parseCityCountry(selectedLocation);
 
     const initState = {
@@ -715,8 +678,8 @@ class Hotel extends React.Component {
             </div>
           </div>
           <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
-          <a className="action-primary btn btn-primary" href="details.html">Book Now</a>
-          <a className="action-secondary btn btn-text" href="details.html">More details</a>
+          <a className="action-primary btn btn-primary" href={`details.html?ty_id=${hotel.ty_id}`}>Book Now</a>
+          <a className="action-secondary btn btn-text" href={`details.html?ty_id=${hotel.ty_id}`}>More details</a>
         </div>
       </article>
     }
@@ -754,7 +717,7 @@ class SearchPage extends React.Component {
   }
 
   componentDidMount() {
-    const selectedLocation = getLocationSearchInUrl();
+    const selectedLocation = getLocationSearchInUrl("location");
     const locationFilter = parseCityCountry(selectedLocation);
     const newState = {
       isLoadingHotel: true
@@ -869,13 +832,14 @@ class SearchPage extends React.Component {
 
 ReactDOM.render(<SearchPage />, document.getElementById('search-page'))
 
-  </script>
-  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-  <script type="text/javascript" src="js/main.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-  <script type="text/javascript" src="//unpkg.com/react@17/umd/react.production.min.js"></script>
-  <script type="text/javascript" src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-  <script type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js"></script>
-  <script type="text/javascript" src="//unpkg.com/antd/dist/antd.min.js"></script>
-  <link rel="stylesheet" href="//unpkg.com/antd/dist/antd.min.css"/>
-</body>
+    </script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script type="text/javascript" src="//unpkg.com/react@17/umd/react.production.min.js"></script>
+    <script type="text/javascript" src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
+    <script type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js"></script>
+    <script type="text/javascript" src="//unpkg.com/antd/dist/antd.min.js"></script>
+    <link rel="stylesheet" href="//unpkg.com/antd/dist/antd.min.css"/>
+  </body>
+</html>

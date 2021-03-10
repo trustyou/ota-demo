@@ -1,12 +1,4 @@
 
-const IMAGES_SIZE = 20;
-
-function getRandomImageIndex() {
-  // Random image Index
-  var randomIndex = Math.floor(Math.random() * IMAGES_SIZE);
-  return randomIndex + 1;
-}
-
 function NoResult({}) {
   return <div className="placeholder-box">
     <div className="placeholder-box-icon">
@@ -130,7 +122,6 @@ class SearchHeader extends React.Component {
   }
 
   onSearchSummaryItemRemoved = (kind, value) => {
-    console.log(`Removing ${kind}=${value}`);
     var newState = null;
 
     if (kind === "category") {
@@ -172,7 +163,7 @@ class SearchHeader extends React.Component {
   }
 
   componentDidMount() {
-    const selectedLocation = getLocationSearchInUrl()
+    const selectedLocation = getLocationSearchInUrl("location")
     const locationFilter = parseCityCountry(selectedLocation);
 
     const initState = {
@@ -576,8 +567,8 @@ class Hotel extends React.Component {
             </div>
           </div>
           <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
-          <a className="action-primary btn btn-primary" href="details.html">Book Now</a>
-          <a className="action-secondary btn btn-text" href="details.html">More details</a>
+          <a className="action-primary btn btn-primary" href={`details.html?ty_id=${hotel.ty_id}`}>Book Now</a>
+          <a className="action-secondary btn btn-text" href={`details.html?ty_id=${hotel.ty_id}`}>More details</a>
         </div>
       </article>
     }
@@ -615,7 +606,7 @@ class SearchPage extends React.Component {
   }
 
   componentDidMount() {
-    const selectedLocation = getLocationSearchInUrl();
+    const selectedLocation = getLocationSearchInUrl("location");
     const locationFilter = parseCityCountry(selectedLocation);
     const newState = {
       isLoadingHotel: true
