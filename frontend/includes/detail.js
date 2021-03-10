@@ -1,17 +1,4 @@
 
-<html>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <meta name="robots" content="noindex, nofollow"/>
-  <title>Hotel Details</title>
-  <link rel="stylesheet" type="text/css" href="css/style.css"/>
-  <link rel="stylesheet" type="text/css" href="css/details.css"/>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display&amp;family=Roboto&amp;display=swap"/>
-  <link rel="stylesheet" href="https://cdn.integration.trustyou.com/apps/trustyou-iconic/public/css/trustyou-iconic.min.latest.css"/>
-  <body>
-    <div id="detail-page"></div>
-    <script type="text/javascript" src="js/common.js"></script>
-    <script type="text/babel">
 function WidgetIframe({url}) {
   return <iframe
     src={url}
@@ -115,15 +102,3 @@ class DetailPage extends React.Component {
 const selectedTyId = getLocationSearchInUrl("ty_id");
 
 ReactDOM.render(<DetailPage tyId={selectedTyId} apiKey={TRUSTYOU_HOTEL_API_KEY} />, document.getElementById('detail-page'))
-
-    </script>
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <script type="text/javascript" src="//api.trustyou.com/static/3rdparty/iframe-resizer/js/iframeResizer.min.js"></script>
-    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
-    <script type="text/javascript" src="js/main.js"></script>
-    <script type="text/javascript" src="//unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script type="text/javascript" src="//unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-    <script type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js"></script>
-    <script type="text/javascript">iFrameResize({});</script>
-  </body>
-</html>
