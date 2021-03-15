@@ -1,6 +1,7 @@
 from requests_futures.sessions import FuturesSession
 
 from typing import Any, List
+import random
 
 from ota_demo_api.view_model.search_response import (
     TravelerTypesDistributionResponse,
@@ -17,6 +18,7 @@ from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse, MatchResponse
 from ota_demo_api.consts import TRUSTYOU_HOTEL_API_KEY
+from ota_demo_api.service.badges import get_badge_icon
 
 
 class SearchServiceDataFeed(object):
@@ -56,13 +58,14 @@ class SearchServiceDataFeed(object):
             future_relevant_now = request_session.get(
                 f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}&scale={search_data.scale}"
             )
+            future_badges = request_session.get(f"{ty_api}/{ty_id}/badges.json?scale={search_data.scale}")
 
             meta_review = future_meta_review.result().json().get("response")
             reviews = future_reviews.result().json().get("response")
             relevant_now_data = future_relevant_now.result().json().get("response")
             seal = future_seal.result().json().get("response")
 
-            badges = cls.get_badges(meta_review)
+            badges = cls.get_badges(future_badges.result().json().get("response"))
             categories = cls.get_categories(meta_review)
 
             reviews_distribution = cls.get_reviews_distribution(reviews)
@@ -85,7 +88,8 @@ class SearchServiceDataFeed(object):
                         trip_type=(ty_clusters[ty_id].trip_type if ty_clusters[ty_id] else "all"),
                         categories=(ty_clusters[ty_id].categories if ty_clusters[ty_id] else {"all": -1}),
                         hotel_types=(ty_clusters[ty_id].hotel_types if ty_clusters[ty_id] else {"all": -1})
-                    )
+                    ),
+                    distance_from_center=f"{round(random.uniform(1, 5), 1)} km from center"
                 )
             )
 
@@ -94,26 +98,27 @@ class SearchServiceDataFeed(object):
         )
 
     @classmethod
-    def get_badges(cls, meta_review: Any):
+    def get_badges(cls, badges_data: Any):
         """
         Mock badges list, data comes from meta review
 
         :param meta_review: result of meta_review.json
         :return: [BadgeResponse]
         """
-        badge_list = meta_review["badge_list"]
+        badge_list = badges_data["badge_list"]
         badges = []
 
         for badge in badge_list:
             badge_data = BadgeDataModel(**badge["badge_data"])
-            highlight_list = [BadgeHighlightModel(**highlight) for highlight in badge["highlight_list"]]
+            highlight_list = [BadgeHighlightModel(**highlight) for highlight in badge.get("highlight_list", [])]
 
             badge_response = BadgeResponse(
-                text=badge["text"],
-                subtext=badge["subtext"],
+                text=badge.get("text", ""),
+                subtext=badge.get("subtext", ""),
                 badge_type=badge["badge_type"],
                 badge_data=badge_data,
-                highlight_list=highlight_list
+                highlight_list=highlight_list,
+                icon=get_badge_icon(badge)
             )
             badges.append(badge_response)
 

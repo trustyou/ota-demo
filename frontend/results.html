@@ -130,6 +130,28 @@ function ErrorMessage({}) {
   </div>
 }
 
+function RelevantNow({relevantNow}) {
+  var items = [];
+  var relevantNowText = '';
+
+  if (relevantNow.overall_satisfaction && relevantNow.overall_satisfaction.score) {
+    var recentRating = relevantNow.overall_satisfaction.score;
+    items.push(`<span>Recent feedback: Score <span class="pill">${recentRating}</span>`);
+  }
+
+  if (relevantNow.relevant_topics) {
+    for (var key in relevantNow.relevant_topics) {
+      const val = relevantNow.relevant_topics[key];
+      items.push(`${val.name} <span class="pill">${val.score}</span>`)
+    }
+  }
+  relevantNowText = items.join(', ');
+
+  return <div>
+    {relevantNowText && <span dangerouslySetInnerHTML={{ __html: relevantNowText }}></span>}
+  </div>
+}
+
 function SearchSummaryItem({kind, text, value, onClick}) {
   return <span key={`${kind}-${value}`} className="search-tag">{text}
     <i className="ty-icon ty-icon-remove" data-kind={kind} data-value={value} onClick={onClick}></i>
@@ -512,7 +534,6 @@ class OccasionsFilter extends React.Component {
 }
 
 class CategoryFilter extends React.Component {
-  // We will use API data once we fixed CORS issue
   state = {
     error: null,
     categories: [],
@@ -639,19 +660,27 @@ function HotelCategories({hotelId, categories}) {
 }
 
 function HotelBadges({hotelId, badges}) {
-  return <ul className="badges">
-    { badges.slice(0, 3).map(badge => <li
+  // Take 1st badge is not trust_score_sentence, if there is no item, take 1st
+  var badge = badges.find(b => b.badge_type !== 'trust_score_sentence')
+  if (badge === undefined && badges.length > 0) {
+    badge = badges[0];
+  }
+
+  return <>
+    { badge && <ul className="badges">
+      <li
         key={`${hotelId}-${badge.badge_type}-${badge.badge_data.category_name}-${badge.subtext}`}
         className="has-tooltip"
       >
         <div className="tooltip"> {badge.subtext} {badge.badge_data.category_name}</div>
         <div className="badge">
-            <div className="icon-wrapper"><i className="ty-icon ty-icon-trophy"></i></div>
+            <div className="icon-wrapper"><i className={`ty-icon ty-icon-${badge.icon || "trophy"}`}></i></div>
             <div className="ribbon-tail"></div>
         </div>
       </li>
-    )}
-  </ul>;
+    </ul>
+    }
+  </>;
 }
 
 class Hotel extends React.Component {
@@ -663,11 +692,13 @@ class Hotel extends React.Component {
         <div className="hotel-image" style={hotelImage}></div>
         <div className="hotel-details">
           <div className="hotel-name">{hotel.name}</div>
-          <div className="hotel-location">
-            <i className="ty-icon ty-icon-map-marker"></i> 2km from center
+          { hotel.distance_from_center && <div className="hotel-location">
+            <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
           </div>
+          }
           85% match for you:
           <HotelCategories hotelId={hotel.ty_id} categories={hotel.categories} />
+          <RelevantNow relevantNow={hotel.relevant_now} />
         </div>
         <div className="hotel-actions">
           <div className="trustscore">
