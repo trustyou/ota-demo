@@ -19,8 +19,8 @@ class BadgeHighlightModel(BaseModel):
 
 
 class BadgeDataModel(BaseModel):
-    global_popularity: float
-    popularity: float
+    global_popularity: Optional[float]
+    popularity: Optional[float]
     score: Optional[float]
     category_id: Optional[str]
     category_name: Optional[str]
@@ -32,6 +32,7 @@ class BadgeResponse(BaseModel):
     badge_type: str
     badge_data: BadgeDataModel
     highlight_list: List[BadgeHighlightModel]
+    icon: str
 
 
 class CategoryResponseBase(BaseModel):
@@ -93,6 +94,8 @@ class HotelResponse(BaseModel):
     reviews_distribution: Optional[List[ReviewsDistributionResponse]]
     traveler_types_distribution: Optional[List[TravelerTypesDistributionResponse]]
     match: MatchResponse
+    distance_from_center: Optional[str]
+
 
 class SearchResponse(BaseModel):
     hotels: List[HotelResponse]
