@@ -443,34 +443,40 @@ class OccasionsFilter extends React.Component {
   allOccasions = () => {
     return [
       {
-        id:  "wedding",
-        name: "Wedding",
-        icon: "tuxedo",
+        id:  "honeymoon",
+        name: "Honeymoon",
+        icon: "tree-palm",
+        categories: ["16b", "16d", "16r"]
       },
       {
         id:  "bachelor-party",
         name: "Bachelor party",
         icon: "glass-martini",
+        categories: ["16i", "16ag", "16z"]
       },
       {
         id:  "wellness-relaxing",
         name: "Wellness & relaxing",
         icon: "lotus",
+        categories: ["16e"]
       },
       {
         id:  "wintersports",
         name: "Wintersports",
         icon: "snowflake",
+        categories: ["16s"]
       },
       {
         id:  "hiking-outdoors",
         name: "Hiking & outdoors",
         icon: "tree-pine",
+        categories: ["16ab"]
       },
       {
         id:  "luxury",
         name: "Luxury",
         icon: "crown",
+        categories: ["16b"]
       },
     ]
   }
@@ -484,7 +490,7 @@ class OccasionsFilter extends React.Component {
     if (index > -1) {
       selectedItems.splice(index, 1);
     } else {
-      selectedItems.push(value)
+      selectedItems = [value]
     }
 
     this.setState({
@@ -664,7 +670,8 @@ class Hotel extends React.Component {
       const { hotel, randomIndex } = this.props
       const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
       const hasOnlyGenericMatchCategories = "all" in hotel.match.categories;
-      const matchCategories = Object.entries(hotel.match.categories).filter(
+      const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
+      const matchCategories = Object.entries(allCategories).filter(
           ([key, _value]) => key !== "all"
       ).map(([cat_id, cat_score]) => ({
         "category_id": cat_id,
@@ -783,7 +790,7 @@ class SearchPage extends React.Component {
     });
 
     this.state.filterOccasions.forEach(function(occasion) {
-      url = `${url}&occasion=${occasion.id}`
+      occasion.categories.forEach(cat => url = `${url}&hotel_types=${cat}`)
     });
 
     url = `${url}&page_size=10&page=0`
