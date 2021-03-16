@@ -251,48 +251,43 @@ class TripsFilter extends React.Component {
     return [
       {
         id: "couple",
-        name: "Couple"
+        name: "Couple",
+        icon: "couple",
       },
       {
         id: "business",
-        name: "Business"
+        name: "Business",
+        icon: "suitcase",
       },
       {
         id: "family",
-        name: "Family"
+        name: "Family",
+        icon: "family",
       },
       {
         id: "solo",
-        name: "Solo"
+        name: "Solo",
+        icon: "single",
       },
     ]
   }
 
   handleClick = (e) => {
-    const { value } = e.target
-    var selectedItems = this.state.selected.map(a => a)
+    const { value } = e.target;
+    var selectedItems = [value];
 
-    const index = selectedItems.indexOf(value);
-
-    if (index > -1) {
-      // Remove item if exists
-      selectedItems.splice(index, 1);
-    } else {
-      // Add item
-      selectedItems.push(value)
-    }
     this.setState({
       selected: selectedItems,
     }, () => {
       this.props.onChange(this.allTrips().filter(t => selectedItems.includes(t.id)))
-    })
+    });
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.selected !== this.props.selected) {
       this.setState({
         selected: this.props.selected.map(a => a.id),
-      })
+      });
     }
   }
 
@@ -308,7 +303,7 @@ class TripsFilter extends React.Component {
     return <fieldset>
       <legend>What kind of trip did you have in mind?</legend>
       {
-        this.allTrips().map(({id, name}) => <label key={id} className={selected.includes(id) ? "is-selected" : ""}>
+        this.allTrips().map(({id, name, icon}) => <label key={id} className={selected.includes(id) ? "is-selected" : ""}>
           <input
             type="checkbox"
             defaultChecked={selected.includes(id)}
@@ -316,7 +311,7 @@ class TripsFilter extends React.Component {
             name={name}
             value={id}
           />
-            <i className="ty-icon ty-icon-heart"></i>
+            <i className={`ty-icon ty-icon-${icon}`}></i>
             {capitalize(name)}
         </label>)
       }
@@ -532,7 +527,7 @@ function HotelCategories({hotelId, categories}) {
 
 function HotelBadges({hotelId, badges}) {
   // Take 1st badge is not trust_score_sentence, if there is no item, take 1st
-  var badge = badges.find(b => b.badge_type !== 'trust_score_sentence')
+  var badge = badges.find(b => b.badge_type !== 'trust_score_sentence' && b.badge_type !== 'good_to_know')
   if (badge === undefined && badges.length > 0) {
     badge = badges[0];
   }
@@ -543,10 +538,16 @@ function HotelBadges({hotelId, badges}) {
         key={`${hotelId}-${badge.badge_type}-${badge.badge_data.category_name}-${badge.subtext}`}
         className="has-tooltip"
       >
-        <div className="tooltip"> {badge.subtext} {badge.badge_data.category_name}</div>
+        <div className="tooltip">
+          { !badge.subtext && <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>}
+          {badge.subtext}
+        </div>
         <div className="badge">
             <div className="icon-wrapper"><i className={`ty-icon ty-icon-${badge.icon || "trophy"}`}></i></div>
             <div className="ribbon-tail"></div>
+        </div>
+        <div class="rank-value">
+          <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>
         </div>
       </li>
     </ul>
@@ -555,56 +556,56 @@ function HotelBadges({hotelId, badges}) {
 }
 
 class Hotel extends React.Component {
-    render() {
-      const { hotel, randomIndex } = this.props
-      const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
-      const hasOnlyGenericMatchCategories = "all" in hotel.match.categories;
-      const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
-      const matchCategories = Object.entries(allCategories).filter(
-          ([key, _value]) => key !== "all"
-      ).map(([cat_id, cat_score]) => ({
-        "category_id": cat_id,
-        "score": cat_score,
-        "category_name": this.props.mrCategories.find(category => category.category_id === cat_id).name
-      })).sort((a, b) => b.score - a.score )
-      const matchesTripType = hotel.match.trip_type !== "all";
-      const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
+  render() {
+    const { hotel, randomIndex } = this.props
+    const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
+    const hasOnlyGenericMatchCategories = "all" in hotel.match.categories;
+    const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
+    const matchCategories = Object.entries(allCategories).filter(
+        ([key, _value]) => key !== "all"
+    ).map(([cat_id, cat_score]) => ({
+      "category_id": cat_id,
+      "score": cat_score,
+      "category_name": this.props.mrCategories.find(category => category.category_id === cat_id).name
+    })).sort((a, b) => b.score - a.score )
+    const matchesTripType = hotel.match.trip_type !== "all";
+    const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
 
-      return <article className="hotel">
-        <div className="hotel-image" style={hotelImage}></div>
-        <div className="hotel-details">
-          <div className="hotel-name">{hotel.name}</div>
-          { hotel.distance_from_center && <div className="hotel-location">
-            <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
-          </div>
-          }
-          <span className="hotel-match-score has-tooltip">
-            <div className="tooltip"> Matches {hotel.match.score}% to your personalization </div>
-            {hotel.match.score}% match for you
-          </span>
-          { matchesTripType &&
-            <div>
-              Guest feedback from similar trips:
-            </div>
-          }
-          <HotelCategories hotelId={hotel.ty_id} categories={categories} />
-          <RelevantNow relevantNow={hotel.relevant_now} />
+    return <article className="hotel">
+      <div className="hotel-image" style={hotelImage}></div>
+      <div className="hotel-details">
+        <div className="hotel-name">{hotel.name}</div>
+        { hotel.distance_from_center && <div className="hotel-location">
+          <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
         </div>
-        <div className="hotel-actions">
-          <div className="trustscore">
-            <div className="score">{hotel.score}</div>
-            <div className="details">
-              <div className="label">Excellent</div>
-              <div className="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
-            </div>
+        }
+        <span className="hotel-match-score has-tooltip">
+          <div className="tooltip"> Matches {hotel.match.score}% to your personalization </div>
+          {hotel.match.score}% match for you
+        </span>
+        { matchesTripType &&
+          <div>
+            Guest feedback from similar trips:
           </div>
-          <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
-          <a className="action-primary btn btn-primary" href={`details.html?ty_id=${hotel.ty_id}`}>Book Now</a>
-          <a className="action-secondary btn btn-text" href={`details.html?ty_id=${hotel.ty_id}`}>More details</a>
+        }
+        <HotelCategories hotelId={hotel.ty_id} categories={categories} />
+        <RelevantNow relevantNow={hotel.relevant_now} />
+      </div>
+      <div className="hotel-actions">
+        <div className="trustscore">
+          <div className="score">{hotel.score}</div>
+          <div className="details">
+            <div className="label">Excellent</div>
+            <div className="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
+          </div>
         </div>
-      </article>
-    }
+        <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
+        <a className="action-primary btn btn-primary" href={`details.html?ty_id=${hotel.ty_id}`}>Book Now</a>
+        <a className="action-secondary btn btn-text" href={`details.html?ty_id=${hotel.ty_id}`}>More details</a>
+      </div>
+    </article>
   }
+}
 
 class SearchResults extends React.Component {
   render() {
