@@ -379,7 +379,7 @@ class OccasionsFilter extends React.Component {
     if (index > -1) {
       selectedItems.splice(index, 1);
     } else {
-      selectedItems = [value]
+      selectedItems.push(value)
     }
 
     this.setState({
