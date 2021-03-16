@@ -330,7 +330,7 @@ class SearchHeader extends React.Component {
           </fieldset>
           <fieldset className="search-secondary">
             <div className={`search-preferences ${this.state.isOpen ? 'is-open' : ''}`} id="search-preferences">
-              <CategoryFilter onChange={this.applyCategoryChange} selected={this.state.categories}/>
+              <CategoryFilter onChange={this.applyCategoryChange} selected={this.state.categories} mrCategories={this.props.mrCategories}/>
               <TripsFilter onChange={this.applyTripsChange} selected={this.state.tripTypes}/>
               <OccasionsFilter onChange={this.applyOccasionsChange} selected={this.state.occasions}/>
               <input
@@ -535,34 +535,12 @@ class OccasionsFilter extends React.Component {
 
 class CategoryFilter extends React.Component {
   state = {
-    error: null,
-    categories: [],
-    isLoading: false,
     selected: null,
   }
 
   updateValue = (selected) => {
     this.setState({ selected });
     this.props.onChange(selected)
-  }
-
-  fetchCategories() {
-    axios({
-        method: 'get',
-        url: `${OTA_DEMO_API_URL}/hotels/categories`
-      })
-      .then(response => {
-        return response
-      })
-      .then(response => response.data.response.cluster_category_list)
-      .then(categories =>
-        this.setState({
-          error: null,
-          categories: categories,
-          isLoading: false,
-        })
-      )
-      .catch(error => this.setState({ error, isLoading: false }));
   }
 
   componentDidUpdate(prevProps) {
@@ -576,13 +554,11 @@ class CategoryFilter extends React.Component {
   componentDidMount() {
     this.setState({
       selected: this.props.selected,
-      isLoading: true,
     })
-    this.fetchCategories();
   }
 
   render() {
-    const options = this.state.categories.map(
+    const options = this.props.mrCategories.map(
       cat => <antd.Select.Option
           key={JSON.stringify({category_id: cat.category_id, name: cat.name})}>{cat.name}
         </antd.Select.Option>
@@ -687,6 +663,16 @@ class Hotel extends React.Component {
     render() {
       const { hotel, randomIndex } = this.props
       const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
+      const hasOnlyGenericMatchCategories = "all" in hotel.match.categories;
+      const matchCategories = Object.entries(hotel.match.categories).filter(
+          ([key, _value]) => key !== "all"
+      ).map(([cat_id, cat_score]) => ({
+        "category_id": cat_id,
+        "score": cat_score,
+        "category_name": this.props.mrCategories.find(category => category.category_id === cat_id).name
+      }))
+      const matchesTripType = hotel.match.trip_type !== "all";
+      const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
 
       return <article className="hotel">
         <div className="hotel-image" style={hotelImage}></div>
@@ -696,8 +682,16 @@ class Hotel extends React.Component {
             <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
           </div>
           }
-          85% match for you:
-          <HotelCategories hotelId={hotel.ty_id} categories={hotel.categories} />
+          <span className="hotel-match-score has-tooltip">
+            <div className="tooltip"> Matches {hotel.match.score}% to your personalization </div>
+            {hotel.match.score}% match for you
+          </span>
+          { matchesTripType &&
+            <div>
+              Guest feedback from similar trips:
+            </div>
+          }
+          <HotelCategories hotelId={hotel.ty_id} categories={categories} />
           <RelevantNow relevantNow={hotel.relevant_now} />
         </div>
         <div className="hotel-actions">
@@ -728,6 +722,7 @@ class SearchResults extends React.Component {
           key={hotel.ty_id}
           hotel={hotel}
           randomIndex={getRandomImageIndex()}
+          mrCategories={this.props.mrCategories}
         />)
       }
     </div>
@@ -737,7 +732,9 @@ class SearchResults extends React.Component {
 class SearchPage extends React.Component {
   state = {
     isLoadingHotel: true,
+    isLoadingCategories: true,
     hotels: [],
+    mrCategories: [],
     error: null,
     filterCity: "",
     filterCountry: "",
@@ -751,7 +748,8 @@ class SearchPage extends React.Component {
     const selectedLocation = getLocationSearchInUrl("location");
     const locationFilter = parseCityCountry(selectedLocation);
     const newState = {
-      isLoadingHotel: true
+      isLoadingHotel: true,
+      isLoadingCategories: true,
     }
 
     if (locationFilter) {
@@ -760,6 +758,7 @@ class SearchPage extends React.Component {
         newState["filterCountry"] = locationFilter[1]
       }
       this.setState(newState, () => this.fetchHotels());
+      this.fetchCategories();
     } else {
       window.location.href = "index.html"
     }
@@ -806,6 +805,25 @@ class SearchPage extends React.Component {
       .catch(error => this.setState({ error, isLoadingHotel: false }));
   }
 
+  fetchCategories() {
+    axios({
+      method: 'get',
+      url: `${OTA_DEMO_API_URL}/hotels/categories`
+    })
+        .then(response => {
+          return response
+        })
+        .then(response => response.data.response.cluster_category_list)
+        .then(categories =>
+            this.setState({
+              error: null,
+              mrCategories: categories,
+              isLoadingCategories: false,
+            })
+        )
+        .catch(error => this.setState({ error, isLoadingCategories: false }));
+  }
+
   onApplyLocationChange = (newLocation) => {
     const locationFilter = parseCityCountry(newLocation);
     if (locationFilter[0] !== this.state.filterCity || locationFilter[1] !== this.state.filterCountry) {
@@ -850,10 +868,11 @@ class SearchPage extends React.Component {
         isSearching={this.state.isLoadingHotel}
         onApplyChanges={this.onApplyChangesFilter}
         onApplyLocationChange={this.onApplyLocationChange}
+        mrCategories={this.state.mrCategories}
       />
       <main>
-        {!this.state.isLoadingHotel && !this.state.error && <SearchResults hotels={this.state.hotels}/>}
-        {!this.state.isLoadingHotel && this.state.error && <ErrorMessage/>}
+        {!this.state.isLoadingHotel && !this.state.isLoadingCategories && !this.state.error && <SearchResults hotels={this.state.hotels} mrCategories={this.state.mrCategories}/>}
+        {!this.state.isLoadingHotel && !this.state.isLoadingCategories && this.state.error && <ErrorMessage/>}
         {this.state.isLoadingHotel && <Loader />}
         <section className="search-map"></section>
       </main>
