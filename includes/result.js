@@ -570,6 +570,11 @@ class Hotel extends React.Component {
     })).sort((a, b) => b.score - a.score )
     const matchesTripType = hotel.match.trip_type !== "all";
     const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
+    const personalizedSearch = !(
+        "all" in hotel.match.categories
+        && "all" in hotel.match.hotel_types
+        && hotel.match.trip_type === "all"
+    )
 
     return <article className="hotel">
       <div className="hotel-image" style={hotelImage}></div>
@@ -579,10 +584,11 @@ class Hotel extends React.Component {
           <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
         </div>
         }
-        <span className="hotel-match-score has-tooltip">
-          <div className="tooltip"> Matches {hotel.match.score}% to your personalization </div>
-          {hotel.match.score}% match for you
-        </span>
+        { personalizedSearch && <span className="hotel-match-score has-tooltip">
+            <div className="tooltip"> Matches {hotel.match.score}% to your personalization </div>
+              {hotel.match.score}% match for you
+          </span>
+        }
         { matchesTripType &&
           <div>
             Guest feedback from similar trips:
