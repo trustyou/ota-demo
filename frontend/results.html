@@ -670,7 +670,7 @@ class Hotel extends React.Component {
         "category_id": cat_id,
         "score": cat_score,
         "category_name": this.props.mrCategories.find(category => category.category_id === cat_id).name
-      }))
+      })).sort((a, b) => b.score - a.score )
       const matchesTripType = hotel.match.trip_type !== "all";
       const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
 
