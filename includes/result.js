@@ -25,7 +25,7 @@ function RelevantNow({relevantNow}) {
 
   if (relevantNow.overall_satisfaction && relevantNow.overall_satisfaction.score) {
     var recentRating = relevantNow.overall_satisfaction.score;
-    items.push(`<span>Recent feedback: Score <span class="pill">${recentRating}</span>`);
+    items.push(`<span>Recent Rating: Score <span class="pill">${recentRating}</span>`);
   }
 
   if (relevantNow.relevant_topics) {
@@ -231,7 +231,7 @@ class SearchHeader extends React.Component {
               <input className="form-reset" type="reset" value="Clear selection" onClick={this.clearFilter}/>
             </div>
             <div className="search-toggle" id="search-toggle" onClick={this.props.toggleSearch}>
-              <span>{!this.state.isOpen ? 'Customize your search' : 'Hide preferences' }</span>
+              <span>{!this.state.isOpen ? 'Select your preferences' : 'Hide preferences' }</span>
               <i className={`ty-icon ty-icon-chevron-${this.state.isOpen ? 'up' : 'down'}`}></i>
             </div>
           </fieldset>
@@ -524,10 +524,10 @@ function Loader({}) {
 }
 
 function HotelCategories({hotelId, categories}) {
-  return <ul className="categories">
+  return <ul className="categories" style={{listStyleType: 'none', paddingInlineStart: '0px'}}>
     {
-      categories.slice(0, 3).map(category => <li key={`${hotelId}-${category.category_id}`}>
-        <span className="pill">{category.score}</span> {category.category_name}
+      categories.slice(0, 3).map(category => <li style={{display: 'inline-block'}} key={`${hotelId}-${category.category_id}`}>
+        <span className="pill" style={{padding: '10px', marginRight: '5px', marginTop: '5px'}}>{category.category_name}: {category.score}</span>
       </li>)
     }
   </ul>;
