@@ -273,8 +273,16 @@ class TripsFilter extends React.Component {
   }
 
   handleClick = (e) => {
-    const { value } = e.target;
-    var selectedItems = [value];
+    const { value } = e.target
+    var selectedItems = this.state.selected
+
+    const index = selectedItems.indexOf(value);
+
+    if (index > -1) {
+      selectedItems.splice(index, 1);
+    } else {
+      selectedItems = [value]
+    }
 
     this.setState({
       selected: selectedItems,
@@ -367,14 +375,14 @@ class OccasionsFilter extends React.Component {
 
   handleClick = (e) => {
     const { value } = e.target
-    var selectedItems = this.state.selected.map(a => a)
+    var selectedItems = this.state.selected
 
     const index = selectedItems.indexOf(value);
 
     if (index > -1) {
       selectedItems.splice(index, 1);
     } else {
-      selectedItems.push(value)
+      selectedItems = [value]
     }
 
     this.setState({
