@@ -129,9 +129,20 @@ class SearchRepository:
         """
         query_params["data_points"] = data_points
 
+        query_params["categories"] = search_data.categories or ([] if search_data.hotel_types else ['oall'])
+
         query += """
                 GROUP BY ty_id, trip_type, language
-                HAVING array_length(array_agg(datapoint), 1) = :expected_data_points
+                HAVING array_agg(datapoint) @> :categories
+        """
+
+        if search_data.hotel_types:
+            query += """
+                AND array_agg(datapoint) && :hotel_types
+            """
+            query_params["hotel_types"] = search_data.hotel_types
+
+        query += """
             )
             SELECT 
                   sr.ty_id,
@@ -160,7 +171,6 @@ class SearchRepository:
             ORDER BY {search_data.sort_column} DESC, ty_id
             LIMIT :limit offset :offset;
         """
-        query_params["expected_data_points"] = len(data_points)
         query_params["limit"] = search_data.page_size
         query_params["offset"] = search_data.page_size * search_data.page
 
