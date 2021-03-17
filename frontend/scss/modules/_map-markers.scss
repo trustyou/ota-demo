@@ -1,0 +1,37 @@
+.map-marker {
+    width: 2rem;
+    height: 2rem;
+    display: block;
+    left: -1.5rem;
+    top: -1.5rem;
+    position: relative;
+    border-radius: 3rem 3rem 0;
+    transform: rotate(45deg);
+}
+.marker-excellent {
+    background-color: #3498DB;
+    border: 1px solid #2692da;
+}
+
+.marker-verygood {
+    background-color: #3498db;
+    border: 1px solid #2792da;
+}
+.marker-fair {
+    background-color: #85aac2;
+    border: 1px solid #73a0be;
+}
+
+.marker-good {
+    background-color: #9bafbb;
+    border: 1px solid #91adbd;
+}
+
+.marker-poor {
+    background-color: #b0b3b5;
+    border: 1px solid #a4adb3;
+}
+
+.score-marker {
+    margin-top: 5px;
+}
