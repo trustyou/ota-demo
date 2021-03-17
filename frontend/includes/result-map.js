@@ -1,16 +1,30 @@
 var map = L.map('search-map').setView([48.1019351, 11.53698539037037], 11);
 var markers = [];
 
-var LeafIcon = L.Icon.extend({
-    options: {
-        shadowUrl: 'leaf-shadow.png',
-        iconSize:     [38, 95],
-        shadowSize:   [50, 64],
-        iconAnchor:   [22, 94],
-        shadowAnchor: [4, 62],
-        popupAnchor:  [-3, -76]
+function getIcon(scoreDescription) {
+    const idx = scoreDescription.toLowerCase().replaceAll(" ", "");
+
+    const icons = {
+        excellent: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+        verygood: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
+        fair: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+        good: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+        poor: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
     }
-});
+    var icon = icons[idx];
+    if (!icon) {
+        icon = icons[fair];
+    }
+
+    return new L.Icon({
+        iconUrl: icon,
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+    });
+}
 
 function buildMap(lat, lon) {
     if (map) {
@@ -23,12 +37,12 @@ function buildMap(lat, lon) {
     }).addTo(map);
 }
 
-function addMarker(ty_id, lat, lon, hotelName) {
+function addMarker(tyId, scoreDescription, lat, lon, popupText) {
     if (!map) {
         return;
     }
-    cleanMarker(ty_id);
-    markers[ty_id] = L.marker([lon, lat]).bindPopup(hotelName).addTo(map);
+    cleanMarker(tyId);
+    markers[tyId] = L.marker([lon, lat], {icon: getIcon(scoreDescription)}).bindPopup(popupText).addTo(map);
 }
 
 function cleanMarkers() {
