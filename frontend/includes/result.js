@@ -502,9 +502,9 @@ class CategoryFilter extends React.Component {
   }
 }
 
-function Loader({}) {
+function Loader({itemCount}) {
   return <div id="spinner">
-    <article className="hotel">
+    {[...Array(itemCount).keys()].map(item => <article key={`spinner-${item}`} className="hotel">
         <div className="hotel-image"></div>
         <div className="hotel-details">
           <div className="placeholder-text"></div>
@@ -515,28 +515,7 @@ function Loader({}) {
           <div className="placeholder-text"></div>
         </div>
       </article>
-      <article className="hotel">
-          <div className="hotel-image"></div>
-          <div className="hotel-details">
-            <div className="placeholder-text"></div>
-            <div className="placeholder-text"></div>
-          </div>
-          <div className="hotel-actions">
-            <div className="placeholder-btn"></div>
-            <div className="placeholder-text"></div>
-          </div>
-        </article>
-      <article className="hotel">
-          <div className="hotel-image"></div>
-          <div className="hotel-details">
-            <div className="placeholder-text"></div>
-            <div className="placeholder-text"></div>
-          </div>
-          <div className="hotel-actions">
-            <div className="placeholder-btn"></div>
-            <div className="placeholder-text"></div>
-          </div>
-        </article>
+    )}
   </div>;
 }
 
@@ -655,6 +634,7 @@ class SearchResults extends React.Component {
           mrCategories={this.props.mrCategories}
         />)
       }
+      {this.props.appendLoading && <Loader itemCount={2} />}
     </div>
   }
 }
@@ -662,6 +642,7 @@ class SearchResults extends React.Component {
 class SearchPage extends React.Component {
   state = {
     isLoadingHotel: true,
+    isLoadingMore: false,
     isLoadingCategories: true,
     hotels: [],
     mrCategories: [],
@@ -671,7 +652,12 @@ class SearchPage extends React.Component {
     filterCategories: [],
     filterTrips: [],
     filterOccasions: [],
-    isOpenSearch: false
+    isOpenSearch: false,
+
+    prevY: 0,
+    pageSize: 10,
+    currentPage: 0,
+    hasNextPage: true,
   }
 
   componentDidMount() {
@@ -692,11 +678,42 @@ class SearchPage extends React.Component {
     } else {
       window.location.href = "index.html"
     }
+
+    var options = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 1.0
+    };
+
+    this.observer = new IntersectionObserver(
+      this.handleObserver.bind(this),
+      options
+    );
+    this.observer.observe(this.loadingRef);
+  }
+
+  handleObserver(entities, observer) {
+    const y = entities[0].boundingClientRect.y;
+
+    if (!this.state.isLoadingHotel && this.state.prevY > y && this.state.hasNextPage) {
+      this.setState(
+        { currentPage: this.state.currentPage +1, isLoadingMore: true },
+        () => this.fetchHotels()
+      );
+    }
+    this.setState({ prevY: y });
   }
 
   getMarkerPopup(hotel) {
-    const { name, score_description} = hotel;
-    return `<b>${name}</b><br>${score_description}`;
+    const { name, score, score_description} = hotel;
+    return `<b>${name}</b>
+        <div class="trustscore score-marker">
+        <div class="score">${score}</div>
+        <div class="details">
+          <div class="label">${score_description}</div>
+        </div>
+      </div>
+    `;
   }
 
   addMarkers = (hotels) => {
@@ -730,11 +747,9 @@ class SearchPage extends React.Component {
       occasion.categories.forEach(cat => url = `${url}&hotel_types=${cat}`)
     });
 
-    url = `${url}&page_size=10&page=0`
+    url = `${url}&page_size=${this.state.pageSize}&page=${this.state.currentPage}`
 
-    const coordinateUrl = `https://nominatim.openstreetmap.org/search?q=${filterCity},${filterCountry}&format=json&polygon=1&addressdetails=1`;
-
-    this.fetchLocationCoordinates(coordinateUrl)
+    this.fetchLocationCoordinates()
       .then(coordinates => {
         // Update mapbox
         if (coordinates) {
@@ -748,10 +763,15 @@ class SearchPage extends React.Component {
         .then(response => response.data)
         .then(data => {
           this.addMarkers(data.hotels);
+          const hasNextPage = data.hotels.length == this.state.pageSize ? true : false;
+          const hotels = this.state.currentPage == 0 ? data.hotels : this.state.hotels.concat(data.hotels);
+
           this.setState({
+            hasNextPage,
             error: null,
-            hotels: data.hotels,
+            hotels,
             isLoadingHotel: false,
+            isLoadingMore: false,
             isOpenSearch: false,
           });
         })
@@ -760,7 +780,19 @@ class SearchPage extends React.Component {
       })
   }
 
-  fetchLocationCoordinates(coordinateUrl) {
+  fetchLocationCoordinates() {
+    /**
+     * Get the coordinates of the city.
+     *
+     */
+    const { filterCountry, filterCity, isLoadingMore } = this.state
+
+    if (isLoadingMore) {
+      // Loading more means location is not changed, ignore the fetch
+      return Promise.resolve(null);
+    }
+    const coordinateUrl = `https://nominatim.openstreetmap.org/search?q=${filterCity},${filterCountry}&format=json&polygon=1&addressdetails=1`;
+
     return axios({
       method: 'get',
       url: coordinateUrl
@@ -794,9 +826,15 @@ class SearchPage extends React.Component {
   }
 
   onApplyLocationChange = (newLocation) => {
+    /**
+     * Change location will trigger new search
+     * Reset to first page
+     */
     const locationFilter = parseCityCountry(newLocation);
     if (locationFilter[0] !== this.state.filterCity || locationFilter[1] !== this.state.filterCountry) {
       this.setState({
+        currentPage: 0,
+        isLoadingMore: false,
         filterCity: locationFilter[0],
         filterCountry: locationFilter[1]
       }, () => {
@@ -806,10 +844,15 @@ class SearchPage extends React.Component {
   }
 
   onApplyChangesFilter = (data) => {
+    /**
+     * Apply new search, reset to the first page
+     */
     var newState = {
       filterCategories: data.categories,
       filterTrips: data.tripTypes,
       filterOccasions: data.occasions,
+      currentPage: 0,
+      isLoadingMore: false,
     }
 
     const locationFilter = parseCityCountry(data.location);
@@ -830,6 +873,10 @@ class SearchPage extends React.Component {
   }
 
   render() {
+    const footerLoadingCSS = {
+      height: "60px",
+    };
+
     return <>
       <SearchHeader
         toggleSearch={this.toggleSearch}
@@ -840,11 +887,21 @@ class SearchPage extends React.Component {
         mrCategories={this.state.mrCategories}
       />
       <main>
-        {!this.state.isLoadingHotel && !this.state.isLoadingCategories && !this.state.error && <SearchResults hotels={this.state.hotels} mrCategories={this.state.mrCategories}/>}
+        {(this.state.isLoadingMore || (!this.state.isLoadingHotel && !this.state.isLoadingCategories)) && !this.state.error &&
+          <SearchResults hotels={this.state.hotels} mrCategories={this.state.mrCategories} appendLoading={this.state.isLoadingMore} />
+        }
+
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && this.state.error && <ErrorMessage/>}
-        {this.state.isLoadingHotel && <Loader />}
-        <section className="search-map" id="search-map"></section>
+
+        {this.state.isLoadingHotel && !this.state.isLoadingMore && <Loader itemCount={3} />}
+        <div>
+          <section className="search-map" id="search-map"></section>
+          <div className="score-gradient">
+            Preference match: <img src="/img/score-gradient.png" />
+          </div>
+        </div>
       </main>
+      <div ref={loadingRef => (this.loadingRef = loadingRef)} style={footerLoadingCSS}></div>
     </>
   }
 }

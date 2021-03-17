@@ -1,7 +1,8 @@
 @import "variables/colors",
 		"variables/elevation",
 		"variables/layout",
-		"variables/typography";
+		"variables/typography",
+		"modules/map-markers";
 
 main {
 	padding: $space-10;
@@ -23,6 +24,11 @@ main {
 	position: sticky;
   	height: calc(100vh - 2 * #{$space-10});
   	max-height: 700px;
+}
+
+.score-gradient {
+	margin-top: 20px;
+    text-align: right;
 }
 
 @media (max-width: 1100px) {
