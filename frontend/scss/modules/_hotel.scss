@@ -63,7 +63,8 @@
 		justify-content: flex-end;
 
 		.action-primary {
-			margin: auto auto 0;
+			// margin: auto auto 0;
+			margin: auto 10px 0 auto; // Attemp to fix button align with badge text
 		}
 
 		.action-secondary {
