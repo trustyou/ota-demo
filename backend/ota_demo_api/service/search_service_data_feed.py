@@ -59,11 +59,13 @@ class SearchServiceDataFeed(object):
                 f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}&scale={search_data.scale}"
             )
             future_badges = request_session.get(f"{ty_api}/{ty_id}/badges.json?scale={search_data.scale}")
+            future_location = request_session.get(f"{ty_api}/{ty_id}/location.json")
 
             meta_review = future_meta_review.result().json().get("response")
             reviews = future_reviews.result().json().get("response")
             relevant_now_data = future_relevant_now.result().json().get("response")
             seal = future_seal.result().json().get("response")
+            coordinates = future_location.result().json().get("response", {}).get("coordinates", {}).get("coordinates")
 
             badges = cls.get_badges(future_badges.result().json().get("response"))
             categories = cls.get_categories(meta_review)
@@ -89,7 +91,8 @@ class SearchServiceDataFeed(object):
                         categories=(ty_clusters[ty_id].categories if ty_clusters[ty_id] else {"all": -1}),
                         hotel_types=(ty_clusters[ty_id].hotel_types if ty_clusters[ty_id] else {"all": -1})
                     ),
-                    distance_from_center=f"{round(random.uniform(1, 5), 1)} km from center"
+                    distance_from_center=f"{round(random.uniform(1, 5), 1)} km from center",
+                    coordinates=coordinates
                 )
             )
 

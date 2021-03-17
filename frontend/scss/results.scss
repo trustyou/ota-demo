@@ -19,13 +19,8 @@ main {
 
 .search-map {
 	box-shadow: $elevation-base;
-	background: #ddd url('../img/map.png');
-	background-position: center;
-	background-repeat: no-repeat;
-	background-size: cover;
 	padding: $space-8;
 	position: sticky;
-  	top: $space-10;
   	height: calc(100vh - 2 * #{$space-10});
   	max-height: 600px;
 }

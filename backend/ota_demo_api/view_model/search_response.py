@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Tuple
 from pydantic import BaseModel
 
 
@@ -95,6 +95,7 @@ class HotelResponse(BaseModel):
     traveler_types_distribution: Optional[List[TravelerTypesDistributionResponse]]
     match: MatchResponse
     distance_from_center: Optional[str]
+    coordinates: Optional[Tuple[float, float]]
 
 
 class SearchResponse(BaseModel):
