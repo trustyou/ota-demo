@@ -611,7 +611,7 @@ class Hotel extends React.Component {
         <div className="trustscore">
           <div className="score">{hotel.score}</div>
           <div className="details">
-            <div className="label">Excellent</div>
+            <div className="label">{hotel.score_description}</div>
             <div className="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
           </div>
         </div>
@@ -677,11 +677,16 @@ class SearchPage extends React.Component {
     }
   }
 
+  getMarkerPopup(hotel) {
+    const { name, score_description} = hotel;
+    return `<b>${name}</b><br>${score_description}`;
+  }
+
   addMarkers = (hotels) => {
     hotels.forEach(h => {
-      const { ty_id, coordinates } = h;
+      const { ty_id, score_description, coordinates } = h;
       if (coordinates) {
-        addMarker(ty_id, coordinates[0], coordinates[1], h.name);
+        addMarker(ty_id, score_description, coordinates[0], coordinates[1], this.getMarkerPopup(h));
       }
     });
   }
