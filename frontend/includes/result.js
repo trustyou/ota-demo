@@ -677,6 +677,15 @@ class SearchPage extends React.Component {
     }
   }
 
+  addMarkers = (hotels) => {
+    hotels.forEach(h => {
+      const { ty_id, coordinates } = h;
+      if (coordinates) {
+        addMarker(ty_id, coordinates[0], coordinates[1], h.name);
+      }
+    });
+  }
+
   fetchHotels() {
     this.setState({
       isLoadingHotel: true,
@@ -701,21 +710,46 @@ class SearchPage extends React.Component {
 
     url = `${url}&page_size=10&page=0`
 
-    axios({
-        method: 'get',
-        url: url
-      })
-      .then(response => response.data)
-      .then(data =>
-        this.setState({
-          error: null,
-          hotels: data.hotels,
-          isLoadingHotel: false,
-          isOpenSearch: false,
+    const coordinateUrl = `https://nominatim.openstreetmap.org/search?q=${filterCity},${filterCountry}&format=json&polygon=1&addressdetails=1`;
+
+    this.fetchLocationCoordinates(coordinateUrl)
+      .then(coordinates => {
+        // Update mapbox
+        if (coordinates) {
+          buildMap(coordinates.lat, coordinates.lon);
+        }
+
+        axios({
+          method: 'get',
+          url: url
         })
-      )
-      // Catch any errors we hit and update the app
-      .catch(error => this.setState({ error, isLoadingHotel: false }));
+        .then(response => response.data)
+        .then(data => {
+          this.addMarkers(data.hotels);
+          this.setState({
+            error: null,
+            hotels: data.hotels,
+            isLoadingHotel: false,
+            isOpenSearch: false,
+          });
+        })
+        // Catch any errors we hit and update the app
+        .catch(error => this.setState({ error, isLoadingHotel: false }));
+      })
+  }
+
+  fetchLocationCoordinates(coordinateUrl) {
+    return axios({
+      method: 'get',
+      url: coordinateUrl
+    })
+      .then(response => {
+        if (response.data.length > 0) {
+          return response.data[0];
+        }
+        return null;
+      })
+      .catch(() => null);
   }
 
   fetchCategories() {
@@ -787,7 +821,7 @@ class SearchPage extends React.Component {
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && !this.state.error && <SearchResults hotels={this.state.hotels} mrCategories={this.state.mrCategories}/>}
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && this.state.error && <ErrorMessage/>}
         {this.state.isLoadingHotel && <Loader />}
-        <section className="search-map"></section>
+        <section className="search-map" id="search-map"></section>
       </main>
     </>
   }
