@@ -788,6 +788,15 @@ class SearchPage extends React.Component {
     }
   }
 
+  addMarkers = (hotels) => {
+    hotels.forEach(h => {
+      const { ty_id, coordinates } = h;
+      if (coordinates) {
+        addMarker(ty_id, coordinates[0], coordinates[1], h.name);
+      }
+    });
+  }
+
   fetchHotels() {
     this.setState({
       isLoadingHotel: true,
@@ -812,21 +821,46 @@ class SearchPage extends React.Component {
 
     url = `${url}&page_size=10&page=0`
 
-    axios({
-        method: 'get',
-        url: url
-      })
-      .then(response => response.data)
-      .then(data =>
-        this.setState({
-          error: null,
-          hotels: data.hotels,
-          isLoadingHotel: false,
-          isOpenSearch: false,
+    const coordinateUrl = `https://nominatim.openstreetmap.org/search?q=${filterCity},${filterCountry}&format=json&polygon=1&addressdetails=1`;
+
+    this.fetchLocationCoordinates(coordinateUrl)
+      .then(coordinates => {
+        // Update mapbox
+        if (coordinates) {
+          buildMap(coordinates.lat, coordinates.lon);
+        }
+
+        axios({
+          method: 'get',
+          url: url
         })
-      )
-      // Catch any errors we hit and update the app
-      .catch(error => this.setState({ error, isLoadingHotel: false }));
+        .then(response => response.data)
+        .then(data => {
+          this.addMarkers(data.hotels);
+          this.setState({
+            error: null,
+            hotels: data.hotels,
+            isLoadingHotel: false,
+            isOpenSearch: false,
+          });
+        })
+        // Catch any errors we hit and update the app
+        .catch(error => this.setState({ error, isLoadingHotel: false }));
+      })
+  }
+
+  fetchLocationCoordinates(coordinateUrl) {
+    return axios({
+      method: 'get',
+      url: coordinateUrl
+    })
+      .then(response => {
+        if (response.data.length > 0) {
+          return response.data[0];
+        }
+        return null;
+      })
+      .catch(() => null);
   }
 
   fetchCategories() {
@@ -898,13 +932,58 @@ class SearchPage extends React.Component {
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && !this.state.error && <SearchResults hotels={this.state.hotels} mrCategories={this.state.mrCategories}/>}
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && this.state.error && <ErrorMessage/>}
         {this.state.isLoadingHotel && <Loader />}
-        <section className="search-map"></section>
+        <section className="search-map" id="search-map"></section>
       </main>
     </>
   }
 }
 
 ReactDOM.render(<SearchPage />, document.getElementById('search-page'))
+      var map = L.map('search-map').setView([48.1019351, 11.53698539037037], 11);
+var markers = [];
+
+var LeafIcon = L.Icon.extend({
+    options: {
+        shadowUrl: 'leaf-shadow.png',
+        iconSize:     [38, 95],
+        shadowSize:   [50, 64],
+        iconAnchor:   [22, 94],
+        shadowAnchor: [4, 62],
+        popupAnchor:  [-3, -76]
+    }
+});
+
+function buildMap(lat, lon) {
+    if (map) {
+        map.remove();
+    }
+    map = L.map('search-map').setView([lat, lon], 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+}
+
+function addMarker(ty_id, lat, lon, hotelName) {
+    if (!map) {
+        return;
+    }
+    cleanMarker(ty_id);
+    markers[ty_id] = L.marker([lon, lat]).bindPopup(hotelName).addTo(map);
+}
+
+function cleanMarkers() {
+    if (map && markers) {
+        Object.entries(markers).map(([ty_id, _]) => cleanMarker(ty_id));
+    }
+}
+
+function cleanMarker(ty_id) {
+    if (map && markers && markers.hasOwnProperty(ty_id)) {
+        // remove the marker
+        map.removeLayer(markers[ty_id]);
+    }
+}
 
     </script>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -915,5 +994,7 @@ ReactDOM.render(<SearchPage />, document.getElementById('search-page'))
     <script type="text/javascript" src="//unpkg.com/@babel/standalone@7.13.9/babel.min.js"></script>
     <script type="text/javascript" src="//unpkg.com/antd/dist/antd.min.js"></script>
     <link rel="stylesheet" href="//unpkg.com/antd/dist/antd.min.css"/>
+    <script type="text/javascript" src="//unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <link rel="stylesheet" href="//unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin=""/>
   </body>
 </html>
