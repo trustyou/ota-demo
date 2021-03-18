@@ -20,24 +20,41 @@ function ErrorMessage({}) {
 }
 
 function RelevantNow({relevantNow}) {
-  var items = [];
-  var relevantNowText = '';
+  var scoreTrendItems = []
+  var categoriesItems = []
+  var relevantNowScoreTrendText = ''
+  var relevantNowCategoriesText = ''
 
   if (relevantNow.overall_satisfaction && relevantNow.overall_satisfaction.score) {
-    var recentRating = relevantNow.overall_satisfaction.score;
-    items.push(`<span>Recent Rating: Score <span class="pill">${recentRating}</span>`);
+    const recentRating = relevantNow.overall_satisfaction.score
+    scoreTrendItems.push(`<span>Recent Rating: Score <span class="pill">${recentRating}</span>`);
+    if (relevantNow.overall_satisfaction.trend) {
+      const recentTrend = relevantNow.overall_satisfaction.trend
+      const recentTrendText = (recentTrend > 0) ? '+' + recentTrend : recentTrend
+      const trendClassName = (recentTrend > 0) ? 'text-positive': 'text-negative'
+      const arrowClassName = (recentTrend > 0) ? 'ty-icon-arrow-up': 'ty-icon-arrow-down'
+      scoreTrendItems.push(`<span class=${trendClassName}><i class="ty-icon ${arrowClassName}"></i>${recentTrendText}</span>`)
+    }
+
+    relevantNowScoreTrendText = scoreTrendItems.join('')
   }
 
   if (relevantNow.relevant_topics) {
     for (var key in relevantNow.relevant_topics) {
       const val = relevantNow.relevant_topics[key];
-      items.push(`${val.name} <span class="pill">${val.score}</span>`)
+      categoriesItems.push(`${val.name} <span class="pill">${val.score}</span>`)
     }
+
+    relevantNowCategoriesText = categoriesItems.join(', ')
   }
-  relevantNowText = items.join(', ');
 
   return <div>
-    {relevantNowText && <span dangerouslySetInnerHTML={{ __html: relevantNowText }}></span>}
+    <div>
+      {relevantNowScoreTrendText && <span dangerouslySetInnerHTML={{ __html: relevantNowScoreTrendText }}></span>}
+    </div>
+    <div>
+      {relevantNowCategoriesText && <span dangerouslySetInnerHTML={{ __html: relevantNowCategoriesText }}></span>}
+    </div>
   </div>
 }
 
