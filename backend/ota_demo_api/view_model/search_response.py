@@ -46,16 +46,36 @@ class CategoryResponseBase(BaseModel):
     category_name: str
 
 
-class MatchCategoryResponse(BaseModel):
-    count: Optional[int]
+class HotelTypeResponseBase(BaseModel):
+    sentiment: str
+    text: str
     score: float
-    short_text: Optional[str]
+    short_text: str
     category_id: str
-    category_name: Optional[str]
+    category_name: str
+
+
+class MatchCategoryResponse(BaseModel):
+    count: int
+    score: float
+    short_text: str
+    category_id: str
+    category_name: str
+
+
+class MatchHotelTypeResponse(BaseModel):
+    score: float
+    short_text: str
+    category_id: str
+    category_name: str
 
 
 class CategoryResponse(CategoryResponseBase):
     sub_categories: List[CategoryResponseBase]
+
+
+class HotelTypeResponse(HotelTypeResponseBase):
+    sub_categories: List[HotelTypeResponseBase]
 
 
 class RelevantTopicCategoryModel(BaseModel):
@@ -87,7 +107,7 @@ class MatchResponse(BaseModel):
     language: str
     trip_type: str
     categories: Dict[str, MatchCategoryResponse]
-    hotel_types: Dict[str, MatchCategoryResponse]
+    hotel_types: Dict[str, MatchHotelTypeResponse]
     overall_score: Optional[float]
 
 
