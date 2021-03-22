@@ -4,7 +4,7 @@ from fastapi import APIRouter, Query, HTTPException
 
 from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.search_response import SearchResponse
-from ota_demo_api.service.search_service import SearchService, SearchServiceMock
+from ota_demo_api.service.search_service import SearchService
 from ota_demo_api.repository.search_repository import SearchRepository
 from ota_demo_api.persistence.database import database
 from pydantic import ValidationError
@@ -32,7 +32,6 @@ async def search_api(
     page: Optional[int] = 0,
     scale: Optional[int] = 100,
     page_size: Optional[int] = 10,
-    use_mock: Optional[int] = 0
 ) -> SearchResponse:
     try:
         search_data = SearchRequest(
@@ -54,9 +53,6 @@ async def search_api(
     except ValidationError as ex:
         raise HTTPException(422, detail=ex.errors())
 
-    if use_mock:
-        search_service = SearchServiceMock()
-    else:
-        search_service = SearchService(SearchRepository(database))
+    search_service = SearchService(SearchRepository(database))
 
     return await search_service.search(search_data)

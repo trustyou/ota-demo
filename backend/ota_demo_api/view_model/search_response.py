@@ -46,6 +46,14 @@ class CategoryResponseBase(BaseModel):
     category_name: str
 
 
+class MatchCategoryResponse(BaseModel):
+    count: Optional[int]
+    score: float
+    short_text: Optional[str]
+    category_id: str
+    category_name: Optional[str]
+
+
 class CategoryResponse(CategoryResponseBase):
     sub_categories: List[CategoryResponseBase]
 
@@ -78,8 +86,9 @@ class MatchResponse(BaseModel):
     score: float
     language: str
     trip_type: str
-    categories: Dict[str, float]
-    hotel_types: Dict[str, float]
+    categories: Dict[str, MatchCategoryResponse]
+    hotel_types: Dict[str, MatchCategoryResponse]
+    overall_score: Optional[float]
 
 
 class HotelResponse(BaseModel):

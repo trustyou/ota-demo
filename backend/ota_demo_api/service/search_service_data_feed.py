@@ -1,6 +1,6 @@
 from requests_futures.sessions import FuturesSession
 
-from typing import Any, List
+from typing import Any, List, Optional
 import random
 
 from ota_demo_api.view_model.search_response import (
@@ -9,6 +9,7 @@ from ota_demo_api.view_model.search_response import (
     BadgeResponse,
     BadgeHighlightModel,
     CategoryResponse,
+    MatchCategoryResponse,
     RelevantNowResponse,
     OverallSatisfaction,
     RelevantTopic
@@ -23,16 +24,15 @@ from ota_demo_api.service.badges import get_badge_icon
 
 class SearchServiceDataFeed(object):
     @classmethod
-    def search(cls, search_data: SearchRequest, clusters: List[ClusterSearchResult], use_mock: bool = False) -> SearchResponse:
+    def search(cls, search_data: SearchRequest, clusters: List[ClusterSearchResult]) -> SearchResponse:
         """
-        Mock data for API
+        The data for API
 
         :param search_data: SearchRequest object
         :param clusters: Results of the search
-        :param use_mock: Mock data or not
         :return: Filtered data
         """
-        if not clusters and not use_mock:
+        if not clusters:
             hotels = []
             return SearchResponse(
                 hotels=hotels
@@ -42,13 +42,7 @@ class SearchServiceDataFeed(object):
 
         ty_api = "https://api.trustyou.com/hotels/"
 
-        if not use_mock:
-            ty_clusters = {str(c.ty_id): c for c in clusters}
-        else:
-            ty_clusters = {
-                "ae6db065-86a4-4d27-9d59-fcfe9e14c9c7": None,
-                "ca5b81c8-4cce-483b-9b98-cb0140463339": None
-            }
+        ty_clusters = {str(c.ty_id): c for c in clusters}
 
         hotels = []
         for ty_id in ty_clusters.keys():
@@ -72,6 +66,8 @@ class SearchServiceDataFeed(object):
 
             reviews_distribution = cls.get_reviews_distribution(reviews)
             traveler_types_distribution = cls.get_traveler_types_distribution(reviews)
+            match_info = cls.get_match_info(categories, ty_clusters[ty_id])
+
             hotels.append(
                 HotelResponse(
                     ty_id=ty_id,
@@ -84,13 +80,7 @@ class SearchServiceDataFeed(object):
                     badges=badges,
                     reviews_distribution=reviews_distribution,
                     traveler_types_distribution=traveler_types_distribution,
-                    match=MatchResponse(
-                        score=(ty_clusters[ty_id].match_score if ty_clusters[ty_id] else -1),
-                        language=(ty_clusters[ty_id].language if ty_clusters[ty_id] else "all"),
-                        trip_type=(ty_clusters[ty_id].trip_type if ty_clusters[ty_id] else "all"),
-                        categories=(ty_clusters[ty_id].categories if ty_clusters[ty_id] else {"all": -1}),
-                        hotel_types=(ty_clusters[ty_id].hotel_types if ty_clusters[ty_id] else {"all": -1})
-                    ),
+                    match=match_info,
                     distance_from_center=f"{round(random.uniform(1, 5), 1)} km from center",
                     coordinates=coordinates
                 )
@@ -103,7 +93,7 @@ class SearchServiceDataFeed(object):
     @classmethod
     def get_badges(cls, badges_data: Any):
         """
-        Mock badges list, data comes from meta review
+        The badges list, data comes from meta review
 
         :param meta_review: result of meta_review.json
         :return: [BadgeResponse]
@@ -130,7 +120,7 @@ class SearchServiceDataFeed(object):
     @classmethod
     def get_reviews_distribution(cls, reviews: Any) -> List[ReviewsDistributionResponse]:
         """
-        Mock reviews_distribution, data comes from reviews
+        The reviews_distribution, data comes from reviews
 
         :param reviews: result of reviews.json
         :return: List[ReviewsDistributionResponse]
@@ -140,7 +130,7 @@ class SearchServiceDataFeed(object):
     @classmethod
     def get_traveler_types_distribution(cls, reviews: Any) -> List[TravelerTypesDistributionResponse]:
         """
-        Mock traveler_types_distribution, data comes from reviews
+        The traveler_types_distribution, data comes from reviews
         :param reviews: result of reviews.json
         :return: List[TravelerTypesDistributionResponse]
         """
@@ -149,7 +139,7 @@ class SearchServiceDataFeed(object):
     @classmethod
     def get_categories(cls, meta_review: Any) -> List[CategoryResponse]:
         """
-        Mock categories, data comes from meta review
+        The categories, data comes from meta review
 
         :param meta_review: result of meta_review.json
         :return: List[CategoryResponse]
@@ -164,7 +154,7 @@ class SearchServiceDataFeed(object):
     @classmethod
     def get_relevant_now(cls, relevant_now: Any) -> RelevantNowResponse:
         """
-        Mock relevant_now, data comes from relevant_now.json
+        The relevant_now, data comes from relevant_now.json
 
         :param relevant_now: result of relevant_now.json
         :return: RelevantNowResponse
@@ -188,4 +178,34 @@ class SearchServiceDataFeed(object):
         return RelevantNowResponse(
             relevant_topics=relevant_topics,
             overall_satisfaction=overall_satisfaction
+        )
+
+    @classmethod
+    def get_match_info(cls, categories: List[CategoryResponse],
+                       search_result: ClusterSearchResult) -> MatchResponse:
+        """
+        Return the match info.
+        :param categories: List of categories for the cluster
+        :param search_result: The cluster result from the search
+        :return: The MatchResponse object with match info
+        """
+        all_categories = {
+            i.category_id: i for l in map(lambda c: [c] + (c.sub_categories or []), categories) for i in l
+        }
+        match_categories = {
+            c_id: MatchCategoryResponse(**(dict(all_categories.get(c_id, {})) | dict(c_val)))
+            for c_id, c_val in search_result.categories.items()
+        }
+        match_hotel_types = {
+            c_id: MatchCategoryResponse(**(dict(all_categories.get(c_id, {})) | dict(c_val)))
+            for c_id, c_val in search_result.hotel_types.items()
+        }
+
+        return MatchResponse(
+            score=search_result.match_score,
+            language=search_result.language,
+            trip_type=search_result.trip_type,
+            categories=match_categories,
+            hotel_types=match_hotel_types,
+            overall_score=search_result.overall_score
         )
