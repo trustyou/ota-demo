@@ -520,10 +520,10 @@ function Loader({itemCount}) {
 }
 
 function HotelCategories({hotelId, categories}) {
-  return <ul className="categories" style={{listStyleType: 'none', paddingInlineStart: '0px'}}>
+  return <ul className="categories">
     {
-      categories.slice(0, 3).map(category => <li style={{display: 'inline-block'}} key={`${hotelId}-${category.category_id}`}>
-        <span className="pill" style={{padding: '10px', marginRight: '5px', marginTop: '5px'}}>{category.category_name}: {category.score}</span>
+      categories.slice(0, 3).map(category => <li key={`${hotelId}-${category.category_id}`}>
+        <span className="category pill">{category.category_name}: {category.score}</span>
       </li>)
     }
   </ul>;
