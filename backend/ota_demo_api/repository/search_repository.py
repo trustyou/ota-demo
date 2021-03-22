@@ -1,56 +1,8 @@
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 
+from ota_demo_api.util.score import normalize_score, scale_score
 from ota_demo_api.view_model.search_request import SearchRequest
-from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
-
-
-def scale_score(field: Optional[float], scale: int) -> Optional[float]:
-    """
-    Scale the field from 100 to 5 scale.
-    :param field: The score on 100 scale
-    :param scale: The scale
-    :return: The field on the requested scale
-    """
-    try:
-        result = round(field / 20.0, 1) if scale != 100 else round(field)
-    except TypeError:
-        return None
-    else:
-        return result
-
-
-def normalize_score(field: Optional[float], scale: int) -> Optional[float]:
-    """
-    Normalize to 100 scale the field expressed in scale.
-    :param field: The score field
-    :param scale: The current scale of the score
-    :return: The normalizaed score
-    """
-    return round(field * 100 / scale)
-
-
-def transform_record(record_dict: Dict[str, Any], scale: int) -> Dict[str, Any]:
-    """
-    Transform the DB record to the expected format.
-    :param record_dict: The db record
-    :param scale: The scale to use for scores
-    :return: Dict with result in expected format
-    """
-    record_dict["match_score"] = scale_score(
-        record_dict["match_score"],
-        scale
-    )
-    data_point_scores = list(zip(record_dict["data_points"], record_dict["scores"]))
-    record_dict["hotel_types"] = {
-        ("all" if dps[0] == "oall" else dps[0]): scale_score(dps[1], scale)
-        for dps in data_point_scores if dps[0] == "oall" or dps[0].startswith("16")
-    }
-    record_dict["categories"] = {
-        ("all" if dps[0] == "oall" else dps[0]): scale_score(dps[1], scale)
-        for dps in data_point_scores if dps[0] == "oall" or not dps[0].startswith("16")
-    }
-
-    return record_dict
+from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult, DataPoint
 
 
 class SearchRepository:
@@ -77,6 +29,7 @@ class SearchRepository:
                     SUM(score) / COUNT(score) AS search_score,
                     array_agg(datapoint) as data_points,
                     array_agg(score) as scores,
+                    array_agg(review_count) as review_counts,
                     ROW_NUMBER() OVER (PARTITION BY ty_id ORDER BY (language != 'all', trip_type != 'all') DESC) AS rn
                 FROM cluster_search
         """
@@ -148,6 +101,7 @@ class SearchRepository:
                   sr.ty_id,
                   sr.data_points,
                   sr.scores, 
+                  sr.review_counts,
                   sr.language,
                   sr.trip_type,
                   sr.rn,
@@ -179,7 +133,43 @@ class SearchRepository:
         if len(records) == 0:
             return None
 
-        record_dicts = [transform_record(dict(r), search_data.scale) for r in records]
+        record_dicts = [self._transform_record(dict(r), search_data.scale) for r in records]
         results = [ClusterSearchResult(**record_dict) for record_dict in record_dicts]
 
         return results
+
+    @staticmethod
+    def _format_data_points(data_point_tuples:Tuple[str, float, int], scale: int) -> Dict[str, Any]:
+        """
+        Format category information.
+        :param data_point_tuples: Tuples in form of category id, score and reviews count
+        :param scale: The score scale
+        :return: Dict with formatted values
+        """
+        return {
+            dps[0]: DataPoint(
+                **dict(zip(["id", "score", "count"], [dps[0], scale_score(dps[1], scale), dps[2]]))
+            ) for dps in data_point_tuples
+        }
+
+    def _transform_record(self, record_dict: Dict[str, Any], scale: int) -> Dict[str, Any]:
+        """
+        Transform the DB record to the expected format.
+        :param record_dict: The db record
+        :param scale: The score scale
+        :return: Dict with result in expected format
+        """
+        if record_dict["data_points"] == ["oall"]:
+            record_dict["overall_score"] = record_dict["scores"][0]
+            record_dict["hotel_types"] = []
+            record_dict["categories"] = []
+            return record_dict
+
+        data_points = list(zip(record_dict["data_points"], record_dict["scores"], record_dict["review_counts"]))
+        hotel_types_dps = [dps for dps in data_points if dps[0] == "oall" or dps[0].startswith("16")]
+        categories_dps = [dps for dps in data_points if dps[0] == "oall" or not dps[0].startswith("16")]
+        record_dict["hotel_types"] = self._format_data_points(hotel_types_dps, scale)
+        record_dict["categories"] = self._format_data_points(categories_dps, scale)
+        record_dict["overall_score"] = None
+
+        return record_dict
