@@ -215,12 +215,12 @@ class SearchServiceDataFeed(object):
             i.category_id: i for l in map(lambda c: [c] + (c.sub_categories or []), hotel_types) for i in l
         }
         match_categories = {
-            c_id: MatchCategoryResponse(**(dict(all_categories.get(c_id, {})) | dict(c_val)))
-            for c_id, c_val in search_result.categories.items()
+            c_id: MatchCategoryResponse(**(dict(all_categories[c_id]) | dict(c_val)))
+            for c_id, c_val in search_result.categories.items() if c_id in all_categories
         }
         match_hotel_types = {
             c_id: MatchHotelTypeResponse(**(dict(all_hotel_types.get(c_id, {})) | dict(c_val)))
-            for c_id, c_val in search_result.hotel_types.items()
+            for c_id, c_val in search_result.hotel_types.items() if c_id in all_hotel_types
         }
 
         return MatchResponse(
