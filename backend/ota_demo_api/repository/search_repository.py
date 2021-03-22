@@ -139,7 +139,7 @@ class SearchRepository:
         return results
 
     @staticmethod
-    def _format_data_points(data_point_tuples:Tuple[str, float, int], scale: int) -> Dict[str, Any]:
+    def _format_data_points(data_point_tuples:Tuple[str, float, int], scale: int) -> Dict[str, DataPoint]:
         """
         Format category information.
         :param data_point_tuples: Tuples in form of category id, score and reviews count
@@ -161,8 +161,8 @@ class SearchRepository:
         """
         if record_dict["data_points"] == ["oall"]:
             record_dict["overall_score"] = record_dict["scores"][0]
-            record_dict["hotel_types"] = []
-            record_dict["categories"] = []
+            record_dict["hotel_types"] = {}
+            record_dict["categories"] = {}
             return record_dict
 
         data_points = list(zip(record_dict["data_points"], record_dict["scores"], record_dict["review_counts"]))

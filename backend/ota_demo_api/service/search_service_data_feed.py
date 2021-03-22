@@ -9,7 +9,9 @@ from ota_demo_api.view_model.search_response import (
     BadgeResponse,
     BadgeHighlightModel,
     CategoryResponse,
+    HotelTypeResponse,
     MatchCategoryResponse,
+    MatchHotelTypeResponse,
     RelevantNowResponse,
     OverallSatisfaction,
     RelevantTopic
@@ -63,10 +65,11 @@ class SearchServiceDataFeed(object):
 
             badges = cls.get_badges(future_badges.result().json().get("response"))
             categories = cls.get_categories(meta_review)
+            hotel_types = cls.get_hotel_types(meta_review)
 
             reviews_distribution = cls.get_reviews_distribution(reviews)
             traveler_types_distribution = cls.get_traveler_types_distribution(reviews)
-            match_info = cls.get_match_info(categories, ty_clusters[ty_id])
+            match_info = cls.get_match_info(categories, hotel_types, ty_clusters[ty_id])
 
             hotels.append(
                 HotelResponse(
@@ -152,6 +155,21 @@ class SearchServiceDataFeed(object):
         ]
 
     @classmethod
+    def get_hotel_types(cls, meta_review: Any) -> List[HotelTypeResponse]:
+        """
+        The hotel_types, data comes from meta review
+
+        :param meta_review: result of meta_review.json
+        :return: List[CategoryResponse]
+        """
+        return [
+            HotelTypeResponse(
+                **category,
+                sub_categories=category["sub_category_list"]
+            ) for category in meta_review["hotel_type_list"]
+        ]
+
+    @classmethod
     def get_relevant_now(cls, relevant_now: Any) -> RelevantNowResponse:
         """
         The relevant_now, data comes from relevant_now.json
@@ -181,23 +199,27 @@ class SearchServiceDataFeed(object):
         )
 
     @classmethod
-    def get_match_info(cls, categories: List[CategoryResponse],
+    def get_match_info(cls, categories: List[CategoryResponse], hotel_types: List[HotelTypeResponse],
                        search_result: ClusterSearchResult) -> MatchResponse:
         """
         Return the match info.
         :param categories: List of categories for the cluster
+        :param hotel_types: List of hotel_types for the cluster
         :param search_result: The cluster result from the search
         :return: The MatchResponse object with match info
         """
         all_categories = {
             i.category_id: i for l in map(lambda c: [c] + (c.sub_categories or []), categories) for i in l
         }
+        all_hotel_types = {
+            i.category_id: i for l in map(lambda c: [c] + (c.sub_categories or []), hotel_types) for i in l
+        }
         match_categories = {
             c_id: MatchCategoryResponse(**(dict(all_categories.get(c_id, {})) | dict(c_val)))
             for c_id, c_val in search_result.categories.items()
         }
         match_hotel_types = {
-            c_id: MatchCategoryResponse(**(dict(all_categories.get(c_id, {})) | dict(c_val)))
+            c_id: MatchHotelTypeResponse(**(dict(all_hotel_types.get(c_id, {})) | dict(c_val)))
             for c_id, c_val in search_result.hotel_types.items()
         }
 
