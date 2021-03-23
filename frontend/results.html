@@ -634,7 +634,13 @@ function HotelCategories({hotelId, categories}) {
   return <ul className="categories">
     {
       categories.slice(0, 3).map(category => <li key={`${hotelId}-${category.category_id}`}>
-        <span className="category pill">{category.category_name}: {category.score}</span>
+        <div className="has-tooltip">
+          <span className="category pill">{category.category_name}: {category.score}</span>
+          { category.count && <div className="tooltip">
+              Based on {category.count} {category.count === 1 ? "review" : "reviews"}
+            </div>
+          }
+        </div>
       </li>)
     }
   </ul>;
@@ -676,22 +682,12 @@ class Hotel extends React.Component {
   render() {
     const { hotel, randomIndex } = this.props
     const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
-    const hasOnlyGenericMatchCategories = "all" in hotel.match.categories;
+    const hasOnlyGenericMatchCategories = !!hotel.match.overall_score;
     const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
-    const matchCategories = Object.entries(allCategories).filter(
-        ([key, _value]) => key !== "all"
-    ).map(([cat_id, cat_score]) => ({
-      "category_id": cat_id,
-      "score": cat_score,
-      "category_name": this.props.mrCategories.find(category => category.category_id === cat_id).name
-    })).sort((a, b) => b.score - a.score )
+    const matchCategories = Object.values(allCategories).sort((a, b) => b.score - a.score )
     const matchesTripType = hotel.match.trip_type !== "all";
     const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
-    const personalizedSearch = !(
-        "all" in hotel.match.categories
-        && "all" in hotel.match.hotel_types
-        && hotel.match.trip_type === "all"
-    )
+    const personalizedSearch = !(hasOnlyGenericMatchCategories && hotel.match.trip_type === "all")
 
     return <article className="hotel">
       <div className="hotel-image" style={hotelImage}></div>
@@ -703,7 +699,7 @@ class Hotel extends React.Component {
         }
         { personalizedSearch && <span className="hotel-match-score has-tooltip">
             <div className="tooltip"> Matches {hotel.match.score}% to your personalization </div>
-              {hotel.match.score}% match for you
+              {hotel.match.match_score}% match for you
           </span>
         }
         { matchesTripType &&
@@ -742,7 +738,6 @@ class SearchResults extends React.Component {
           key={hotel.ty_id}
           hotel={hotel}
           randomIndex={getRandomImageIndex()}
-          mrCategories={this.props.mrCategories}
         />)
       }
       {this.props.appendLoading && <Loader itemCount={2} />}
@@ -999,7 +994,7 @@ class SearchPage extends React.Component {
       />
       <main>
         {(this.state.isLoadingMore || (!this.state.isLoadingHotel && !this.state.isLoadingCategories)) && !this.state.error &&
-          <SearchResults hotels={this.state.hotels} mrCategories={this.state.mrCategories} appendLoading={this.state.isLoadingMore} />
+          <SearchResults hotels={this.state.hotels} appendLoading={this.state.isLoadingMore} />
         }
 
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && this.state.error && <ErrorMessage/>}
