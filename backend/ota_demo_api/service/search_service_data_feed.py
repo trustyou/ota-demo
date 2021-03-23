@@ -224,7 +224,7 @@ class SearchServiceDataFeed(object):
         }
 
         return MatchResponse(
-            score=search_result.match_score,
+            match_score=search_result.match_score,
             language=search_result.language,
             trip_type=search_result.trip_type,
             categories=match_categories,

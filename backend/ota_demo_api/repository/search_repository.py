@@ -159,6 +159,8 @@ class SearchRepository:
         :param scale: The score scale
         :return: Dict with result in expected format
         """
+        record_dict["match_score"] = round(record_dict["match_score"])
+
         if record_dict["data_points"] == ["oall"]:
             record_dict["overall_score"] = record_dict["scores"][0]
             record_dict["hotel_types"] = {}

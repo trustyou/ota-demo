@@ -103,7 +103,7 @@ class RelevantNowResponse(BaseModel):
 
 
 class MatchResponse(BaseModel):
-    score: float
+    match_score: float
     language: str
     trip_type: str
     categories: Dict[str, MatchCategoryResponse]
