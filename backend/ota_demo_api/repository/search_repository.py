@@ -57,8 +57,9 @@ class SearchRepository:
             query_params["trip_type"] = search_data.trip_type
         else:
             query += """
-                AND trip_type = 'all'
+                AND trip_type = :trip_type
             """
+            query_params["trip_type"] = "all"
 
         if search_data.language:
             query += """
@@ -67,35 +68,13 @@ class SearchRepository:
             query_params["language"] = search_data.language
         else:
             query += """
-                AND language = 'all'
+                AND language = :language
             """
-
-        data_points = []
-        if search_data.categories or search_data.hotel_types:
-            data_points += search_data.categories or []
-            data_points += search_data.hotel_types or []
-        else:
-            data_points += ['oall']
+            query_params["language"] = "all"
 
         query += """
                 AND datapoint = ANY(:data_points)
-        """
-        query_params["data_points"] = data_points
-
-        query_params["categories"] = search_data.categories or ([] if search_data.hotel_types else ['oall'])
-
-        query += """
                 GROUP BY ty_id, trip_type, language
-                HAVING array_agg(datapoint) @> :categories
-        """
-
-        if search_data.hotel_types:
-            query += """
-                AND array_agg(datapoint) && :hotel_types
-            """
-            query_params["hotel_types"] = search_data.hotel_types
-
-        query += """
             )
             SELECT 
                   sr.ty_id,
@@ -105,15 +84,27 @@ class SearchRepository:
                   sr.language,
                   sr.trip_type,
                   sr.rn,
-                  sr.search_score - sr.search_score * (
-                    (CASE WHEN sr.language != :language THEN 1 ELSE 0 END) + 
-                    (CASE WHEN sr.trip_type != :trip_type THEN 1 ELSE 0 END)
-                  ) * 10 / 100 as match_score,
+                  sr.search_score * (
+                    (
+                        (CASE WHEN sr.language = :language THEN 1 ELSE 0 END) + 
+                        (CASE WHEN sr.trip_type = :trip_type THEN 1 ELSE 0 END) + 
+                        array_length(sr.data_points, 1)
+                    ) / (array_length(:data_points, 1)::decimal + 2)
+                  ) as match_score,
                   cs.score as score
             FROM search_results sr
             JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
             WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
         """
+
+        data_points = []
+        if search_data.categories or search_data.hotel_types:
+            data_points += search_data.categories or []
+            data_points += search_data.hotel_types or []
+        else:
+            data_points += ['oall']
+
+        query_params["data_points"] = data_points
 
         if search_data.min_score is not None:
             query += """
