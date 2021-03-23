@@ -20,6 +20,6 @@ class SearchService(object):
 
         cluster_search_results = await self.repository.fetch(search_data)
 
-        hotels_response = SearchServiceDataFeed.search(search_data, cluster_search_results)
+        hotels_response = await SearchServiceDataFeed.search(search_data, cluster_search_results)
 
         return hotels_response
