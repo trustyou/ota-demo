@@ -587,7 +587,7 @@ class Hotel extends React.Component {
         </div>
         }
         { personalizedSearch && <span className="hotel-match-score has-tooltip">
-            <div className="tooltip"> Matches {hotel.match.score}% to your personalization </div>
+            <div className="tooltip"> Matches {hotel.match.match_score}% to your personalization </div>
               {hotel.match.match_score}% match for you
           </span>
         }
