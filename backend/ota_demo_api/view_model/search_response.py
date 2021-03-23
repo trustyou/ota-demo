@@ -58,14 +58,14 @@ class HotelTypeResponseBase(BaseModel):
 class MatchCategoryResponse(BaseModel):
     count: int
     score: float
-    short_text: str
+    short_text: Optional[str]
     category_id: str
     category_name: str
 
 
 class MatchHotelTypeResponse(BaseModel):
     score: float
-    short_text: str
+    short_text: Optional[str]
     category_id: str
     category_name: str
 

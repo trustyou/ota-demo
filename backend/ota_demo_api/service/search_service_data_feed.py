@@ -1,6 +1,7 @@
+from functools import lru_cache
 from requests_futures.sessions import FuturesSession
 
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 import random
 
 from ota_demo_api.view_model.search_response import (
@@ -46,6 +47,8 @@ class SearchServiceDataFeed(object):
 
         ty_clusters = {str(c.ty_id): c for c in clusters}
 
+        category_names = cls.get_category_names(request_session)
+
         hotels = []
         for ty_id in ty_clusters.keys():
             future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}")
@@ -69,7 +72,7 @@ class SearchServiceDataFeed(object):
 
             reviews_distribution = cls.get_reviews_distribution(reviews)
             traveler_types_distribution = cls.get_traveler_types_distribution(reviews)
-            match_info = cls.get_match_info(categories, hotel_types, ty_clusters[ty_id])
+            match_info = cls.get_match_info(category_names, categories, hotel_types, ty_clusters[ty_id])
 
             hotels.append(
                 HotelResponse(
@@ -199,10 +202,23 @@ class SearchServiceDataFeed(object):
         )
 
     @classmethod
-    def get_match_info(cls, categories: List[CategoryResponse], hotel_types: List[HotelTypeResponse],
-                       search_result: ClusterSearchResult) -> MatchResponse:
+    @lru_cache()
+    def get_category_names(cls, session: FuturesSession) -> Dict[str, str]:
+        """
+        Get the names for all MR categories.
+        :param session: The async session to use to fetch the data
+        :return: Dict with MR categories
+        """
+        categories_future = session.get('https://api.trustyou.com/hotels/categories')
+        categories = categories_future.result().json()["response"]["cluster_category_list"]
+        return {c["category_id"]: c["name"] for c in categories}
+
+    @classmethod
+    def get_match_info(cls, category_names: Dict[str, str], categories: List[CategoryResponse],
+                       hotel_types: List[HotelTypeResponse], search_result: ClusterSearchResult) -> MatchResponse:
         """
         Return the match info.
+        :param category_names: Dict with MR categories and their names
         :param categories: List of categories for the cluster
         :param hotel_types: List of hotel_types for the cluster
         :param search_result: The cluster result from the search
@@ -215,12 +231,18 @@ class SearchServiceDataFeed(object):
             i.category_id: i for l in map(lambda c: [c] + (c.sub_categories or []), hotel_types) for i in l
         }
         match_categories = {
-            c_id: MatchCategoryResponse(**(dict(all_categories[c_id]) | dict(c_val)))
-            for c_id, c_val in search_result.categories.items() if c_id in all_categories
+            c_id: MatchCategoryResponse(**(dict(all_categories.get(
+                c_id,
+                { "category_id": c_id, "category_name": category_names[c_id]}
+            )) | dict(c_val)))
+            for c_id, c_val in search_result.categories.items()
         }
         match_hotel_types = {
-            c_id: MatchHotelTypeResponse(**(dict(all_hotel_types.get(c_id, {})) | dict(c_val)))
-            for c_id, c_val in search_result.hotel_types.items() if c_id in all_hotel_types
+            c_id: MatchHotelTypeResponse(**(dict(all_hotel_types.get(
+                c_id,
+                { "category_id": c_id, "category_name": category_names[c_id]}
+            )) | dict(c_val)))
+            for c_id, c_val in search_result.hotel_types.items()
         }
 
         return MatchResponse(

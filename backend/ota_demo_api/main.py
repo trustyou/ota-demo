@@ -1,4 +1,4 @@
-import requests
+import httpx
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -51,5 +51,6 @@ app.include_router(
 
 @app.get("/hotels/categories")
 async def categories():
-    # Attempt to wrap hotel api categories
-    return requests.get("https://api.trustyou.com/hotels/categories").json()
+    async with httpx.AsyncClient() as client:
+        response = await client.get('https://api.trustyou.com/hotels/categories')
+        return response.json()
