@@ -1,8 +1,10 @@
-from functools import lru_cache
-from requests_futures.sessions import FuturesSession
+import asyncio
+from typing import Any, List, Dict, Tuple, Sequence, Optional
 
-from typing import Any, List, Optional, Dict
-import random
+from requests_futures.sessions import FuturesSession
+from geopy.geocoders import Nominatim
+from geopy.distance import geodesic
+from async_lru import alru_cache
 
 from ota_demo_api.view_model.search_response import (
     TravelerTypesDistributionResponse,
@@ -27,7 +29,7 @@ from ota_demo_api.service.badges import get_badge_icon
 
 class SearchServiceDataFeed(object):
     @classmethod
-    def search(cls, search_data: SearchRequest, clusters: List[ClusterSearchResult]) -> SearchResponse:
+    async def search(cls, search_data: SearchRequest, clusters: List[ClusterSearchResult]) -> SearchResponse:
         """
         The data for API
 
@@ -51,6 +53,7 @@ class SearchServiceDataFeed(object):
 
         hotels = []
         for ty_id in ty_clusters.keys():
+            cluster_search_result = ty_clusters[ty_id]
             future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}")
             future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json?scale={search_data.scale}")
             future_seal = request_session.get(f"{ty_api}/{ty_id}/seal.json?scale={search_data.scale}")
@@ -64,10 +67,13 @@ class SearchServiceDataFeed(object):
             reviews = future_reviews.result().json().get("response")
             relevant_now_data = future_relevant_now.result().json().get("response")
             seal = future_seal.result().json().get("response")
-            coordinates = future_location.result().json().get("response", {}).get("coordinates", {}).get("coordinates")
+            location_response = future_location.result().json().get("response", {})
+            coordinates = location_response.get("coordinates", {}).get("coordinates")
+            city = location_response.get("address", {}).get("city")
+            country = location_response.get("address", {}).get("country")
+            distance_from_center = await cls.get_distance_from_center(city, country, coordinates)
 
             badges = cls.get_badges(future_badges.result().json().get("response"))
-            cluster_search_result = ty_clusters[ty_id]
             filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
                                                                 cluster_search_result.language)
             categories = cls.get_categories(filtered_meta_review)
@@ -90,7 +96,7 @@ class SearchServiceDataFeed(object):
                     reviews_distribution=reviews_distribution,
                     traveler_types_distribution=traveler_types_distribution,
                     match=match_info,
-                    distance_from_center=f"{round(random.uniform(1, 5), 1)} km from center",
+                    distance_from_center=distance_from_center,
                     coordinates=coordinates
                 )
             )
@@ -122,6 +128,43 @@ class SearchServiceDataFeed(object):
                                                    filtered_meta_review["trip_type_meta_review_list"]))
 
         return filtered_meta_review
+
+    @classmethod
+    async def get_distance_from_center(cls, city: Optional[str], country: Optional[str],
+                                       coordinates: Optional[Sequence[float]]) -> str:
+        """
+        Get the coordinates to the city center.
+        :param city: The search city
+        :param country: The search country
+        :param coordinates: Tuple with latitude and longitude of the hotel
+        :return: The text describing the distance from the city center
+        """
+        if not city or not country or not coordinates:
+            return None
+
+        hotel_coords = coordinates[::-1]
+        city_center_coords = await cls.get_city_coords(city, country)
+
+        if city_center_coords:
+            distance_from_center_km = round(geodesic(city_center_coords, hotel_coords).kilometers, 1)
+            return f"{distance_from_center_km} km from center"
+
+    @classmethod
+    @alru_cache(maxsize=128)
+    async def get_city_coords(cls, city: str, country: str) -> Optional[Tuple[float, float]]:
+        """
+        The the coordinates of the city
+        :param city: The city
+        :param country: The country
+        :return: Tuple with lat and lon floats
+        """
+        loop = asyncio.get_event_loop()
+        with Nominatim(user_agent="ty-ota-demo") as geolocator:
+            try:
+                location = await loop.run_in_executor(None, lambda: geolocator.geocode(f"{city},{country}", limit=1))
+            except:
+                return None
+            return location.latitude, location.longitude
 
     @classmethod
     def get_badges(cls, badges_data: Any):
@@ -229,7 +272,6 @@ class SearchServiceDataFeed(object):
         )
 
     @classmethod
-    @lru_cache()
     def get_category_names(cls, session: FuturesSession) -> Dict[str, str]:
         """
         Get the names for all MR categories.
