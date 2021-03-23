@@ -67,12 +67,15 @@ class SearchServiceDataFeed(object):
             coordinates = future_location.result().json().get("response", {}).get("coordinates", {}).get("coordinates")
 
             badges = cls.get_badges(future_badges.result().json().get("response"))
-            categories = cls.get_categories(meta_review)
+            cluster_search_result = ty_clusters[ty_id]
+            filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
+                                                                cluster_search_result.language)
+            categories = cls.get_categories(filtered_meta_review)
             hotel_types = cls.get_hotel_types(meta_review)
 
             reviews_distribution = cls.get_reviews_distribution(reviews)
             traveler_types_distribution = cls.get_traveler_types_distribution(reviews)
-            match_info = cls.get_match_info(category_names, categories, hotel_types, ty_clusters[ty_id])
+            match_info = cls.get_match_info(category_names, categories, hotel_types, cluster_search_result)
 
             hotels.append(
                 HotelResponse(
@@ -95,6 +98,30 @@ class SearchServiceDataFeed(object):
         return SearchResponse(
             hotels=hotels
         )
+
+    @classmethod
+    def get_filtered_meta_review(cls, meta_review: Any, trip_type: str, language: str) -> Dict[str, Any]:
+        """
+        Apply the filters and get the resulting meta review.
+        :param meta_review: The MR document
+        :param trip_type: The type of the trip filter
+        :param language: The language filter
+        :return: The filtered MR document
+        """
+        filtered_meta_review = meta_review
+
+        if language != "all":
+            filtered_meta_review = next(filter(lambda x: x["filter"]["language"] == language,
+                                               filtered_meta_review["language_meta_review_list"]))
+            if trip_type != "all":
+                filtered_meta_review = next(filter(lambda x: x["filter"]["trip_type"] == trip_type,
+                                                   filtered_meta_review["trip_type_meta_review_list"]))
+        else:
+            if trip_type != "all":
+                filtered_meta_review = next(filter(lambda x: x["filter"]["trip_type"] == trip_type,
+                                                   filtered_meta_review["trip_type_meta_review_list"]))
+
+        return filtered_meta_review
 
     @classmethod
     def get_badges(cls, badges_data: Any):
