@@ -868,10 +868,6 @@ class SearchPage extends React.Component {
   }
 
   render() {
-    const footerLoadingCSS = {
-      height: "60px",
-    };
-
     return <>
       <SearchHeader
         toggleSearch={this.toggleSearch}
@@ -896,7 +892,7 @@ class SearchPage extends React.Component {
           </div>
         </div>
       </main>
-      <div ref={loadingRef => (this.loadingRef = loadingRef)} style={footerLoadingCSS}></div>
+      <div className="footer-loader" ref={loadingRef => (this.loadingRef = loadingRef)}></div>
     </>
   }
 }
