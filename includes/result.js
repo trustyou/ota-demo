@@ -585,7 +585,7 @@ class Hotel extends React.Component {
     const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
     const personalizedSearch = !(hasOnlyGenericMatchCategories && hotel.match.trip_type === "all")
 
-    return <article className="hotel">
+    return <article className="hotel" id={hotel.ty_id}>
       <div className="hotel-image" style={hotelImage}></div>
       <div className="hotel-details">
         <div className="hotel-name">{hotel.name}</div>
@@ -628,7 +628,7 @@ class SearchResults extends React.Component {
       return <NoResult />
     }
 
-    return <div>
+    return <div id="hotel-list">
       {this.props.hotels.map(
         hotel => <Hotel
           key={hotel.ty_id}
@@ -661,6 +661,8 @@ class SearchPage extends React.Component {
     pageSize: 10,
     currentPage: 0,
     hasNextPage: true,
+
+    isMapFloating: false,
   }
 
   componentDidMount() {
@@ -693,6 +695,33 @@ class SearchPage extends React.Component {
       options
     );
     this.observer.observe(this.loadingRef);
+
+    // float Map
+    this.observerFloatMap = new IntersectionObserver(
+      this.handleObserverFloatMap.bind(this),
+      options
+    );
+    this.observerFloatMap.observe(this.floatMapRef);
+  }
+
+  handleObserverFloatMap(entities, observer) {
+    /**
+     * if The indicator is not in the viewport set map floating
+     */
+    const el = entities[0];
+    var rect = el.boundingClientRect,
+      vWidth = window.innerWidth || document.documentElement.clientWidth,
+      vHeight = window.innerHeight || document.documentElement.clientHeight;
+
+    var isMapFloating = false;
+
+    if (rect.bottom < 0 || rect.top < 0) {
+      isMapFloating = true;
+    }
+
+    this.setState({
+      isMapFloating,
+    });
   }
 
   handleObserver(entities, observer) {
@@ -889,6 +918,8 @@ class SearchPage extends React.Component {
         mrCategories={this.state.mrCategories}
         totalCount={this.state.totalCount}
       />
+      <span id="list-indicator" ref={floatMapRef => (this.floatMapRef = floatMapRef)}></span>
+
       <main>
         {(this.state.isLoadingMore || (!this.state.isLoadingHotel && !this.state.isLoadingCategories)) && !this.state.error &&
           <SearchResults hotels={this.state.hotels} appendLoading={this.state.isLoadingMore} />
@@ -897,13 +928,14 @@ class SearchPage extends React.Component {
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && this.state.error && <ErrorMessage/>}
 
         {this.state.isLoadingHotel && !this.state.isLoadingMore && <Loader itemCount={3} />}
-        <div>
+        <div className={this.state.isMapFloating ? 'map-container-float' : 'map-container'}>
           <section className="search-map" id="search-map"></section>
           <div className="score-gradient">
             Preference match: <img src="img/score-gradient.png" />
           </div>
         </div>
       </main>
+
       <div className="footer-loader" ref={loadingRef => (this.loadingRef = loadingRef)}></div>
     </>
   }
