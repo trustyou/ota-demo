@@ -5,7 +5,7 @@
 		"modules/map-markers";
 
 main {
-	padding: $space-10;
+	padding: $space-10 $space-10 0 $space-10;
 	display: grid;
 	grid-template-columns: 6.5fr 5.5fr;
 	row-gap: $space-8;
