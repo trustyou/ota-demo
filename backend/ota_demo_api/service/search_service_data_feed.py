@@ -1,7 +1,7 @@
 import asyncio
 from typing import Any, List, Dict, Tuple, Sequence, Optional
 
-from requests_futures.sessions import FuturesSession
+import httpx
 from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 from async_lru import alru_cache
@@ -43,37 +43,36 @@ class SearchServiceDataFeed(object):
                 hotels=hotels
             )
 
-        request_session = FuturesSession()
-
+        category_names = await cls.get_category_names()
         ty_api = "https://api.trustyou.com/hotels/"
-
         ty_clusters = {str(c.ty_id): c for c in clusters}
-
-        category_names = cls.get_category_names(request_session)
 
         hotels = []
         for ty_id in ty_clusters.keys():
             cluster_search_result = ty_clusters[ty_id]
-            future_meta_review = request_session.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}")
-            future_reviews = request_session.get(f"{ty_api}/{ty_id}/reviews.json?scale={search_data.scale}")
-            future_seal = request_session.get(f"{ty_api}/{ty_id}/seal.json?scale={search_data.scale}")
-            future_relevant_now = request_session.get(
-                f"{ty_api}/{ty_id}/relevant_now.json?key={TRUSTYOU_HOTEL_API_KEY}&scale={search_data.scale}"
-            )
-            future_badges = request_session.get(f"{ty_api}/{ty_id}/badges.json?scale={search_data.scale}")
-            future_location = request_session.get(f"{ty_api}/{ty_id}/location.json")
 
-            meta_review = future_meta_review.result().json().get("response")
-            reviews = future_reviews.result().json().get("response")
-            relevant_now_data = future_relevant_now.result().json().get("response")
-            seal = future_seal.result().json().get("response")
-            location_response = future_location.result().json().get("response", {})
+            async with httpx.AsyncClient() as client:
+                responses = await asyncio.gather(
+                    client.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}"),
+                    client.get(f"{ty_api}/{ty_id}/reviews.json?scale={search_data.scale}"),
+                    client.get(f"{ty_api}/{ty_id}/seal.json?scale={search_data.scale}"),
+                    client.get(f"{ty_api}/{ty_id}/badges.json?scale={search_data.scale}"),
+                    client.get(f"{ty_api}/{ty_id}/location.json")
+                )
+                meta_review_response, reviews_response, seal_response, badges_response, location_response = responses
+
+            meta_review = meta_review_response.json().get("response", {})
+            reviews = reviews_response.json().get("response", {})
+            seal = seal_response.json().get("response", {})
+            location_response = location_response.json().get("response", {})
             coordinates = location_response.get("coordinates", {}).get("coordinates")
             city = location_response.get("address", {}).get("city")
             country = location_response.get("address", {}).get("country")
-            distance_from_center = await cls.get_distance_from_center(city, country, coordinates)
+            city_center_coords = await cls.get_city_coords(city, country)
 
-            badges = cls.get_badges(future_badges.result().json().get("response"))
+            distance_from_center = cls.get_distance_from_center(city_center_coords, coordinates)
+
+            badges = cls.get_badges(badges_response.json().get("response"))
             filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
                                                                 cluster_search_result.language)
             categories = cls.get_categories(filtered_meta_review)
@@ -90,7 +89,7 @@ class SearchServiceDataFeed(object):
                     score=float(seal.get("score")),
                     reviews_count=seal.get("reviews_count"),
                     score_description=seal.get("score_description"),
-                    relevant_now=cls.get_relevant_now(relevant_now_data),
+                    relevant_now=cls.get_relevant_now(meta_review),
                     categories=categories,
                     badges=badges,
                     reviews_distribution=reviews_distribution,
@@ -130,27 +129,25 @@ class SearchServiceDataFeed(object):
         return filtered_meta_review
 
     @classmethod
-    async def get_distance_from_center(cls, city: Optional[str], country: Optional[str],
+    def get_distance_from_center(cls, city_center_coords: Tuple[float, float],
                                        coordinates: Optional[Sequence[float]]) -> str:
         """
         Get the coordinates to the city center.
-        :param city: The search city
-        :param country: The search country
+        :param city_center_coords: The coords of the city center
         :param coordinates: Tuple with latitude and longitude of the hotel
         :return: The text describing the distance from the city center
         """
-        if not city or not country or not coordinates:
+        if not city_center_coords or not coordinates:
             return None
 
         hotel_coords = coordinates[::-1]
-        city_center_coords = await cls.get_city_coords(city, country)
 
         if city_center_coords:
             distance_from_center_km = round(geodesic(city_center_coords, hotel_coords).kilometers, 1)
             return f"{distance_from_center_km} km from center"
 
     @classmethod
-    @alru_cache(maxsize=128)
+    @alru_cache
     async def get_city_coords(cls, city: str, country: str) -> Optional[Tuple[float, float]]:
         """
         The the coordinates of the city
@@ -243,15 +240,15 @@ class SearchServiceDataFeed(object):
         ]
 
     @classmethod
-    def get_relevant_now(cls, relevant_now: Any) -> RelevantNowResponse:
+    def get_relevant_now(cls, meta_review: Any) -> RelevantNowResponse:
         """
         The relevant_now, data comes from relevant_now.json
 
-        :param relevant_now: result of relevant_now.json
+        :param meta_review: result of meta_review.json
         :return: RelevantNowResponse
         """
 
-        relevant_now_item = relevant_now["relevant_now"]
+        relevant_now_item = meta_review["relevant_now"] or {}
 
         relevant_topics = None
         overall_satisfaction = None
@@ -272,15 +269,17 @@ class SearchServiceDataFeed(object):
         )
 
     @classmethod
-    def get_category_names(cls, session: FuturesSession) -> Dict[str, str]:
+    @alru_cache
+    async def get_category_names(cls) -> Dict[str, str]:
         """
         Get the names for all MR categories.
         :param session: The async session to use to fetch the data
         :return: Dict with MR categories
         """
-        categories_future = session.get('https://api.trustyou.com/hotels/categories')
-        categories = categories_future.result().json()["response"]["cluster_category_list"]
-        return {c["category_id"]: c["name"] for c in categories}
+        async with httpx.AsyncClient() as client:
+            categories_resonse = await client.get('https://api.trustyou.com/hotels/categories')
+            categories = categories_resonse.json()["response"]["cluster_category_list"]
+            return {c["category_id"]: c["name"] for c in categories}
 
     @classmethod
     def get_match_info(cls, category_names: Dict[str, str], categories: List[CategoryResponse],
