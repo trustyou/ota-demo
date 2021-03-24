@@ -129,3 +129,4 @@ class HotelResponse(BaseModel):
 
 class SearchResponse(BaseModel):
     hotels: List[HotelResponse]
+    total_count: int
