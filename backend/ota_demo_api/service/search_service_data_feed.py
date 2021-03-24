@@ -120,16 +120,19 @@ class SearchServiceDataFeed(object):
         """
         filtered_meta_review = meta_review
 
-        if language != "all":
-            filtered_meta_review = next(filter(lambda x: x["filter"]["language"] == language,
-                                               filtered_meta_review["language_meta_review_list"]))
-            if trip_type != "all":
-                filtered_meta_review = next(filter(lambda x: x["filter"]["trip_type"] == trip_type,
-                                                   filtered_meta_review["trip_type_meta_review_list"]))
-        else:
-            if trip_type != "all":
-                filtered_meta_review = next(filter(lambda x: x["filter"]["trip_type"] == trip_type,
-                                                   filtered_meta_review["trip_type_meta_review_list"]))
+        try:
+            if language != "all":
+                filtered_meta_review = next(filter(lambda x: x["filter"]["language"] == language,
+                                                   filtered_meta_review["language_meta_review_list"]))
+                if trip_type != "all":
+                    filtered_meta_review = next(filter(lambda x: x["filter"]["trip_type"] == trip_type,
+                                                       filtered_meta_review["trip_type_meta_review_list"]))
+            else:
+                if trip_type != "all":
+                    filtered_meta_review = next(filter(lambda x: x["filter"]["trip_type"] == trip_type,
+                                                       filtered_meta_review["trip_type_meta_review_list"]))
+        except StopIteration:
+            return filtered_meta_review
 
         return filtered_meta_review
 
@@ -326,5 +329,5 @@ class SearchServiceDataFeed(object):
             trip_type=search_result.trip_type,
             categories=match_categories,
             hotel_types=match_hotel_types,
-            overall_score=search_result.overall_score
+            overall_match=search_result.overall_match
         )

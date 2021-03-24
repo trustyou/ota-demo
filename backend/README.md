@@ -29,8 +29,12 @@ uvicorn ota_demo_api.main:app --reload
 ```
 
 6. For the documentation go to:
-  * Swagger: 127.0.0.1:8000/docs
-  * ReDoc: 127.0.0.1:8000/redoc
+  * Local
+  ** Swagger: 127.0.0.1:8000/docs
+  ** ReDoc: 127.0.0.1:8000/redoc
+  * Deployed
+  ** Swagger: https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/docs
+  ** Redoc: https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/redoc  
 
 
 How to generate a new alembic migration?
@@ -62,7 +66,7 @@ How to run in docker?
 How to run tests?
 -----------------
 
-Runnig tests + linting + mypy checks
+Running tests + linting + mypy checks
 ```
 tox
 ```

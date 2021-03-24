@@ -108,7 +108,7 @@ class MatchResponse(BaseModel):
     trip_type: str
     categories: Dict[str, MatchCategoryResponse]
     hotel_types: Dict[str, MatchHotelTypeResponse]
-    overall_score: Optional[float]
+    overall_match: bool
 
 
 class HotelResponse(BaseModel):
