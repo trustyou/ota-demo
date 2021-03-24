@@ -240,7 +240,6 @@ legend {
 					.ant-select-selection-search-input {
 						width: 100%;
 						transition: all 0.1s ease-in-out;
-						padding: 0 $space-3;
 					}
 				}
 
@@ -263,6 +262,10 @@ legend {
 						align-items: center;
 						color: $gray-500;
 					}
+				}
+
+				.ant-select-item-option-active:not(&-disabled) {
+					background-color: $blue-100;
 				}
 			}
 		}
