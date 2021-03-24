@@ -17,7 +17,7 @@ class ClusterSearchResult(BaseModel):
     match_score: float
     categories: Dict[str, DataPoint]
     hotel_types: Dict[str, DataPoint]
-    overall_score: Optional[float]
+    overall_match: bool
 
     class Config:
         orm_mode = True
