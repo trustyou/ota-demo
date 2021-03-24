@@ -64,9 +64,11 @@ class SearchServiceDataFeed(object):
                 reviews = reviews_response.json().get("response", {})
                 seal = seal_response.json().get("response", {})
                 location_response = location_response.json().get("response", {})
-                coordinates = location_response.get("coordinates", {}).get("coordinates")
-                city = location_response.get("address", {}).get("city")
-                country = location_response.get("address", {}).get("country")
+                coordinates_response = location_response.get("coordinates", {}) or {}
+                coordinates = coordinates_response.get("coordinates")
+                address_response = location_response.get("address", {}) or {}
+                city = address_response.get("address", {}).get("city")
+                country = address_response.get("address", {}).get("country")
                 city_center_coords = await cls.get_city_coords(city, country)
 
                 distance_from_center = cls.get_distance_from_center(city_center_coords, coordinates)
