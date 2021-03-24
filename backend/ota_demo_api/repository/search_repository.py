@@ -98,32 +98,25 @@ class SearchRepository:
         """
         is_city_country, is_coordinates = self._validate_location(search_data)
 
-        if is_count_query:
-            query = f"""
-                WITH search_results AS (
-                    SELECT 
-                        ty_id, 
-                        ROW_NUMBER() OVER (
-                            PARTITION BY ty_id ORDER BY (language != 'all', trip_type != 'all') DESC
-                        ) AS rn
-                    FROM cluster_search
-            """
-        else:
-            query = f"""
-                WITH search_results AS (
-                    SELECT 
-                        ty_id, 
-                        language,
-                        trip_type, 
-                        SUM(score) / COUNT(score) AS search_score,
-                        array_agg(datapoint) as data_points,
-                        array_agg(score) as scores,
-                        array_agg(review_count) as review_counts,
-                        ROW_NUMBER() OVER (
-                            PARTITION BY ty_id ORDER BY (language != 'all', trip_type != 'all') DESC
-                        ) AS rn
-                    FROM cluster_search
-            """
+        select_column_list = "ty_id" if is_count_query else """
+            ty_id,
+            language,
+            trip_type, 
+            SUM(score) / COUNT(score) AS search_score,
+            array_agg(datapoint) as data_points,
+            array_agg(score) as scores,
+            array_agg(review_count) as review_counts
+        """
+
+        query = f"""
+            WITH search_results AS (
+                SELECT 
+                    {select_column_list},
+                    ROW_NUMBER() OVER (
+                        PARTITION BY ty_id ORDER BY (language != 'all', trip_type != 'all') DESC
+                    ) AS rn
+                FROM cluster_search
+        """
 
         if is_city_country:
             query +=  """
