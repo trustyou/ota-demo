@@ -578,7 +578,7 @@ class Hotel extends React.Component {
   render() {
     const { hotel, randomIndex } = this.props
     const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
-    const hasOnlyGenericMatchCategories = !!hotel.match.overall_score;
+    const hasOnlyGenericMatchCategories = hotel.match.overall_match;
     const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
     const matchCategories = Object.values(allCategories).sort((a, b) => b.score - a.score )
     const matchesTripType = hotel.match.trip_type !== "all";
