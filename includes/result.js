@@ -888,7 +888,7 @@ class SearchPage extends React.Component {
         <div>
           <section className="search-map" id="search-map"></section>
           <div className="score-gradient">
-            Preference match: <img src="/img/score-gradient.png" />
+            Preference match: <img src="img/score-gradient.png" />
           </div>
         </div>
       </main>
