@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, List, Dict, Tuple, Sequence, Optional
+from typing import Any, List, Dict, Sequence, Optional
 
 import httpx
 from geopy.geocoders import Nominatim
@@ -67,8 +67,8 @@ class SearchServiceDataFeed(object):
                 coordinates_response = location_response.get("coordinates", {}) or {}
                 coordinates = coordinates_response.get("coordinates")
                 address_response = location_response.get("address", {}) or {}
-                city = address_response.get("address", {}).get("city")
-                country = address_response.get("address", {}).get("country")
+                city = address_response.get("city")
+                country = address_response.get("country")
                 city_center_coords = await cls.get_city_coords(city, country)
 
                 distance_from_center = cls.get_distance_from_center(city_center_coords, coordinates)
@@ -130,12 +130,12 @@ class SearchServiceDataFeed(object):
         return filtered_meta_review
 
     @classmethod
-    def get_distance_from_center(cls, city_center_coords: Tuple[float, float],
+    def get_distance_from_center(cls, city_center_coords: Optional[Sequence[float]],
                                        coordinates: Optional[Sequence[float]]) -> str:
         """
         Get the coordinates to the city center.
         :param city_center_coords: The coords of the city center
-        :param coordinates: Tuple with latitude and longitude of the hotel
+        :param coordinates: Sequence with latitude and longitude of the hotel
         :return: The text describing the distance from the city center
         """
         if not city_center_coords or not coordinates:
@@ -143,19 +143,21 @@ class SearchServiceDataFeed(object):
 
         hotel_coords = coordinates[::-1]
 
-        if city_center_coords:
-            distance_from_center_km = round(geodesic(city_center_coords, hotel_coords).kilometers, 1)
-            return f"{distance_from_center_km} km from center"
+        distance_from_center_km = round(geodesic(city_center_coords, hotel_coords).kilometers, 1)
+        return f"{distance_from_center_km} km from center"
 
     @classmethod
     @alru_cache
-    async def get_city_coords(cls, city: str, country: str) -> Optional[Tuple[float, float]]:
+    async def get_city_coords(cls, city: Optional[str], country: Optional[str]) -> Optional[Sequence[float]]:
         """
         The the coordinates of the city
         :param city: The city
         :param country: The country
-        :return: Tuple with lat and lon floats
+        :return: Sequence with lat and lon floats
         """
+        if not city or not country:
+            return None
+
         loop = asyncio.get_event_loop()
         with Nominatim(user_agent="ty-ota-demo") as geolocator:
             try:
