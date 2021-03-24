@@ -40,3 +40,12 @@ function getRandomImageIndex() {
   var randomIndex = Math.floor(Math.random() * IMAGES_SIZE);
   return randomIndex + 1;
 }
+
+function scrollTo(tyId) {
+  window.location.hash=`#${tyId}`;
+
+  $(`#${tyId}`).addClass('hotel-highlight');
+  setTimeout(function(){
+    $(`#${tyId}`).removeClass('hotel-highlight');
+  }, 1500);
+}
