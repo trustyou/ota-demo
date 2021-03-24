@@ -25,12 +25,23 @@ function buildMap(lat, lon) {
     }).addTo(map);
 }
 
+function markerOnClickHandler(e) {
+    scrollTo(e.target.tyId);
+}
+
 function addMarker(tyId, scoreDescription, lat, lon, popupText) {
     if (!map) {
         return;
     }
     cleanMarker(tyId);
-    markers[tyId] = L.marker([lon, lat], {icon: getIcon(scoreDescription)}).bindPopup(popupText).addTo(map);
+
+    var marker = L.marker([lon, lat], {icon: getIcon(scoreDescription)})
+        .bindPopup(popupText);
+    marker.tyId = tyId;
+
+    markers[tyId] = marker
+        .addTo(map)
+        .on('click', markerOnClickHandler);
 }
 
 function cleanMarker(ty_id) {
