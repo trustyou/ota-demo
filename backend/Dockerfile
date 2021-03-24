@@ -1,4 +1,6 @@
-FROM python:3.9.2-buster
+FROM python:3.9.2-slim-buster
+
+RUN apt-get -y update && apt-get -y upgrade && apt-get -y install gcc libpq-dev
 
 COPY . /app
 
