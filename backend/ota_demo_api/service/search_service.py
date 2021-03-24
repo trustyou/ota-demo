@@ -19,7 +19,11 @@ class SearchService(object):
         """
 
         cluster_search_results = await self.repository.fetch(search_data)
+        if cluster_search_results:
+            results_total_count = await self.repository.count(search_data)
+        else:
+            results_total_count = 0
 
-        hotels_response = await SearchServiceDataFeed.search(search_data, cluster_search_results)
+        hotels_response = await SearchServiceDataFeed.search(search_data, cluster_search_results, results_total_count)
 
         return hotels_response

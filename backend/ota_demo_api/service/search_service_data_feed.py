@@ -28,18 +28,21 @@ from ota_demo_api.service.badges import get_badge_icon
 
 class SearchServiceDataFeed(object):
     @classmethod
-    async def search(cls, search_data: SearchRequest, clusters: List[ClusterSearchResult]) -> SearchResponse:
+    async def search(cls, search_data: SearchRequest,
+                     clusters: List[ClusterSearchResult], total_count: int) -> SearchResponse:
         """
         The data for API
 
         :param search_data: SearchRequest object
         :param clusters: Results of the search
+        :param total_count: The total number of results
         :return: Filtered data
         """
         if not clusters:
             hotels = []
             return SearchResponse(
-                hotels=hotels
+                hotels=hotels,
+                total_count=total_count
             )
 
         category_names = await cls.get_category_names()
@@ -102,7 +105,8 @@ class SearchServiceDataFeed(object):
                 )
 
             return SearchResponse(
-                hotels=hotels
+                hotels=hotels,
+                total_count=total_count
             )
 
     @classmethod

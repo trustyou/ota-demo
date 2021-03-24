@@ -153,8 +153,11 @@ class SearchHeader extends React.Component {
 
   applyLocationChange = (location) => {
     if (location !== this.state.location) {
+      const locationFilter = parseCityCountry(location)
       this.setState({
-        location
+        location,
+        city: locationFilter[0],
+        country: locationFilter[1],
       });
       this.props.onApplyLocationChange(location);
     }
@@ -222,7 +225,11 @@ class SearchHeader extends React.Component {
       <form className="search-form" id="search-form" action="results.html">
         <div className="search-container">
           <fieldset className="search-primary" id="search-primary">
-            <legend>You have 1,235 results for <em id="search-location-legend">{capitalize(this.state.city)} - {capitalize(this.state.country)}</em></legend>
+            { (this.props.totalCount == null) && <legend> Searching... </legend> }
+            { this.props.totalCount && <legend> You have {this.props.totalCount.toLocaleString()} results for <em
+              id="search-location-legend">{capitalize(this.state.city)} - {capitalize(this.state.country)}</em>
+              </legend>
+            }
             <div className="search-box">
               <SearchLocation value={this.state.location} handleChange={this.applyLocationChange} placeholder="Try another destination?"/>
               <i className="ty-icon ty-icon-search"></i>
@@ -640,6 +647,7 @@ class SearchPage extends React.Component {
     isLoadingMore: false,
     isLoadingCategories: true,
     hotels: [],
+    totalCount: null,
     mrCategories: [],
     error: null,
     filterCity: "",
@@ -760,11 +768,13 @@ class SearchPage extends React.Component {
           this.addMarkers(data.hotels);
           const hasNextPage = data.hotels.length == this.state.pageSize ? true : false;
           const hotels = this.state.currentPage == 0 ? data.hotels : this.state.hotels.concat(data.hotels);
+          const totalCount = data.total_count;
 
           this.setState({
             hasNextPage,
             error: null,
             hotels,
+            totalCount,
             isLoadingHotel: false,
             isLoadingMore: false,
             isOpenSearch: false,
@@ -831,7 +841,8 @@ class SearchPage extends React.Component {
         currentPage: 0,
         isLoadingMore: false,
         filterCity: locationFilter[0],
-        filterCountry: locationFilter[1]
+        filterCountry: locationFilter[1],
+        totalCount: null,
       }, () => {
         this.fetchHotels();
       });
@@ -876,6 +887,7 @@ class SearchPage extends React.Component {
         onApplyChanges={this.onApplyChangesFilter}
         onApplyLocationChange={this.onApplyLocationChange}
         mrCategories={this.state.mrCategories}
+        totalCount={this.state.totalCount}
       />
       <main>
         {(this.state.isLoadingMore || (!this.state.isLoadingHotel && !this.state.isLoadingCategories)) && !this.state.error &&
