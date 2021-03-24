@@ -7,7 +7,6 @@ from geopy.distance import geodesic
 from async_lru import alru_cache
 
 from ota_demo_api.view_model.search_response import (
-    TravelerTypesDistributionResponse,
     BadgeDataModel,
     BadgeResponse,
     BadgeHighlightModel,
@@ -19,7 +18,6 @@ from ota_demo_api.view_model.search_response import (
     OverallSatisfaction,
     RelevantTopic
 )
-from ota_demo_api.view_model.search_response import ReviewsDistributionResponse
 from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse, MatchResponse
@@ -56,25 +54,21 @@ class SearchServiceDataFeed(object):
 
                 responses = await asyncio.gather(
                     client.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}"),
-                    client.get(f"{ty_api}/{ty_id}/reviews.json?scale={search_data.scale}"),
                     client.get(f"{ty_api}/{ty_id}/seal.json?scale={search_data.scale}"),
                     client.get(f"{ty_api}/{ty_id}/badges.json?scale={search_data.scale}"),
-                    client.get(f"{ty_api}/{ty_id}/location.json")
                 )
-                meta_review_response, reviews_response, seal_response, badges_response, location_response = responses
+                meta_review_response, seal_response, badges_response = responses
 
                 meta_review = meta_review_response.json().get("response", {})
-                reviews = reviews_response.json().get("response", {})
                 seal = seal_response.json().get("response", {})
-                location_response = location_response.json().get("response", {})
-                coordinates_response = location_response.get("coordinates", {}) or {}
-                coordinates = coordinates_response.get("coordinates")
-                address_response = location_response.get("address", {}) or {}
-                city = address_response.get("city")
-                country = address_response.get("country")
-                city_center_coords = await cls.get_city_coords(city, country)
+                coordinates = [cluster_search_result.latitude, cluster_search_result.longitude]
+                city_center_coords = await cls.get_city_coords(
+                    cluster_search_result.city, cluster_search_result.country
+                )
 
-                distance_from_center = cls.get_distance_from_center(city_center_coords, coordinates)
+                distance_from_center = cls.get_distance_from_center(
+                    city_center_coords, coordinates
+                )
 
                 badges = cls.get_badges(badges_response.json().get("response"))
                 filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
@@ -82,8 +76,6 @@ class SearchServiceDataFeed(object):
                 categories = cls.get_categories(filtered_meta_review)
                 hotel_types = cls.get_hotel_types(meta_review)
 
-                reviews_distribution = cls.get_reviews_distribution(reviews)
-                traveler_types_distribution = cls.get_traveler_types_distribution(reviews)
                 match_info = cls.get_match_info(category_names, categories, hotel_types, cluster_search_result)
 
                 hotels.append(
@@ -96,8 +88,6 @@ class SearchServiceDataFeed(object):
                         relevant_now=cls.get_relevant_now(meta_review),
                         categories=categories,
                         badges=badges,
-                        reviews_distribution=reviews_distribution,
-                        traveler_types_distribution=traveler_types_distribution,
                         match=match_info,
                         distance_from_center=distance_from_center,
                         coordinates=coordinates
@@ -148,9 +138,7 @@ class SearchServiceDataFeed(object):
         if not city_center_coords or not coordinates:
             return None
 
-        hotel_coords = coordinates[::-1]
-
-        distance_from_center_km = round(geodesic(city_center_coords, hotel_coords).kilometers, 1)
+        distance_from_center_km = round(geodesic(city_center_coords, coordinates).kilometers, 1)
         return f"{distance_from_center_km} km from center"
 
     @classmethod
@@ -199,25 +187,6 @@ class SearchServiceDataFeed(object):
             badges.append(badge_response)
 
         return badges
-
-    @classmethod
-    def get_reviews_distribution(cls, reviews: Any) -> List[ReviewsDistributionResponse]:
-        """
-        The reviews_distribution, data comes from reviews
-
-        :param reviews: result of reviews.json
-        :return: List[ReviewsDistributionResponse]
-        """
-        return [ReviewsDistributionResponse(**distribution) for distribution in reviews["reviews_distribution"]]
-
-    @classmethod
-    def get_traveler_types_distribution(cls, reviews: Any) -> List[TravelerTypesDistributionResponse]:
-        """
-        The traveler_types_distribution, data comes from reviews
-        :param reviews: result of reviews.json
-        :return: List[TravelerTypesDistributionResponse]
-        """
-        return [TravelerTypesDistributionResponse(**distribution) for distribution in reviews["trip_type_distribution"]]
 
     @classmethod
     def get_categories(cls, meta_review: Any) -> List[CategoryResponse]:

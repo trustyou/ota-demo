@@ -18,6 +18,10 @@ class ClusterSearchResult(BaseModel):
     categories: Dict[str, DataPoint]
     hotel_types: Dict[str, DataPoint]
     overall_match: bool
+    city: str
+    country: str
+    latitude: float
+    longitude: float
 
     class Config:
         orm_mode = True

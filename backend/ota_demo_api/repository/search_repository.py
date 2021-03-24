@@ -98,20 +98,24 @@ class SearchRepository:
         """
         is_city_country, is_coordinates = self._validate_location(search_data)
 
-        select_column_list = "ty_id" if is_count_query else """
+        search_results_column_list = "ty_id" if is_count_query else """
             ty_id,
             language,
             trip_type, 
+            latitude,
+            longitude,
+            city,
+            country,
             SUM(score) / COUNT(score) AS search_score,
-            array_agg(datapoint) as data_points,
-            array_agg(score) as scores,
-            array_agg(review_count) as review_counts
+            ARRAY_AGG(datapoint) AS data_points,
+            ARRAY_AGG(score) AS scores,
+            ARRAY_AGG(review_count) AS review_counts
         """
 
         query = f"""
             WITH search_results AS (
                 SELECT 
-                    {select_column_list},
+                    {search_results_column_list},
                     ROW_NUMBER() OVER (
                         PARTITION BY ty_id ORDER BY (language != 'all', trip_type != 'all') DESC
                     ) AS rn
@@ -120,13 +124,13 @@ class SearchRepository:
 
         if is_city_country:
             query +=  """
-                WHERE lower(city) = lower(:city) AND lower(country) = lower(:country)
+                WHERE LOWER(city) = LOWER(:city) AND LOWER(country) = LOWER(:country)
             """
 
         if is_coordinates:
             query += """
-                WHERE earth_box(ll_to_earth (:lat, :long), :radius) @> ll_to_earth (latitude, longitude)
-                AND earth_distance(ll_to_earth (:lat, :long), ll_to_earth (latitude, longitude)) < :radius
+                WHERE EARTH_BOX(LL_TO_EARTH (:lat, :long), :radius) @> LL_TO_EARTH (latitude, longitude)
+                AND EARTH_DISTANCE(LL_TO_EARTH (:lat, :long), LL_TO_EARTH (latitude, longitude)) < :radius
             """
 
         if search_data.trip_type:
@@ -149,39 +153,38 @@ class SearchRepository:
 
         query += """
                 AND datapoint = ANY(:data_points)
-                GROUP BY ty_id, trip_type, language
+                GROUP BY ty_id, trip_type, language, latitude, longitude, city, country
             )
         """
 
-        if is_count_query:
-            query += """
-                SELECT COUNT(*)
-                FROM search_results sr
-                JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
-                WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
-            """
-        else:
-            query += """
-                SELECT 
-                      sr.ty_id,
-                      sr.data_points,
-                      sr.scores, 
-                      sr.review_counts,
-                      sr.language,
-                      sr.trip_type,
-                      sr.rn,
-                      sr.search_score * (
-                        (
-                            (CASE WHEN sr.language = :language THEN 1 ELSE 0 END) + 
-                            (CASE WHEN sr.trip_type = :trip_type THEN 1 ELSE 0 END) + 
-                            array_length(sr.data_points, 1)
-                        ) / (array_length(:data_points, 1)::decimal + 2)
-                      ) as match_score,
-                      cs.score as score
-                FROM search_results sr
-                JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
-                WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
-            """
+        cluster_search_column_list = "COUNT(*)" if is_count_query else """
+            sr.ty_id,
+            sr.data_points,
+            sr.scores, 
+            sr.review_counts,
+            sr.language,
+            sr.trip_type,
+            sr.latitude,
+            sr.longitude,
+            sr.city,
+            sr.country,
+            sr.rn,
+            sr.search_score * (
+                (
+                    (CASE WHEN sr.language = :language THEN 1 ELSE 0 END) + 
+                    (CASE WHEN sr.trip_type = :trip_type THEN 1 ELSE 0 END) + 
+                    ARRAY_LENGTH(sr.data_points, 1)
+                ) / (ARRAY_LENGTH(:data_points, 1)::decimal + 2)
+            ) as match_score,
+            cs.score as score
+        """
+
+        query += f"""
+            SELECT {cluster_search_column_list}
+            FROM search_results sr
+            JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
+            WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
+        """
 
         if search_data.min_score is not None:
             query += """
