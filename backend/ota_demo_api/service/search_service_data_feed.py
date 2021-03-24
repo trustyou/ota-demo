@@ -23,7 +23,6 @@ from ota_demo_api.view_model.search_response import ReviewsDistributionResponse
 from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse, MatchResponse
-from ota_demo_api.consts import TRUSTYOU_HOTEL_API_KEY
 from ota_demo_api.service.badges import get_badge_icon
 
 
@@ -47,11 +46,11 @@ class SearchServiceDataFeed(object):
         ty_api = "https://api.trustyou.com/hotels/"
         ty_clusters = {str(c.ty_id): c for c in clusters}
 
-        hotels = []
-        for ty_id in ty_clusters.keys():
-            cluster_search_result = ty_clusters[ty_id]
+        async with httpx.AsyncClient() as client:
+            hotels = []
+            for ty_id in ty_clusters.keys():
+                cluster_search_result = ty_clusters[ty_id]
 
-            async with httpx.AsyncClient() as client:
                 responses = await asyncio.gather(
                     client.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}"),
                     client.get(f"{ty_api}/{ty_id}/reviews.json?scale={search_data.scale}"),
@@ -61,48 +60,48 @@ class SearchServiceDataFeed(object):
                 )
                 meta_review_response, reviews_response, seal_response, badges_response, location_response = responses
 
-            meta_review = meta_review_response.json().get("response", {})
-            reviews = reviews_response.json().get("response", {})
-            seal = seal_response.json().get("response", {})
-            location_response = location_response.json().get("response", {})
-            coordinates = location_response.get("coordinates", {}).get("coordinates")
-            city = location_response.get("address", {}).get("city")
-            country = location_response.get("address", {}).get("country")
-            city_center_coords = await cls.get_city_coords(city, country)
+                meta_review = meta_review_response.json().get("response", {})
+                reviews = reviews_response.json().get("response", {})
+                seal = seal_response.json().get("response", {})
+                location_response = location_response.json().get("response", {})
+                coordinates = location_response.get("coordinates", {}).get("coordinates")
+                city = location_response.get("address", {}).get("city")
+                country = location_response.get("address", {}).get("country")
+                city_center_coords = await cls.get_city_coords(city, country)
 
-            distance_from_center = cls.get_distance_from_center(city_center_coords, coordinates)
+                distance_from_center = cls.get_distance_from_center(city_center_coords, coordinates)
 
-            badges = cls.get_badges(badges_response.json().get("response"))
-            filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
-                                                                cluster_search_result.language)
-            categories = cls.get_categories(filtered_meta_review)
-            hotel_types = cls.get_hotel_types(meta_review)
+                badges = cls.get_badges(badges_response.json().get("response"))
+                filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
+                                                                    cluster_search_result.language)
+                categories = cls.get_categories(filtered_meta_review)
+                hotel_types = cls.get_hotel_types(meta_review)
 
-            reviews_distribution = cls.get_reviews_distribution(reviews)
-            traveler_types_distribution = cls.get_traveler_types_distribution(reviews)
-            match_info = cls.get_match_info(category_names, categories, hotel_types, cluster_search_result)
+                reviews_distribution = cls.get_reviews_distribution(reviews)
+                traveler_types_distribution = cls.get_traveler_types_distribution(reviews)
+                match_info = cls.get_match_info(category_names, categories, hotel_types, cluster_search_result)
 
-            hotels.append(
-                HotelResponse(
-                    ty_id=ty_id,
-                    name=seal.get("name"),
-                    score=float(seal.get("score")),
-                    reviews_count=seal.get("reviews_count"),
-                    score_description=seal.get("score_description"),
-                    relevant_now=cls.get_relevant_now(meta_review),
-                    categories=categories,
-                    badges=badges,
-                    reviews_distribution=reviews_distribution,
-                    traveler_types_distribution=traveler_types_distribution,
-                    match=match_info,
-                    distance_from_center=distance_from_center,
-                    coordinates=coordinates
+                hotels.append(
+                    HotelResponse(
+                        ty_id=ty_id,
+                        name=seal.get("name"),
+                        score=float(seal.get("score")),
+                        reviews_count=seal.get("reviews_count"),
+                        score_description=seal.get("score_description"),
+                        relevant_now=cls.get_relevant_now(meta_review),
+                        categories=categories,
+                        badges=badges,
+                        reviews_distribution=reviews_distribution,
+                        traveler_types_distribution=traveler_types_distribution,
+                        match=match_info,
+                        distance_from_center=distance_from_center,
+                        coordinates=coordinates
+                    )
                 )
-            )
 
-        return SearchResponse(
-            hotels=hotels
-        )
+            return SearchResponse(
+                hotels=hotels
+            )
 
     @classmethod
     def get_filtered_meta_review(cls, meta_review: Any, trip_type: str, language: str) -> Dict[str, Any]:
