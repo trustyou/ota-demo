@@ -10,7 +10,7 @@ function fetchCities(value, callback) {
   }
   currentValue = value;
 
-  function fake() {
+  function citySearch() {
     axios({
         method: 'get',
         url: `${OTA_DEMO_API_URL}/api/v1/city_search/?q=${value}`
@@ -23,7 +23,7 @@ function fetchCities(value, callback) {
       });
   }
 
-  timeout = setTimeout(fake, 800);
+  timeout = setTimeout(citySearch, 200);
 }
 
 class SearchLocation extends React.Component {
