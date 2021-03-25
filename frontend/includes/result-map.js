@@ -1,5 +1,7 @@
-var map = L.map('search-map').setView([48.1019351, 11.53698539037037], 11);
-var markers = [];
+// Init default map
+var RESULT_MAP = L.map('search-map').setView([48.1019351, 11.53698539037037], 13);
+
+var RESULT_MAP_MARKERS = [];;
 
 function getIcon(scoreDescription) {
     const iconClass = scoreDescription.toLowerCase().replaceAll(" ", "");
@@ -15,14 +17,21 @@ function getIcon(scoreDescription) {
 }
 
 function buildMap(lat, lon) {
-    if (map) {
-        map.remove();
+    const mapConfig = {
+        minZoom: 10,
+        maxZoom: 13,
     }
-    map = L.map('search-map').setView([lat, lon], 13);
+    if (RESULT_MAP) {
+        RESULT_MAP.remove();
+    }
+    var map = L.map('search-map', mapConfig).setView([lat, lon], 13);
 
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+    RESULT_MAP = map;
+
+    return map;
 }
 
 function markerOnClickHandler(e) {
@@ -30,7 +39,8 @@ function markerOnClickHandler(e) {
 }
 
 function addMarker(tyId, scoreDescription, lat, lon, popupText) {
-    if (!map) {
+
+    if (!RESULT_MAP) {
         return;
     }
     cleanMarker(tyId);
@@ -39,14 +49,14 @@ function addMarker(tyId, scoreDescription, lat, lon, popupText) {
         .bindPopup(popupText);
     marker.tyId = tyId;
 
-    markers[tyId] = marker
-        .addTo(map)
+    RESULT_MAP_MARKERS[tyId] = marker
+        .addTo(RESULT_MAP)
         .on('click', markerOnClickHandler);
 }
 
 function cleanMarker(ty_id) {
-    if (map && markers && markers.hasOwnProperty(ty_id)) {
+    if (RESULT_MAP && RESULT_MAP_MARKERS && RESULT_MAP_MARKERS.hasOwnProperty(ty_id)) {
         // remove the marker
-        map.removeLayer(markers[ty_id]);
+        RESULT_MAP.removeLayer(RESULT_MAP_MARKERS[ty_id]);
     }
 }
