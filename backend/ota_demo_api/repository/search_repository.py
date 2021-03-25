@@ -12,6 +12,7 @@ class SearchRepository:
     async def fetch(self, search_data: SearchRequest) -> List[ClusterSearchResult]:
         query = self._build_query(search_data)
         query_params = self._build_query_params(search_data)
+
         records = await self.database.fetch_all(query, values=query_params)
 
         if len(records) == 0:
@@ -44,7 +45,7 @@ class SearchRepository:
         return {
             dps[0]: DataPoint(
                 **dict(zip(["id", "score", "count"], [dps[0], scale_score(dps[1], scale), dps[2]]))
-            ) for dps in data_point_tuples
+            ) for dps in data_point_tuples if dps[0] != "oall"
         }
 
     def _transform_record(self, record_dict: Dict[str, Any], scale: int) -> Dict[str, Any]:
@@ -63,8 +64,8 @@ class SearchRepository:
             return record_dict
 
         data_points = list(zip(record_dict["data_points"], record_dict["scores"], record_dict["review_counts"]))
-        hotel_types_dps = [dps for dps in data_points if dps[0] == "oall" or dps[0].startswith("16")]
-        categories_dps = [dps for dps in data_points if dps[0] == "oall" or not dps[0].startswith("16")]
+        hotel_types_dps = [dps for dps in data_points if dps[0].startswith("16")]
+        categories_dps = [dps for dps in data_points if not dps[0].startswith("16")]
         record_dict["hotel_types"] = self._format_data_points(hotel_types_dps, scale)
         record_dict["categories"] = self._format_data_points(categories_dps, scale)
         record_dict["overall_match"] = False
@@ -229,12 +230,10 @@ class SearchRepository:
         else:
             query_params["language"] = "all"
 
-        data_points = []
+        data_points = ['oall']
         if search_data.categories or search_data.hotel_types:
             data_points += search_data.categories or []
             data_points += search_data.hotel_types or []
-        else:
-            data_points += ['oall']
 
         query_params["data_points"] = data_points
 
