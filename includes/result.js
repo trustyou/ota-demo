@@ -577,15 +577,19 @@ function HotelBadges({hotelId, badges}) {
 class Hotel extends React.Component {
   render() {
     const { hotel, randomIndex, isPersonalizedSearch } = this.props
-    const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
+    if (!hotel.image) {
+      hotel.image = `img/hotels/h${randomIndex}.jpg`
+    }
+    const hotelImageStyle = { backgroundImage: `url(${hotel.image})`, };
+
     const hasOnlyGenericMatchCategories = hotel.match.overall_match;
     const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
     const matchCategories = Object.values(allCategories).sort((a, b) => b.score - a.score )
     const matchesTripType = hotel.match.trip_type !== "all";
     const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
 
-    return <article className="hotel" id={hotel.ty_id}>
-      <div className="hotel-image" style={hotelImage}></div>
+    return <article className="hotel" id={hotel.ty_id} onClick={() => this.props.onHotelClicked(hotel)}>
+      <div className="hotel-image" style={hotelImageStyle}></div>
       <div className="hotel-details">
         <div className="hotel-name">{hotel.name}</div>
         { hotel.distance_from_center && <div className="hotel-location">
@@ -631,6 +635,7 @@ class SearchResults extends React.Component {
       {this.props.hotels.map(
         hotel => <Hotel
           key={hotel.ty_id}
+          onHotelClicked={this.props.onHotelClicked}
           hotel={hotel}
           isPersonalizedSearch={this.props.isPersonalizedSearch}
           randomIndex={getRandomImageIndex()}
@@ -652,6 +657,10 @@ class SearchPage extends React.Component {
     error: null,
     filterCity: "",
     filterCountry: "",
+
+    filterLat: null,
+    filterLon: null,
+
     filterCategories: [],
     filterTrips: [],
     filterOccasions: [],
@@ -664,6 +673,12 @@ class SearchPage extends React.Component {
     hasNextPage: true,
 
     isMapFloating: false,
+    newHotels: null,
+
+    // Selected hotel, center in map
+    selectedHotelId: null,
+    centerLat: null,
+    centerLon: null,
   }
 
   componentDidMount() {
@@ -710,9 +725,7 @@ class SearchPage extends React.Component {
      * if The indicator is not in the viewport set map floating
      */
     const el = entities[0];
-    var rect = el.boundingClientRect,
-      vWidth = window.innerWidth || document.documentElement.clientWidth,
-      vHeight = window.innerHeight || document.documentElement.clientHeight;
+    var rect = el.boundingClientRect;
 
     var isMapFloating = false;
 
@@ -750,12 +763,7 @@ class SearchPage extends React.Component {
   }
 
   addMarkers = (hotels) => {
-    hotels.forEach(h => {
-      const { ty_id, score_description, coordinates } = h;
-      if (coordinates) {
-        addMarker(ty_id, score_description, coordinates[0], coordinates[1], this.getMarkerPopup(h));
-      }
-    });
+    this.setState({ newHotels: hotels})
   }
 
   fetchHotels() {
@@ -786,7 +794,10 @@ class SearchPage extends React.Component {
       .then(coordinates => {
         // Update mapbox
         if (coordinates) {
-          buildMap(coordinates.lat, coordinates.lon);
+          this.setState({
+            filterLat: coordinates.lat,
+            filterLon: coordinates.lon
+          })
         }
 
         axios({
@@ -909,6 +920,20 @@ class SearchPage extends React.Component {
     })
   }
 
+  handleHotelClicked = (hotel) => {
+    if (
+      hotel.coordinates
+      && this.state.centerLat !== hotel.coordinates[0]
+      && this.state.centerLon !== hotel.coordinates[1]
+    ) {
+      this.setState({
+        centerLat: hotel.coordinates[0],
+        centerLon: hotel.coordinates[1],
+        selectedHotelId: hotel.ty_id,
+      })
+    }
+  }
+
   render() {
     return <>
       <SearchHeader
@@ -924,18 +949,27 @@ class SearchPage extends React.Component {
 
       <main>
         {(this.state.isLoadingMore || (!this.state.isLoadingHotel && !this.state.isLoadingCategories)) && !this.state.error &&
-          <SearchResults hotels={this.state.hotels} isPersonalizedSearch={this.state.isPersonalizedSearch} appendLoading={this.state.isLoadingMore} />
+          <SearchResults
+            hotels={this.state.hotels}
+            isPersonalizedSearch={this.state.isPersonalizedSearch}
+            onHotelClicked={this.handleHotelClicked}
+            appendLoading={this.state.isLoadingMore}
+          />
         }
 
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && this.state.error && <ErrorMessage/>}
 
         {this.state.isLoadingHotel && !this.state.isLoadingMore && <Loader itemCount={3} />}
-        <div className={this.state.isMapFloating ? 'map-container-float' : 'map-container'}>
-          <section className="search-map" id="search-map"></section>
-          <div className="score-gradient">
-            Preference match: <img src="img/score-gradient.png" />
-          </div>
-        </div>
+
+        <MapContainer
+          newHotels={this.state.newHotels}
+          lat={this.state.filterLat}
+          lon={this.state.filterLon}
+          centerLat={this.state.centerLat}
+          centerLon={this.state.centerLon}
+          selectedHotelId={this.state.selectedHotelId}
+          isMapFloating={this.state.isMapFloating}
+        />
       </main>
 
       <div className="footer-loader" ref={loadingRef => (this.loadingRef = loadingRef)}></div>
