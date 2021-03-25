@@ -26,12 +26,6 @@ def upgrade():
     )
 
     op.create_table(
-        'badge',
-        sa.Column('cluster_id', postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column('badge', postgresql.JSON(astext_type=sa.Text()), nullable=False),
-    )
-
-    op.create_table(
         'cluster',
         sa.Column('cluster_id', postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column('name', sa.String(), nullable=False),
@@ -40,7 +34,5 @@ def upgrade():
 
 def downgrade():
     op.drop_table('cluster')
-
-    op.drop_table('badge')
 
     op.drop_table('meta_review')
