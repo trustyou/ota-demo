@@ -19,7 +19,7 @@ function getIcon(scoreDescription) {
 function buildMap(lat, lon) {
     const mapConfig = {
         minZoom: 10,
-        maxZoom: 13,
+        maxZoom: 16,
     }
     if (RESULT_MAP) {
         RESULT_MAP.remove();
