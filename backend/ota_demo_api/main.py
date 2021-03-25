@@ -38,14 +38,12 @@ async def shutdown():
 app.include_router(
     search.router,
     prefix="/api/v1",
-    tags=["search"],
 )
 
 
 app.include_router(
     city_search.router,
     prefix="/api/v1",
-    tags=["city_search"],
 )
 
 
