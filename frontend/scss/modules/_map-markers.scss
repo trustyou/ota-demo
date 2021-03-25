@@ -14,20 +14,16 @@
 }
 
 .marker-verygood {
-    background-color: #3498db;
-    border: 1px solid #2792da;
+    background-color: #6da5ca;
+    border: 1px solid #5584a3;
 }
+
 .marker-fair {
-    background-color: #85aac2;
-    border: 1px solid #73a0be;
+    background-color: #97aebd;
+    border: 1px solid #768a97;
 }
 
-.marker-good {
-    background-color: #9bafbb;
-    border: 1px solid #91adbd;
-}
-
-.marker-poor {
+.marker-good, .marker-poor {
     background-color: #b0b3b5;
     border: 1px solid #a4adb3;
 }
