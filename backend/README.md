@@ -30,11 +30,11 @@ uvicorn ota_demo_api.main:app --reload
 
 6. For the documentation go to:
   * Local
-  ** Swagger: 127.0.0.1:8000/docs
-  ** ReDoc: 127.0.0.1:8000/redoc
+    * Swagger: 127.0.0.1:8000/docs
+    * ReDoc: 127.0.0.1:8000/redoc
   * Deployed
-  ** Swagger: https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/docs
-  ** Redoc: https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/redoc  
+    * Swagger: https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/docs
+    * Redoc: https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net/redoc  
 
 
 How to generate a new alembic migration?

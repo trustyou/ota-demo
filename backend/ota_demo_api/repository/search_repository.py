@@ -1,6 +1,6 @@
+import json
 from typing import Optional, List, Dict, Any, Tuple
 
-from ota_demo_api.util.score import normalize_score, scale_score
 from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult, DataPoint
 
@@ -18,7 +18,7 @@ class SearchRepository:
         if len(records) == 0:
             return []
 
-        record_dicts = [self._transform_record(dict(r), search_data.scale) for r in records]
+        record_dicts = [self._transform_record(dict(r)) for r in records]
         results = [ClusterSearchResult(**record_dict) for record_dict in record_dicts]
 
         return results
@@ -35,30 +35,29 @@ class SearchRepository:
         return count
 
     @staticmethod
-    def _format_data_points(data_point_tuples:Tuple[str, float, int], scale: int) -> Dict[str, DataPoint]:
+    def _format_data_points(data_point_tuples:Tuple[str, float, int]) -> Dict[str, DataPoint]:
         """
         Format category information.
         :param data_point_tuples: Tuples in form of category id, score and reviews count
-        :param scale: The score scale
         :return: Dict with formatted values
         """
         return {
             dps[0]: DataPoint(
-                **dict(zip(["id", "score", "count"], [dps[0], scale_score(dps[1], scale), dps[2]]))
+                **dict(zip(["id", "score", "count"], [dps[0], dps[1], dps[2]]))
             ) for dps in data_point_tuples if dps[0] != "oall"
         }
 
-    def _transform_record(self, record_dict: Dict[str, Any], scale: int) -> Dict[str, Any]:
+    def _transform_record(self, record_dict: Dict[str, Any]) -> Dict[str, Any]:
         """
         Transform the DB record to the expected format.
         :param record_dict: The db record
-        :param scale: The score scale
         :return: Dict with result in expected format
         """
+        record_dict["meta_review"] = json.loads(record_dict["meta_review"])
         record_dict["match_score"] = round(record_dict["match_score"])
 
         if record_dict["data_points"] == ["oall"]:
-            record_dict["overall_match"] = True
+            record_dict["personalized_match"] = False
             record_dict["hotel_types"] = {}
             record_dict["categories"] = {}
             return record_dict
@@ -66,9 +65,9 @@ class SearchRepository:
         data_points = list(zip(record_dict["data_points"], record_dict["scores"], record_dict["review_counts"]))
         hotel_types_dps = [dps for dps in data_points if dps[0].startswith("16")]
         categories_dps = [dps for dps in data_points if not dps[0].startswith("16")]
-        record_dict["hotel_types"] = self._format_data_points(hotel_types_dps, scale)
-        record_dict["categories"] = self._format_data_points(categories_dps, scale)
-        record_dict["overall_match"] = False
+        record_dict["hotel_types"] = self._format_data_points(hotel_types_dps)
+        record_dict["categories"] = self._format_data_points(categories_dps)
+        record_dict["personalized_match"] = True
 
         return record_dict
 
@@ -177,13 +176,17 @@ class SearchRepository:
                     ARRAY_LENGTH(sr.data_points, 1)
                 ) / (ARRAY_LENGTH(:data_points, 1)::decimal + 2)
             ) as match_score,
-            cs.score as score
+            cs.score as score,
+            mr.meta_review,
+            c.name
         """
 
         query += f"""
             SELECT {cluster_search_column_list}
             FROM search_results sr
-            JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
+            JOIN cluster_search cs ON (sr.ty_id = cs.ty_id)
+            JOIN meta_review mr on (sr.ty_id = mr.cluster_id)
+            JOIN cluster c on (sr.ty_id = c.cluster_id)
             WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
         """
 
@@ -238,7 +241,7 @@ class SearchRepository:
         query_params["data_points"] = data_points
 
         if search_data.min_score is not None:
-            query_params["min_score"] = normalize_score(search_data.min_score, search_data.scale)
+            query_params["min_score"] = search_data.min_score
 
         if not is_count_query:
             query_params["limit"] = search_data.page_size

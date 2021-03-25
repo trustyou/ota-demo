@@ -1,26 +1,39 @@
 from typing import Optional
 
+SCORE_DESCRIPTIONS = {
+    "score_0": "Excellent",
+    "score_1": "Very Good",
+    "score_2": "Good",
+    "score_3": "Fair",
+    "score_4": "Poor",
+    "not_rated": "Not Rated"
+}
 
-def scale_score(field: Optional[float], scale: int) -> Optional[float]:
+SCORE_THRESHOLDS = [86.0, 80.0, 74.0, 68.0, 0.0]
+
+
+def apply_threshold(value: float) -> Optional[int]:
     """
-    Scale the field from 100 to 5 scale.
-    :param field: The score on 100 scale
-    :param scale: The scale
-    :return: The field on the requested scale
+    Figure out the index of the threshold so that threshold < value <= next_threshold.
+    :param value: Number
+    :return: Index of the threshold where value falls
     """
-    try:
-        result = round(field / 20.0, 1) if scale != 100 else round(field)
-    except TypeError:
+    if value is None:
         return None
-    else:
-        return result
+    for index, threshold in enumerate(SCORE_THRESHOLDS):
+        if value > threshold:
+            return index
+    return len(thresholds)
 
 
-def normalize_score(field: Optional[float], scale: int) -> Optional[float]:
+def get_score_description(trust_score: float) -> str:
     """
-    Normalize to 100 scale the field expressed in scale.
-    :param field: The score field
-    :param scale: The current scale of the score
-    :return: The normalizaed score
+    Fetch the correct description for this TrustScore, e.g. "Excellent"
+    :param trust_score: TrustScore on 100 scale
+    :return: String representation of TrustScore
     """
-    return round(field * 100 / scale)
+    if trust_score is None:
+        return SCORE_DESCRIPTIONS["not_rated"]
+    score_index = apply_threshold(trust_score)
+    score_description_key = "score_{0:d}".format(score_index)
+    return SCORE_DESCRIPTIONS[score_description_key]

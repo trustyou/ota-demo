@@ -67,7 +67,6 @@ async def search_api(
         example="fr"
     ),
     page: Optional[int] = Query(0, description="The current page index.", example=0),
-    scale: Optional[int] = Query(100, description="The scale. Supported values are 5 and 100.", example=100),
     page_size: Optional[int] = Query(
         10, description="The number max number of results in any given results page", example=10
     )
@@ -105,7 +104,6 @@ async def search_api(
             long=long,
             radius=radius,
             language=language,
-            scale=scale,
             page=page,
             page_size=page_size
         )

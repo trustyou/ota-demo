@@ -15,7 +15,6 @@ class SearchRequest(BaseModel):
     long: Optional[float]
     radius: Optional[confloat(ge=0, le=10000)]
     language: Optional[str]
-    scale: Optional[int] = 100
     page: Optional[conint(ge=0)] = 1
     page_size: Optional[conint(gt=0, le=100)] = 10
 
@@ -27,10 +26,7 @@ class SearchRequest(BaseModel):
         if cls.is_valid_city_country_request(values) and cls.is_valid_map_box_request(values):
             raise ValueError('Only (city, country) or (lat, long, radius) should be included')
 
-        if values.get("scale") not in [5, 100]:
-            raise ValueError('Only (5, 100) are supported values for scale')
-
-        if values.get("min_score") and (values.get("min_score") < 0 or values.get("min_score") > values.get("scale")):
+        if values.get("min_score") and (values.get("min_score") < 0 or values.get("min_score") > 100):
             raise ValueError('Then min_score filter is outside the supported range')
 
         if values.get("sort_column") not in ["match_score", "score"]:

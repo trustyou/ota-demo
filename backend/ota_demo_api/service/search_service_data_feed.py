@@ -18,20 +18,18 @@ from ota_demo_api.view_model.search_response import (
     OverallSatisfaction,
     RelevantTopic
 )
-from ota_demo_api.view_model.search_request import SearchRequest
 from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse, MatchResponse
 from ota_demo_api.service.badges import get_badge_icon
+from ota_demo_api.util.score import get_score_description
 
 
 class SearchServiceDataFeed(object):
     @classmethod
-    async def search(cls, search_data: SearchRequest,
-                     clusters: List[ClusterSearchResult], total_count: int) -> SearchResponse:
+    async def search(cls, clusters: List[ClusterSearchResult], total_count: int) -> SearchResponse:
         """
         The data for API
 
-        :param search_data: SearchRequest object
         :param clusters: Results of the search
         :param total_count: The total number of results
         :return: Filtered data
@@ -44,60 +42,53 @@ class SearchServiceDataFeed(object):
             )
 
         category_names = await cls.get_category_names()
-        ty_api = "https://api.trustyou.com/hotels/"
         ty_clusters = {str(c.ty_id): c for c in clusters}
 
-        async with httpx.AsyncClient() as client:
-            hotels = []
-            for ty_id in ty_clusters.keys():
-                cluster_search_result = ty_clusters[ty_id]
+        hotels = []
+        for ty_id in ty_clusters.keys():
+            cluster_search_result = ty_clusters[ty_id]
 
-                responses = await asyncio.gather(
-                    client.get(f"{ty_api}/{ty_id}/meta_review.json?scale={search_data.scale}"),
-                    client.get(f"{ty_api}/{ty_id}/seal.json?scale={search_data.scale}"),
-                    client.get(f"{ty_api}/{ty_id}/badges.json?scale={search_data.scale}"),
-                )
-                meta_review_response, seal_response, badges_response = responses
-
-                meta_review = meta_review_response.json().get("response", {})
-                seal = seal_response.json().get("response", {})
-                coordinates = [cluster_search_result.latitude, cluster_search_result.longitude]
-                city_center_coords = await cls.get_city_coords(
-                    cluster_search_result.city, cluster_search_result.country
-                )
-
-                distance_from_center = cls.get_distance_from_center(
-                    city_center_coords, coordinates
-                )
-
-                badges = cls.get_badges(badges_response.json().get("response"))
-                filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
-                                                                    cluster_search_result.language)
-                categories = cls.get_categories(filtered_meta_review)
-                hotel_types = cls.get_hotel_types(meta_review)
-
-                match_info = cls.get_match_info(category_names, categories, hotel_types, cluster_search_result)
-
-                hotels.append(
-                    HotelResponse(
-                        ty_id=ty_id,
-                        name=seal.get("name"),
-                        score=float(seal.get("score")),
-                        reviews_count=seal.get("reviews_count"),
-                        score_description=seal.get("score_description"),
-                        relevant_now=cls.get_relevant_now(meta_review),
-                        categories=categories,
-                        badges=badges,
-                        match=match_info,
-                        distance_from_center=distance_from_center,
-                        coordinates=coordinates
-                    )
-                )
-
-            return SearchResponse(
-                hotels=hotels,
-                total_count=total_count
+            meta_review = cluster_search_result.meta_review
+            name = cluster_search_result.name
+            score = float(meta_review["summary"]["score"])
+            reviews_count = meta_review["reviews_count"]
+            coordinates = [cluster_search_result.latitude, cluster_search_result.longitude]
+            city_center_coords = await cls.get_city_coords(
+                cluster_search_result.city, cluster_search_result.country
             )
+
+            distance_from_center = cls.get_distance_from_center(
+                city_center_coords, coordinates
+            )
+
+            badges = cls.get_badges(meta_review)
+            filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
+                                                                cluster_search_result.language)
+            categories = cls.get_categories(filtered_meta_review)
+            hotel_types = cls.get_hotel_types(meta_review)
+
+            match_info = cls.get_match_info(category_names, categories, hotel_types, cluster_search_result)
+
+            hotels.append(
+                HotelResponse(
+                    ty_id=ty_id,
+                    name=name,
+                    score=score,
+                    reviews_count=reviews_count,
+                    score_description=get_score_description(score),
+                    relevant_now=cls.get_relevant_now(meta_review),
+                    categories=categories,
+                    badges=badges,
+                    match=match_info,
+                    distance_from_center=distance_from_center,
+                    coordinates=coordinates
+                )
+            )
+
+        return SearchResponse(
+            hotels=hotels,
+            total_count=total_count
+        )
 
     @classmethod
     def get_filtered_meta_review(cls, meta_review: Any, trip_type: str, language: str) -> Dict[str, Any]:
@@ -162,14 +153,14 @@ class SearchServiceDataFeed(object):
             return location.latitude, location.longitude
 
     @classmethod
-    def get_badges(cls, badges_data: Any):
+    def get_badges(cls, meta_review: Any):
         """
         The badges list, data comes from meta review
 
         :param meta_review: result of meta_review.json
         :return: [BadgeResponse]
         """
-        badge_list = badges_data["badge_list"]
+        badge_list = meta_review["badge_list"]
         badges = []
 
         for badge in badge_list:
@@ -227,7 +218,7 @@ class SearchServiceDataFeed(object):
         :return: RelevantNowResponse
         """
 
-        relevant_now_item = meta_review["relevant_now"] or {}
+        relevant_now_item = meta_review.get("relevant_now", {}) or {}
 
         relevant_topics = None
         overall_satisfaction = None
@@ -298,5 +289,5 @@ class SearchServiceDataFeed(object):
             trip_type=search_result.trip_type,
             categories=match_categories,
             hotel_types=match_hotel_types,
-            overall_match=search_result.overall_match
+            personalized_match=search_result.personalized_match
         )
