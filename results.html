@@ -367,10 +367,26 @@ class SearchHeader extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+    const newState = {};
+
     if (prevProps.isOpen !== this.props.isOpen) {
-      this.setState({
-        isOpen: this.props.isOpen,
-      })
+      newState["isOpen"] = this.props.isOpen;
+    }
+
+    if (prevProps.categories !== this.props.categories) {
+      newState["categories"] = this.props.categories;
+    }
+
+    if (prevProps.occasions !== this.props.occasions) {
+      newState["occasions"] = this.props.occasions;
+    }
+
+    if (prevProps.tripTypes !== this.props.tripTypes) {
+      newState["tripTypes"] = this.props.tripTypes;
+    }
+
+    if (Object.keys(newState).length > 0) {
+      this.setState(newState);
     }
   }
 
@@ -442,28 +458,7 @@ class TripsFilter extends React.Component {
 
   allTrips = () => {
     // TODO API call?
-    return [
-      {
-        id: "couple",
-        name: "Couple",
-        icon: "couple",
-      },
-      {
-        id: "business",
-        name: "Business",
-        icon: "suitcase",
-      },
-      {
-        id: "family",
-        name: "Family",
-        icon: "family",
-      },
-      {
-        id: "solo",
-        name: "Solo",
-        icon: "single",
-      },
-    ]
+    return ALL_TRIP_TYPES;
   }
 
   handleClick = (e) => {
@@ -527,44 +522,7 @@ class OccasionsFilter extends React.Component {
   }
 
   allOccasions = () => {
-    return [
-      {
-        id:  "honeymoon",
-        name: "Honeymoon",
-        icon: "tree-palm",
-        categories: ["16b", "16d", "16r"]
-      },
-      {
-        id:  "bachelor-party",
-        name: "Bachelor party",
-        icon: "glass-martini",
-        categories: ["16i", "16ag", "16z"]
-      },
-      {
-        id:  "wellness-relaxing",
-        name: "Wellness & relaxing",
-        icon: "lotus",
-        categories: ["16e"]
-      },
-      {
-        id:  "wintersports",
-        name: "Wintersports",
-        icon: "snowflake",
-        categories: ["16s"]
-      },
-      {
-        id:  "hiking-outdoors",
-        name: "Hiking & outdoors",
-        icon: "tree-pine",
-        categories: ["16ab"]
-      },
-      {
-        id:  "luxury",
-        name: "Luxury",
-        icon: "crown",
-        categories: ["16b"]
-      },
-    ]
+    return ALL_OCCASIONS;
   }
 
   handleClick = (e) => {
@@ -736,7 +694,7 @@ function HotelBadges({hotelId, badges}) {
           </div>
         </li>
       </ul>
-      <div class="rank-value">
+      <div className="rank-value">
         <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>
       </div>
     </>
@@ -853,26 +811,73 @@ class SearchPage extends React.Component {
     centerLon: null,
   }
 
+  fetchSearchParamsInUrl = () => {
+    const newState = {};
+    var isPersonalizedSearch = false;
+
+    const country = getLocationSearchInUrl("country");
+    if (country) {
+      newState["filterCountry"] = country;
+    }
+    const city = getLocationSearchInUrl("city");
+    if (city) {
+      newState["filterCity"] = city;
+    }
+
+    const pageSize = getLocationSearchInUrl("page_size");
+    if (pageSize && !isNaN(parseInt(pageSize))) {
+      newState["pageSize"] = parseInt(pageSize);
+    }
+
+    const filterTrips = getParamsInUrl("trip_type");
+    if (filterTrips && filterTrips.length > 0) {
+      isPersonalizedSearch = true;
+      newState["filterTrips"] = filterTrips.map(id => {
+        return ALL_TRIPS_INDEX[id];
+      });
+    }
+
+    const filterOccasions = getParamsInUrl("occasions");
+    if (filterOccasions && filterOccasions.length > 0) {
+      isPersonalizedSearch = true;
+      newState["filterOccasions"] = filterOccasions.map(id => {
+        return ALL_OCCASIONS_INDEX[id];
+      });
+    }
+
+    const filterCategories = getParamsInUrl("categories");
+    if (filterCategories && filterCategories.length > 0) {
+      isPersonalizedSearch = true;
+      newState["filterCategories"] = filterCategories;
+    }
+
+    newState["isPersonalizedSearch"] = isPersonalizedSearch;
+
+    return newState;
+  }
+
   componentDidMount() {
     const selectedLocation = getLocationSearchInUrl("location");
     const locationFilter = parseCityCountry(selectedLocation);
-    const newState = {
+    var newState = {
       isLoadingHotel: true,
       isLoadingCategories: true,
     }
 
     if (locationFilter) {
+      // TODO Support lat,lon query
       if (this.state.filterCity != locationFilter[0] || this.state.filterCountry != locationFilter[1]) {
         newState["filterCity"] = locationFilter[0]
         newState["filterCountry"] = locationFilter[1]
       }
+      newState = Object.assign({}, this.fetchSearchParamsInUrl(), newState);
       this.setState(newState, () => this.fetchHotels());
       this.fetchCategories();
     } else {
       window.location.href = "index.html"
     }
 
-    var options = {
+    var observerOptions = {
       root: null,
       rootMargin: "0px",
       threshold: 1.0
@@ -880,14 +885,14 @@ class SearchPage extends React.Component {
 
     this.observer = new IntersectionObserver(
       this.handleObserver.bind(this),
-      options
+      observerOptions
     );
     this.observer.observe(this.loadingRef);
 
     // float Map
     this.observerFloatMap = new IntersectionObserver(
       this.handleObserverFloatMap.bind(this),
-      options
+      observerOptions
     );
     this.observerFloatMap.observe(this.floatMapRef);
   }
@@ -938,29 +943,48 @@ class SearchPage extends React.Component {
     this.setState({ newHotels: hotels})
   }
 
+  buildAndStoreSearchUrl = () => {
+    const { filterCountry, filterCity, filterCategories, filterOccasions } = this.state;
+    var url = `country=${filterCountry}&city=${filterCity}`;
+    var browserUrl = url;
+
+    filterCategories.forEach(function(category) {
+      url = `${url}&categories=${JSON.parse(category).category_id}`;
+      browserUrl = `${browserUrl}&categories=${category}`;
+    });
+
+    this.state.filterTrips.forEach(function(trip) {
+      url = `${url}&trip_type=${trip.id}`;
+      browserUrl = `${browserUrl}&trip_type=${trip.id}`;
+    });
+
+    filterOccasions.forEach(function(occasion) {
+      occasion.categories.forEach(cat => {
+        url = `${url}&hotel_types=${cat}`;
+      });
+      browserUrl = `${browserUrl}&occasions=${occasion.id}`;
+    });
+
+    url = `${url}&page_size=${this.state.pageSize}&page=${this.state.currentPage}`;
+    browserUrl = `${browserUrl}&page_size=${this.state.pageSize}`;
+
+    const urlFull = `results.html?location=${filterCity}--${filterCountry}&${browserUrl}`;
+
+    // Replace url to keep track search params
+    if (`results.html${window.location.search}`.toUpperCase() !== encodeURI(urlFull).toUpperCase()) {
+      window.history.replaceState(null, null, urlFull);
+    }
+
+    return url;
+  }
+
   fetchHotels() {
     this.setState({
       isLoadingHotel: true,
     })
 
-    const { filterCountry, filterCity, filterCategories } = this.state
-
-    const base_url = `${OTA_DEMO_API_URL}/api/v1/search/?`
-    var url = `${base_url}country=${filterCountry}&city=${filterCity}`
-
-    filterCategories.forEach(function(category) {
-      url = `${url}&categories=${JSON.parse(category).category_id}`
-    });
-
-    this.state.filterTrips.forEach(function(trip) {
-      url = `${url}&trip_type=${trip.id}`
-    });
-
-    this.state.filterOccasions.forEach(function(occasion) {
-      occasion.categories.forEach(cat => url = `${url}&hotel_types=${cat}`)
-    });
-
-    url = `${url}&page_size=${this.state.pageSize}&page=${this.state.currentPage}`
+    const baseUrl = `${OTA_DEMO_API_URL}/api/v1/search/?`
+    var url = this.buildAndStoreSearchUrl();
 
     this.fetchLocationCoordinates()
       .then(coordinates => {
@@ -974,7 +998,7 @@ class SearchPage extends React.Component {
 
         axios({
           method: 'get',
-          url: url
+          url: `${baseUrl}${url}`
         })
         .then(response => response.data)
         .then(data => {
@@ -1115,6 +1139,9 @@ class SearchPage extends React.Component {
         onApplyChanges={this.onApplyChangesFilter}
         onApplyLocationChange={this.onApplyLocationChange}
         mrCategories={this.state.mrCategories}
+        categories={this.state.filterCategories}
+        tripTypes={this.state.filterTrips}
+        occasions={this.state.filterOccasions}
         totalCount={this.state.totalCount}
       />
       <span id="list-indicator" ref={floatMapRef => (this.floatMapRef = floatMapRef)}></span>
