@@ -35,7 +35,7 @@ function addMarker(tyId, scoreDescription, lat, lon, popupText) {
     }
     cleanMarker(tyId);
 
-    var marker = L.marker([lon, lat], {icon: getIcon(scoreDescription)})
+    var marker = L.marker([lat, lon], {icon: getIcon(scoreDescription)})
         .bindPopup(popupText);
     marker.tyId = tyId;
 
