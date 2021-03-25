@@ -77,10 +77,12 @@ async def search_api(
 
     Location filters:
     - city and country
+
     OR
+
     - lat, long and radius
 
-    Please specify either city and country or lat, long, radius, specifying both triggers a validation error.
+    Please specify either (city, country) or (lat, long, radius), specifying both triggers a validation error.
 
     Optional filters: categories, trip_type, hotel_types, language.
 

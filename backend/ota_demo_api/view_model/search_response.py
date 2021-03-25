@@ -2,16 +2,6 @@ from typing import Optional, List, Dict, Tuple
 from pydantic import BaseModel
 
 
-class ReviewsDistributionResponse(BaseModel):
-    count: int
-    stars: int
-
-
-class TravelerTypesDistributionResponse(BaseModel):
-    count: int
-    trip_type: str
-
-
 class BadgeHighlightModel(BaseModel):
     text: str
     confidence: float
@@ -120,8 +110,6 @@ class HotelResponse(BaseModel):
     relevant_now: Optional[RelevantNowResponse]
     categories: Optional[List[CategoryResponse]]
     badges: Optional[List[BadgeResponse]]
-    reviews_distribution: Optional[List[ReviewsDistributionResponse]]
-    traveler_types_distribution: Optional[List[TravelerTypesDistributionResponse]]
     match: MatchResponse
     distance_from_center: Optional[str]
     coordinates: Optional[Tuple[float, float]]

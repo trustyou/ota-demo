@@ -12,6 +12,7 @@ class SearchRepository:
     async def fetch(self, search_data: SearchRequest) -> List[ClusterSearchResult]:
         query = self._build_query(search_data)
         query_params = self._build_query_params(search_data)
+
         records = await self.database.fetch_all(query, values=query_params)
 
         if len(records) == 0:
@@ -44,7 +45,7 @@ class SearchRepository:
         return {
             dps[0]: DataPoint(
                 **dict(zip(["id", "score", "count"], [dps[0], scale_score(dps[1], scale), dps[2]]))
-            ) for dps in data_point_tuples
+            ) for dps in data_point_tuples if dps[0] != "oall"
         }
 
     def _transform_record(self, record_dict: Dict[str, Any], scale: int) -> Dict[str, Any]:
@@ -63,8 +64,8 @@ class SearchRepository:
             return record_dict
 
         data_points = list(zip(record_dict["data_points"], record_dict["scores"], record_dict["review_counts"]))
-        hotel_types_dps = [dps for dps in data_points if dps[0] == "oall" or dps[0].startswith("16")]
-        categories_dps = [dps for dps in data_points if dps[0] == "oall" or not dps[0].startswith("16")]
+        hotel_types_dps = [dps for dps in data_points if dps[0].startswith("16")]
+        categories_dps = [dps for dps in data_points if not dps[0].startswith("16")]
         record_dict["hotel_types"] = self._format_data_points(hotel_types_dps, scale)
         record_dict["categories"] = self._format_data_points(categories_dps, scale)
         record_dict["overall_match"] = False
@@ -98,20 +99,24 @@ class SearchRepository:
         """
         is_city_country, is_coordinates = self._validate_location(search_data)
 
-        select_column_list = "ty_id" if is_count_query else """
+        search_results_column_list = "ty_id" if is_count_query else """
             ty_id,
             language,
             trip_type, 
+            latitude,
+            longitude,
+            city,
+            country,
             SUM(score) / COUNT(score) AS search_score,
-            array_agg(datapoint) as data_points,
-            array_agg(score) as scores,
-            array_agg(review_count) as review_counts
+            ARRAY_AGG(datapoint) AS data_points,
+            ARRAY_AGG(score) AS scores,
+            ARRAY_AGG(review_count) AS review_counts
         """
 
         query = f"""
             WITH search_results AS (
                 SELECT 
-                    {select_column_list},
+                    {search_results_column_list},
                     ROW_NUMBER() OVER (
                         PARTITION BY ty_id ORDER BY (language != 'all', trip_type != 'all') DESC
                     ) AS rn
@@ -120,13 +125,13 @@ class SearchRepository:
 
         if is_city_country:
             query +=  """
-                WHERE lower(city) = lower(:city) AND lower(country) = lower(:country)
+                WHERE LOWER(city) = LOWER(:city) AND LOWER(country) = LOWER(:country)
             """
 
         if is_coordinates:
             query += """
-                WHERE earth_box(ll_to_earth (:lat, :long), :radius) @> ll_to_earth (latitude, longitude)
-                AND earth_distance(ll_to_earth (:lat, :long), ll_to_earth (latitude, longitude)) < :radius
+                WHERE EARTH_BOX(LL_TO_EARTH (:lat, :long), :radius) @> LL_TO_EARTH (latitude, longitude)
+                AND EARTH_DISTANCE(LL_TO_EARTH (:lat, :long), LL_TO_EARTH (latitude, longitude)) < :radius
             """
 
         if search_data.trip_type:
@@ -149,39 +154,38 @@ class SearchRepository:
 
         query += """
                 AND datapoint = ANY(:data_points)
-                GROUP BY ty_id, trip_type, language
+                GROUP BY ty_id, trip_type, language, latitude, longitude, city, country
             )
         """
 
-        if is_count_query:
-            query += """
-                SELECT COUNT(*)
-                FROM search_results sr
-                JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
-                WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
-            """
-        else:
-            query += """
-                SELECT 
-                      sr.ty_id,
-                      sr.data_points,
-                      sr.scores, 
-                      sr.review_counts,
-                      sr.language,
-                      sr.trip_type,
-                      sr.rn,
-                      sr.search_score * (
-                        (
-                            (CASE WHEN sr.language = :language THEN 1 ELSE 0 END) + 
-                            (CASE WHEN sr.trip_type = :trip_type THEN 1 ELSE 0 END) + 
-                            array_length(sr.data_points, 1)
-                        ) / (array_length(:data_points, 1)::decimal + 2)
-                      ) as match_score,
-                      cs.score as score
-                FROM search_results sr
-                JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
-                WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
-            """
+        cluster_search_column_list = "COUNT(*)" if is_count_query else """
+            sr.ty_id,
+            sr.data_points,
+            sr.scores, 
+            sr.review_counts,
+            sr.language,
+            sr.trip_type,
+            sr.latitude,
+            sr.longitude,
+            sr.city,
+            sr.country,
+            sr.rn,
+            sr.search_score * (
+                (
+                    (CASE WHEN sr.language = :language THEN 1 ELSE 0 END) + 
+                    (CASE WHEN sr.trip_type = :trip_type THEN 1 ELSE 0 END) + 
+                    ARRAY_LENGTH(sr.data_points, 1)
+                ) / (ARRAY_LENGTH(:data_points, 1)::decimal + 2)
+            ) as match_score,
+            cs.score as score
+        """
+
+        query += f"""
+            SELECT {cluster_search_column_list}
+            FROM search_results sr
+            JOIN public.cluster_search cs ON (sr.ty_id = cs.ty_id)
+            WHERE cs.datapoint = 'oall' and cs.trip_type = 'all' and cs.language = 'all' and sr.rn = 1
+        """
 
         if search_data.min_score is not None:
             query += """
@@ -226,12 +230,10 @@ class SearchRepository:
         else:
             query_params["language"] = "all"
 
-        data_points = []
+        data_points = ['oall']
         if search_data.categories or search_data.hotel_types:
             data_points += search_data.categories or []
             data_points += search_data.hotel_types or []
-        else:
-            data_points += ['oall']
 
         query_params["data_points"] = data_points
 
