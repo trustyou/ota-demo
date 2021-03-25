@@ -21,6 +21,6 @@ class ClusterSearchModel(Base):
 class CitySearchModel(Base):
     __tablename__ = "city_search"
 
-    city = Column(String)
-    country = Column(String)
+    city = Column(String, primary_key=True)
+    country = Column(String, primary_key=True)
     count = Column(SmallInteger)

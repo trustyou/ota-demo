@@ -58,6 +58,7 @@ def downgrade():
         DROP INDEX idx_cluster_search_by_city;
         DROP INDEX idx_cluster_search_by_coordinates;
         DROP TABLE cluster_search;
+        DROP TYPE trip_type_enum;
         
         DROP INDEX city_search_city_prefix;
         DROP TABLE city_search;
