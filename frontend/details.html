@@ -70,7 +70,7 @@ class HotelNameLocation extends React.Component{
     const { image, addresses, coordinates, name} = this.state;
 
     const hotelImage = { backgroundImage: `url(${image})`, };
-    const mapLink = coordinates ? `https://www.google.com/maps?q=${coordinates[0]},${coordinates[1]}` : "javascript:void(0)";
+    const mapLink = coordinates ? `https://www.google.com/maps?q=${coordinates[1]},${coordinates[0]}` : "javascript:void(0)";
 
     return <header style={hotelImage}>
       <div className="container">
