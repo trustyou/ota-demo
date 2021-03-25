@@ -576,14 +576,13 @@ function HotelBadges({hotelId, badges}) {
 
 class Hotel extends React.Component {
   render() {
-    const { hotel, randomIndex } = this.props
+    const { hotel, randomIndex, isPersonalizedSearch } = this.props
     const hotelImage = { backgroundImage: `url(img/hotels/h${randomIndex}.jpg)`, };
     const hasOnlyGenericMatchCategories = hotel.match.overall_match;
     const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
     const matchCategories = Object.values(allCategories).sort((a, b) => b.score - a.score )
     const matchesTripType = hotel.match.trip_type !== "all";
     const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
-    const personalizedSearch = !(hasOnlyGenericMatchCategories && hotel.match.trip_type === "all")
 
     return <article className="hotel" id={hotel.ty_id}>
       <div className="hotel-image" style={hotelImage}></div>
@@ -593,7 +592,7 @@ class Hotel extends React.Component {
           <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
         </div>
         }
-        { personalizedSearch && <span className="hotel-match-score has-tooltip">
+        { isPersonalizedSearch && <span className="hotel-match-score has-tooltip">
             <div className="tooltip"> Matches {hotel.match.match_score}% to your personalization </div>
               {hotel.match.match_score}% match for you
           </span>
@@ -633,6 +632,7 @@ class SearchResults extends React.Component {
         hotel => <Hotel
           key={hotel.ty_id}
           hotel={hotel}
+          isPersonalizedSearch={this.props.isPersonalizedSearch}
           randomIndex={getRandomImageIndex()}
         />)
       }
@@ -655,6 +655,7 @@ class SearchPage extends React.Component {
     filterCategories: [],
     filterTrips: [],
     filterOccasions: [],
+    isPersonalizedSearch: false,
     isOpenSearch: false,
 
     prevY: 0,
@@ -886,6 +887,7 @@ class SearchPage extends React.Component {
       filterCategories: data.categories,
       filterTrips: data.tripTypes,
       filterOccasions: data.occasions,
+      isPersonalizedSearch: !!(data.categories.length || data.tripTypes.length || data.occasions.length),
       currentPage: 0,
       isLoadingMore: false,
     }
@@ -922,7 +924,7 @@ class SearchPage extends React.Component {
 
       <main>
         {(this.state.isLoadingMore || (!this.state.isLoadingHotel && !this.state.isLoadingCategories)) && !this.state.error &&
-          <SearchResults hotels={this.state.hotels} appendLoading={this.state.isLoadingMore} />
+          <SearchResults hotels={this.state.hotels} isPersonalizedSearch={this.state.isPersonalizedSearch} appendLoading={this.state.isLoadingMore} />
         }
 
         {!this.state.isLoadingHotel && !this.state.isLoadingCategories && this.state.error && <ErrorMessage/>}
