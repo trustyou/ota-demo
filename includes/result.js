@@ -532,7 +532,7 @@ function HotelCategories({hotelId, categories}) {
       categories.slice(0, 3).map(category => <li key={`${hotelId}-${category.category_id}`}>
         <div className="has-tooltip">
           <span className="category pill">{category.category_name}: {category.score}</span>
-          { category.count && <div className="tooltip">
+          { category.count > 0 && <div className="tooltip">
               Based on {category.count} {category.count === 1 ? "review" : "reviews"}
             </div>
           }
@@ -544,7 +544,8 @@ function HotelCategories({hotelId, categories}) {
 
 function HotelBadges({hotelId, badges}) {
   // Take 1st badge is not trust_score_sentence, if there is no item, take 1st
-  var badge = badges.find(b => b.badge_type !== 'trust_score_sentence' && b.badge_type !== 'good_to_know')
+  var badge = badges.find(b => b.badge_type !== 'trust_score_sentence' && b.badge_type !== 'good_to_know'
+      && b.badge_type !== 'ranking')
   if (badge === undefined && badges.length > 0) {
     badge = badges[0];
   }
@@ -582,11 +583,11 @@ class Hotel extends React.Component {
     }
     const hotelImageStyle = { backgroundImage: `url(${hotel.image})`, };
 
-    const hasOnlyGenericMatchCategories = hotel.match.overall_match;
+    const isPersonalizedMatch = hotel.match.personalized_match;
     const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
     const matchCategories = Object.values(allCategories).sort((a, b) => b.score - a.score )
     const matchesTripType = hotel.match.trip_type !== "all";
-    const categories = hasOnlyGenericMatchCategories ? hotel.categories : matchCategories;
+    const categories = isPersonalizedMatch ? matchCategories: hotel.categories;
 
     return <article className="hotel" id={hotel.ty_id} onClick={() => this.props.onHotelClicked(hotel)}>
       <div className="hotel-image" style={hotelImageStyle}></div>
