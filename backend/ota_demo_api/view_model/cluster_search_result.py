@@ -1,5 +1,5 @@
 import uuid
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 from pydantic import BaseModel
 
@@ -17,11 +17,13 @@ class ClusterSearchResult(BaseModel):
     match_score: float
     categories: Dict[str, DataPoint]
     hotel_types: Dict[str, DataPoint]
-    overall_match: bool
+    personalized_match: bool
     city: str
     country: str
     latitude: float
     longitude: float
+    meta_review: Dict[str, Any]
+    name: str
 
     class Config:
         orm_mode = True

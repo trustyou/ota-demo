@@ -98,7 +98,7 @@ class MatchResponse(BaseModel):
     trip_type: str
     categories: Dict[str, MatchCategoryResponse]
     hotel_types: Dict[str, MatchHotelTypeResponse]
-    overall_match: bool
+    personalized_match: bool
 
 
 class HotelResponse(BaseModel):
