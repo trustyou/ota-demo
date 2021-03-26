@@ -1,6 +1,7 @@
 class MapContainer extends React.Component {
     componentDidUpdate(prevProps) {
-        if (prevProps.lat !== this.props.lat || prevProps.lon !== this.props.lon) {
+        if (prevProps.lat !== this.props.lat || prevProps.lon !== this.props.lon
+            || (prevProps.isStaleMap !== this.props.isStaleMap && this.props.isStaleMap)) {
             RESULT_MAP = buildMap(this.props.lat, this.props.lon);
             RESULT_MAP.on('zoomend', () => this.mapChanged());
             RESULT_MAP.on('dragend', () => this.mapChanged());

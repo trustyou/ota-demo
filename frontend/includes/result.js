@@ -995,6 +995,7 @@ class SearchPage extends React.Component {
           newHotels={this.state.newHotels}
           lat={this.state.filterLat}
           lon={this.state.filterLon}
+          isStaleMap={this.state.isLoadingHotel && !this.state.isLoadingMore}
           centerLat={this.state.centerLat}
           centerLon={this.state.centerLon}
           selectedHotelId={this.state.selectedHotelId}
