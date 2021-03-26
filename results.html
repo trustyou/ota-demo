@@ -197,7 +197,7 @@ function RelevantNow({relevantNow}) {
 
   if (relevantNow.overall_satisfaction && relevantNow.overall_satisfaction.score) {
     const recentRating = relevantNow.overall_satisfaction.score
-    scoreTrendItems.push(`<span>Recent Rating: Score <span class="pill">${recentRating}</span>`);
+    scoreTrendItems.push(`<span><b>Recent Rating</b>: Score <span class="pill">${recentRating}</span>`);
     if (relevantNow.overall_satisfaction.trend) {
       const recentTrend = relevantNow.overall_satisfaction.trend
       const recentTrendText = (recentTrend > 0) ? '+' + recentTrend : recentTrend
