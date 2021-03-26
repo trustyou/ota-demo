@@ -13,8 +13,15 @@ class CitySearchRepository:
             raise ValueError("You have to provide at least one char to search for")
 
         query = """
-            SELECT city, country, count FROM public.city_search
+            SELECT
+            regexp_replace(regexp_replace(city, '^\s+', ''), '\s+$', '') as city,
+            regexp_replace(regexp_replace(country, '^\s+', ''), '\s+$', '') as country,
+            SUM(city_search.count) as count
+            FROM city_search
             WHERE lower(city) LIKE :prefix
+            GROUP BY
+                regexp_replace(regexp_replace(city, '^\s+', ''), '\s+$', ''),
+                regexp_replace(regexp_replace(country, '^\s+', ''), '\s+$', '')
             ORDER BY count DESC
             LIMIT :limit;
         """
