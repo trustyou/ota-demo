@@ -22,14 +22,17 @@ from ota_demo_api.view_model.cluster_search_result import ClusterSearchResult
 from ota_demo_api.view_model.search_response import SearchResponse, HotelResponse, MatchResponse
 from ota_demo_api.service.badges import get_badge_icon
 from ota_demo_api.util.score import get_score_description
+from ota_demo_api.view_model.search_request import SearchRequest
 
 
 class SearchServiceDataFeed(object):
     @classmethod
-    async def search(cls, clusters: List[ClusterSearchResult], total_count: int) -> SearchResponse:
+    async def search(cls, search_data: SearchRequest,
+                     clusters: List[ClusterSearchResult], total_count: int) -> SearchResponse:
         """
         The data for API
 
+        :param search_data: The search request
         :param clusters: Results of the search
         :param total_count: The total number of results
         :return: Filtered data
@@ -61,11 +64,12 @@ class SearchServiceDataFeed(object):
                 city_center_coords, coordinates
             )
 
-            badges = cls.get_badges(meta_review)
             filtered_meta_review = cls.get_filtered_meta_review(meta_review, cluster_search_result.trip_type,
                                                                 cluster_search_result.language)
             categories = cls.get_categories(filtered_meta_review)
             hotel_types = cls.get_hotel_types(meta_review)
+            preferred_dps = cls.get_preferred_dps(search_data)
+            badges = cls.get_badges(meta_review, preferred_dps)
 
             match_info = cls.get_match_info(category_names, categories, hotel_types, cluster_search_result)
 
@@ -157,14 +161,16 @@ class SearchServiceDataFeed(object):
             return location.latitude, location.longitude
 
     @classmethod
-    def get_badges(cls, meta_review: Any):
+    def get_badges(cls, meta_review: Any, preferred_dps: List[str]) -> List[BadgeResponse]:
         """
         The badges list, data comes from meta review
 
-        :param meta_review: result of meta_review.json
-        :return: [BadgeResponse]
+        :param meta_review: Result of meta_review.json
+        :param preferred_dps: List of data point ids that are preferred
+        :return: List with the badges
         """
         badge_list = meta_review["badge_list"]
+        low_prio_types = ["ranking"]
         badges = []
 
         for badge in badge_list:
@@ -180,6 +186,9 @@ class SearchServiceDataFeed(object):
                 icon=get_badge_icon(badge)
             )
             badges.append(badge_response)
+
+        badges = sorted(badges, key=lambda x: (x.badge_data.category_id in preferred_dps,
+                                               x.badge_type not in low_prio_types), reverse=True)
 
         return badges
 
@@ -295,3 +304,18 @@ class SearchServiceDataFeed(object):
             hotel_types=match_hotel_types,
             personalized_match=search_result.personalized_match
         )
+
+    @classmethod
+    def get_preferred_dps(cls, search_data: SearchRequest) -> List[str]:
+        """
+        Get the preferred data points if any.
+        :param search_data: The search request
+        :return: The preferred data points
+        """
+        preferred_dps = []
+        if search_data.categories:
+            preferred_dps += search_data.categories
+        if search_data.hotel_types:
+            preferred_dps += search_data.hotel_types
+
+        return preferred_dps

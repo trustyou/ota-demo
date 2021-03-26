@@ -24,6 +24,8 @@ class SearchService(object):
         else:
             results_total_count = 0
 
-        hotels_response = await SearchServiceDataFeed.search(cluster_search_results, results_total_count)
+        hotels_response = await SearchServiceDataFeed.search(
+            search_data, cluster_search_results, results_total_count
+        )
 
         return hotels_response
