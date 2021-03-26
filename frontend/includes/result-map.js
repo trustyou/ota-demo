@@ -1,9 +1,29 @@
 // Init default map
 var RESULT_MAP = L.map('search-map').setView([48.1019351, 11.53698539037037], 13);
 
-var RESULT_MAP_MARKERS = [];;
+var RESULT_MAP_MARKERS = [];
 
-function getIcon(scoreDescription) {
+const SCORE_DESCRIPTIONS = {
+    "score_0": "Excellent",
+    "score_1": "Very Good",
+    "score_2": "Good",
+    "score_3": "Fair",
+    "score_4": "Poor"
+}
+
+const SCORE_THRESHOLDS = [86.0, 80.0, 74.0, 68.0, 0.0];
+
+function applyThreshold(score) {
+    for (const [index, value] of SCORE_THRESHOLDS.entries()) {
+        if (score > value) {
+            return index;
+        }
+    }
+}
+
+function getIcon(matchScore) {
+    const scoreIndex = applyThreshold(matchScore);
+    const scoreDescription = SCORE_DESCRIPTIONS[`score_${scoreIndex}`];
     const iconClass = scoreDescription.toLowerCase().replaceAll(" ", "");
 
     return L.divIcon({
@@ -38,14 +58,14 @@ function markerOnClickHandler(e) {
     scrollTo(e.target.tyId);
 }
 
-function addMarker(tyId, scoreDescription, lat, lon, popupText) {
+function addMarker(tyId, matchScore, lat, lon, popupText) {
 
     if (!RESULT_MAP) {
         return;
     }
     cleanMarker(tyId);
 
-    var marker = L.marker([lat, lon], {icon: getIcon(scoreDescription)})
+    var marker = L.marker([lat, lon], {icon: getIcon(matchScore)})
         .bindPopup(popupText);
     marker.tyId = tyId;
 
