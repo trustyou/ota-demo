@@ -26,7 +26,7 @@ class BadgeResponse(BaseModel):
 
 
 class CategoryResponseBase(BaseModel):
-    count: int
+    review_count: int
     sentiment: str
     text: str
     score: float
@@ -46,7 +46,7 @@ class HotelTypeResponseBase(BaseModel):
 
 
 class MatchCategoryResponse(BaseModel):
-    count: int
+    review_count: int
     score: float
     short_text: Optional[str]
     category_id: str

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class DataPoint(BaseModel):
     id: str
     score: float
-    count: int
+    review_count: int
 
 
 class ClusterSearchResult(BaseModel):

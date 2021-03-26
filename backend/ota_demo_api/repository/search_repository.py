@@ -43,7 +43,7 @@ class SearchRepository:
         """
         return {
             dps[0]: DataPoint(
-                **dict(zip(["id", "score", "count"], [dps[0], dps[1], dps[2]]))
+                **dict(zip(["id", "score", "review_count"], [dps[0], dps[1], dps[2]]))
             ) for dps in data_point_tuples if dps[0] != "oall"
         }
 
