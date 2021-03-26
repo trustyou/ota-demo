@@ -501,12 +501,7 @@ function HotelCategories({hotelId, categories}) {
 }
 
 function HotelBadges({hotelId, badges}) {
-  // Take 1st badge is not trust_score_sentence, if there is no item, take 1st
-  var badge = badges.find(b => b.badge_type !== 'trust_score_sentence' && b.badge_type !== 'good_to_know'
-      && b.badge_type !== 'ranking')
-  if (badge === undefined && badges.length > 0) {
-    badge = badges[0];
-  }
+  const badge = badges.length > 0 ? badges[0]: null
 
   return <>
     { badge && <>
