@@ -111,7 +111,8 @@ class SearchLocation extends React.Component {
 }
       class MapContainer extends React.Component {
     componentDidUpdate(prevProps) {
-        if (prevProps.lat !== this.props.lat || prevProps.lon !== this.props.lon) {
+        if (prevProps.lat !== this.props.lat || prevProps.lon !== this.props.lon
+            || (prevProps.isStaleMap !== this.props.isStaleMap && this.props.isStaleMap)) {
             RESULT_MAP = buildMap(this.props.lat, this.props.lon);
             RESULT_MAP.on('zoomend', () => this.mapChanged());
             RESULT_MAP.on('dragend', () => this.mapChanged());
@@ -1165,6 +1166,7 @@ class SearchPage extends React.Component {
           newHotels={this.state.newHotels}
           lat={this.state.filterLat}
           lon={this.state.filterLon}
+          isStaleMap={this.state.isLoadingHotel && !this.state.isLoadingMore}
           centerLat={this.state.centerLat}
           centerLon={this.state.centerLon}
           selectedHotelId={this.state.selectedHotelId}
@@ -1223,6 +1225,7 @@ function buildMap(lat, lon) {
     }
     if (RESULT_MAP) {
         RESULT_MAP.remove();
+        RESULT_MAP_MARKERS = [];
     }
     var map = L.map('search-map', mapConfig).setView([lat, lon], 13);
 

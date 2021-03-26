@@ -43,6 +43,7 @@ function buildMap(lat, lon) {
     }
     if (RESULT_MAP) {
         RESULT_MAP.remove();
+        RESULT_MAP_MARKERS = [];
     }
     var map = L.map('search-map', mapConfig).setView([lat, lon], 13);
 
