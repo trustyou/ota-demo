@@ -130,6 +130,10 @@ class SearchServiceDataFeed(object):
             return None
 
         distance_from_center_km = round(geodesic(city_center_coords, coordinates).kilometers, 1)
+
+        if distance_from_center_km < 0.1:
+            return "At the center of the city"
+
         return f"{distance_from_center_km} km from center"
 
     @classmethod
