@@ -8,9 +8,9 @@ class MapContainer extends React.Component {
 
         if (prevProps.newHotels !== this.props.newHotels) {
             this.props.newHotels.forEach(h => {
-                const { ty_id, score_description, coordinates } = h;
+                const { ty_id, coordinates } = h;
                 if (coordinates) {
-                    addMarker(ty_id, score_description, coordinates[0], coordinates[1], this.getMarkerPopup(h));
+                    addMarker(ty_id, h.match.match_score, coordinates[0], coordinates[1], this.getMarkerPopup(h));
                 }
             });
         }
