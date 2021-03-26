@@ -1,6 +1,6 @@
 
 const IMAGES_SIZE = 20;
-const OTA_DEMO_API_URL = "http://localhost:8000"
+const OTA_DEMO_API_URL = "https://ota-demo.integration.nbg1-c01-stag.hcloud.trustyou.net"
 
 const ALL_OCCASIONS = [
   {
