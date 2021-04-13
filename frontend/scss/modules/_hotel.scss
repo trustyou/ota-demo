@@ -78,12 +78,26 @@
 	}
 
 	.badges {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		justify-content: flex-end;
-		width: 100%;
+		margin: auto;
+
+		.badges-list {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+
+			.badge {
+				float: left;
+			}
+
+			.rank-value {
+				float: right;
+
+				strong {
+					display: block;
+					color: #3498db;
+				}
+			}
+		}
 	}
 
 	ul.categories {

@@ -682,23 +682,25 @@ function HotelBadges({hotelId, badges}) {
 
   return <>
     { badge && <>
-      <ul className="badges">
-        <li
-          key={`${hotelId}-${badge.badge_type}-${badge.badge_data.category_name}-${badge.subtext}`}
-          className="has-tooltip"
-        >
-          <div className="tooltip">
-            { !badge.subtext && <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>}
-            {badge.subtext}
-          </div>
-          <div className="badge">
-              <div className="icon-wrapper"><i className={`ty-icon ty-icon-${badge.icon || "trophy"}`}></i></div>
-              <div className="ribbon-tail"></div>
-          </div>
-        </li>
-      </ul>
-      <div className="rank-value">
-        <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>
+      <div className="badges">
+        <ul className="badges-list">
+          <li
+            key={`${hotelId}-${badge.badge_type}-${badge.badge_data.category_name}-${badge.subtext}`}
+            className="has-tooltip"
+          >
+            <div className="tooltip">
+              { !badge.subtext && <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>}
+              {badge.subtext}
+            </div>
+            <div className="badge">
+                <div className="icon-wrapper"><i className={`ty-icon ty-icon-${badge.icon || "trophy"}`}></i></div>
+                <div className="ribbon-tail"></div>
+            </div>
+            <div className="rank-value">
+              <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>
+            </div>
+          </li>
+        </ul>
       </div>
     </>
     }
