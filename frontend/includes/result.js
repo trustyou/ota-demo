@@ -243,7 +243,7 @@ class SearchHeader extends React.Component {
           <fieldset className="search-primary" id="search-primary">
             { (this.props.totalCount == null) && <legend> Searching... </legend> }
             { this.props.totalCount && <legend> You have {this.props.totalCount.toLocaleString()} results for <em
-              id="search-location-legend">{capitalize(this.state.city)} - {capitalize(this.state.country)}</em>
+              id="search-location-legend">{toTitleCase(this.state.city)} - {toTitleCase(this.state.country)}</em>
               </legend>
             }
             <div className="search-box">
