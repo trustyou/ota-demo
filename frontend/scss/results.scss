@@ -32,7 +32,15 @@ main {
 
 .score-gradient {
 	margin-top: 20px;
-    text-align: right;
+	float: right;
+
+	img {
+		width: 150px;
+	}
+}
+
+.match-high {
+	float: right;
 }
 
 .map-container-float {
