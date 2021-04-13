@@ -32,8 +32,8 @@ function RelevantNow({relevantNow}) {
       const recentTrend = relevantNow.overall_satisfaction.trend
       const recentTrendText = (recentTrend > 0) ? '+' + recentTrend : recentTrend
       const trendClassName = (recentTrend > 0) ? 'text-positive': 'text-negative'
-      const arrowClassName = (recentTrend > 0) ? 'ty-icon-arrow-up': 'ty-icon-arrow-down'
-      scoreTrendItems.push(`<span class=${trendClassName}><i class="ty-icon ${arrowClassName}"></i>${recentTrendText}</span>`)
+      scoreTrendItems.push(`&nbsp`)
+      scoreTrendItems.push(`<span class=${trendClassName}>${recentTrendText}</span>`)
     }
 
     relevantNowScoreTrendText = scoreTrendItems.join('')

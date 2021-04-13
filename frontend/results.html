@@ -164,8 +164,8 @@ class SearchLocation extends React.Component {
             <div className={this.props.isMapFloating ? 'map-container-float' : 'map-container'}>
                 <section className="search-map" id="search-map"></section>
                 <div className="score-gradient">
-                    <div><span>Preference match</span></div>
-                    <div><img src="img/score-gradient.png" /></div>
+                    <div className="preference-match">Preference match</div>
+                    <img src="img/score-gradient.png" />
                     <div className="match-legend">
                         <span className="match-low">Low</span>
                         <span className="match-high">High</span>
@@ -209,8 +209,8 @@ function RelevantNow({relevantNow}) {
       const recentTrend = relevantNow.overall_satisfaction.trend
       const recentTrendText = (recentTrend > 0) ? '+' + recentTrend : recentTrend
       const trendClassName = (recentTrend > 0) ? 'text-positive': 'text-negative'
-      const arrowClassName = (recentTrend > 0) ? 'ty-icon-arrow-up': 'ty-icon-arrow-down'
-      scoreTrendItems.push(`<span class=${trendClassName}><i class="ty-icon ${arrowClassName}"></i>${recentTrendText}</span>`)
+      scoreTrendItems.push(`&nbsp`)
+      scoreTrendItems.push(`<span class=${trendClassName}>${recentTrendText}</span>`)
     }
 
     relevantNowScoreTrendText = scoreTrendItems.join('')
