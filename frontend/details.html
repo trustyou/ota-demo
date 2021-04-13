@@ -26,7 +26,7 @@ function RelevantNowWidget({tyId, apiKey}) {
   return <div className="container">
     <section className="hotel-relevant-now">
       <WidgetIframe
-        url={`https://api.trustyou.com/hotels/${tyId}/relevant_now.html?key=${apiKey}&amp;iframe_resizer=true`}
+        url={`https://api.trustyou.com/hotels/${tyId}/relevant_now.html?key=${apiKey}&amp;iframe_resizer=true&scale=100`}
       />
     </section>
   </div>
@@ -35,7 +35,7 @@ function RelevantNowWidget({tyId, apiKey}) {
 function MetaReviewWidget({tyId, apiKey}) {
   return <section className="hotel-meta-review">
     <WidgetIframe
-      url={`https://api.trustyou.com/hotels/${tyId}/tops_flops.html?key=${apiKey}&amp;iframe_resizer=true`}
+      url={`https://api.trustyou.com/hotels/${tyId}/tops_flops.html?key=${apiKey}&amp;iframe_resizer=true&scale=100`}
     />
   </section>
 }
