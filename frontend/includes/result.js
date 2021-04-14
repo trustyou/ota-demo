@@ -495,12 +495,14 @@ function Loader({itemCount}) {
   </div>;
 }
 
-function HotelCategories({hotelId, categories}) {
+function HotelCategories({hotelId, categories, highlightCategories}) {
   return <ul className="categories">
     {
       categories.slice(0, 3).map(category => <li key={`${hotelId}-${category.category_id}`}>
         <div className="has-tooltip">
-          <span className="category pill">{category.category_name}: {category.score}</span>
+          <span className={ highlightCategories ? "matched-category category pill" : "category pill"}>
+            {category.category_name}: {category.score}
+          </span>
           { category.review_count > 0 && <div className="tooltip">
               Based on {category.review_count} {category.review_count === 1 ? "review" : "reviews"}
             </div>
@@ -547,13 +549,14 @@ class Hotel extends React.Component {
     if (!hotel.image) {
       hotel.image = `img/hotels/h${randomIndex}.jpg`
     }
-    const hotelImageStyle = { backgroundImage: `url(${hotel.image})`, };
+    const hotelImageStyle = { backgroundImage: `url(${hotel.image})`, }
 
-    const isPersonalizedMatch = hotel.match.personalized_match;
+    const isPersonalizedMatch = hotel.match.personalized_match
     const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
     const matchCategories = Object.values(allCategories).sort((a, b) => b.score - a.score )
-    const matchesTripType = hotel.match.trip_type !== "all";
-    const categories = isPersonalizedMatch ? matchCategories: hotel.categories;
+    const matchesTripType = hotel.match.trip_type !== "all"
+    const categories = isPersonalizedMatch ? matchCategories: hotel.categories
+    const highlightCategories = isPersonalizedMatch || !isPersonalizedSearch
 
     return <article className="hotel" id={hotel.ty_id} onClick={() => this.props.onHotelClicked(hotel)}>
       <div className="hotel-image has-tooltip" style={hotelImageStyle}>
@@ -575,7 +578,7 @@ class Hotel extends React.Component {
             Guest feedback from similar trips:
           </div>
         }
-        <HotelCategories hotelId={hotel.ty_id} categories={categories} />
+        <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={highlightCategories}/>
         <RelevantNow relevantNow={hotel.relevant_now} />
       </div>
       <div className="hotel-actions">
