@@ -32,8 +32,8 @@ function RelevantNow({relevantNow}) {
       const recentTrend = relevantNow.overall_satisfaction.trend
       const recentTrendText = (recentTrend > 0) ? '+' + recentTrend : recentTrend
       const trendClassName = (recentTrend > 0) ? 'text-positive': 'text-negative'
-      const arrowClassName = (recentTrend > 0) ? 'ty-icon-arrow-up': 'ty-icon-arrow-down'
-      scoreTrendItems.push(`<span class=${trendClassName}><i class="ty-icon ${arrowClassName}"></i>${recentTrendText}</span>`)
+      scoreTrendItems.push(`&nbsp`)
+      scoreTrendItems.push(`<span class=${trendClassName}>${recentTrendText}</span>`)
     }
 
     relevantNowScoreTrendText = scoreTrendItems.join('')
@@ -243,7 +243,7 @@ class SearchHeader extends React.Component {
           <fieldset className="search-primary" id="search-primary">
             { (this.props.totalCount == null) && <legend> Searching... </legend> }
             { this.props.totalCount && <legend> You have {this.props.totalCount.toLocaleString()} results for <em
-              id="search-location-legend">{capitalize(this.state.city)} - {capitalize(this.state.country)}</em>
+              id="search-location-legend">{toTitleCase(this.state.city)} - {toTitleCase(this.state.country)}</em>
               </legend>
             }
             <div className="search-box">
@@ -505,23 +505,25 @@ function HotelBadges({hotelId, badges}) {
 
   return <>
     { badge && <>
-      <ul className="badges">
-        <li
-          key={`${hotelId}-${badge.badge_type}-${badge.badge_data.category_name}-${badge.subtext}`}
-          className="has-tooltip"
-        >
-          <div className="tooltip">
-            { !badge.subtext && <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>}
-            {badge.subtext}
-          </div>
-          <div className="badge">
-              <div className="icon-wrapper"><i className={`ty-icon ty-icon-${badge.icon || "trophy"}`}></i></div>
-              <div className="ribbon-tail"></div>
-          </div>
-        </li>
-      </ul>
-      <div className="rank-value">
-        <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>
+      <div className="badges">
+        <ul className="badges-list">
+          <li
+            key={`${hotelId}-${badge.badge_type}-${badge.badge_data.category_name}-${badge.subtext}`}
+            className="has-tooltip"
+          >
+            <div className="tooltip">
+              { !badge.subtext && <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>}
+              {badge.subtext}
+            </div>
+            <div className="badge">
+                <div className="icon-wrapper"><i className={`ty-icon ty-icon-${badge.icon || "trophy"}`}></i></div>
+                <div className="ribbon-tail"></div>
+            </div>
+            <div className="rank-value">
+              <span dangerouslySetInnerHTML={{ __html: badge.text }}></span>
+            </div>
+          </li>
+        </ul>
       </div>
     </>
     }
@@ -553,7 +555,7 @@ class Hotel extends React.Component {
         </div>
         }
         { isPersonalizedSearch && <span className="hotel-match-score has-tooltip">
-            <div className="tooltip"> Matches {hotel.match.match_score}% to your personalization </div>
+            <div className="tooltip"> Matches {hotel.match.match_score}% to your preferences </div>
               {hotel.match.match_score}% match for you
           </span>
         }
