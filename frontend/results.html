@@ -615,7 +615,18 @@ class CategoryFilter extends React.Component {
   }
 
   render() {
-    const options = this.props.mrCategories.map(
+    const sortedMrCategories = this.props.mrCategories.sort(
+      (a,b) => {
+        const a_tokens = a.name.split(" ").length
+        const b_tokens = b.name.split(" ").length
+        return (a_tokens > b_tokens) ? 1 : (
+            (b_tokens > a_tokens) ? -1 : (
+                (a.name > b.name) ? 1 : (b.name > a.name ? -1 : 0)
+            )
+        )
+      }
+    )
+    const options = sortedMrCategories.map(
       cat => <antd.Select.Option
           key={JSON.stringify({category_id: cat.category_id, name: cat.name})}>{cat.name}
         </antd.Select.Option>
