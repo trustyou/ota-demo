@@ -545,18 +545,20 @@ function HotelBadges({hotelId, badges}) {
 
 class Hotel extends React.Component {
   render() {
-    const { hotel, randomIndex, isPersonalizedSearch } = this.props
-    if (!hotel.image) {
-      hotel.image = `img/hotels/h${randomIndex}.jpg`
-    }
-    const hotelImageStyle = { backgroundImage: `url(${hotel.image})`, }
-
-    const isPersonalizedMatch = hotel.match.personalized_match
+    const { hotel, randomIndex, isPersonalizedSearch, filterOccasions, filterCategories } = this.props
+    const randomImage = `img/hotels/h${randomIndex}.jpg`
+    const hotelImageStyle = { backgroundImage: `url(${hotel.image ? hotel.image : randomImage})`}
     const allCategories = {...hotel.match.categories, ...hotel.match.hotel_types}
     const matchCategories = Object.values(allCategories).sort((a, b) => b.score - a.score )
+    const matchCategoryIds = matchCategories.map(category => category.category_id)
+    const matchFilterCategories = filterCategories.filter(filterCategory => {
+      return matchCategoryIds.includes(JSON.parse(filterCategory).category_id)
+    })
     const matchesTripType = hotel.match.trip_type !== "all"
-    const categories = isPersonalizedMatch ? matchCategories: hotel.categories
-    const highlightCategories = isPersonalizedMatch || !isPersonalizedSearch
+    const categories = hotel.match.personalized_data_points ? matchCategories: hotel.categories
+    const occasions = filterOccasions.filter(occasion => {
+      return occasion.categories.some(category => matchCategoryIds.includes(category))
+    })
 
     return <article className="hotel" id={hotel.ty_id} onClick={() => this.props.onHotelClicked(hotel)}>
       <div className="hotel-image has-tooltip" style={hotelImageStyle}>
@@ -565,11 +567,22 @@ class Hotel extends React.Component {
       <div className="hotel-details">
         <div className="hotel-name">{hotel.name}</div>
         { hotel.distance_from_center && <div className="hotel-location">
-          <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
-        </div>
+            <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
+          </div>
         }
         { isPersonalizedSearch && <span className="hotel-match-score has-tooltip">
-            <div className="tooltip"> Matches {hotel.match.match_score}% to your preferences </div>
+            <div className="tooltip">
+              Matches {hotel.match.match_score}% to your preferences: overall review rating
+              { hotel.match.personalized_data_points && <span>
+                  , { matchFilterCategories.map(
+                        category => {return JSON.parse(category).name.toLowerCase()}
+                      ).join(', ')
+                    }
+                </span>
+              }
+              { matchesTripType && <span>, {hotel.match.trip_type} traveler</span> }
+              { occasions && occasions.length > 0 && <span>, {occasions.map(occasion => occasion.id)} </span> }
+            </div>
               {hotel.match.match_score}% match for you
           </span>
         }
@@ -578,7 +591,7 @@ class Hotel extends React.Component {
             Guest feedback from similar trips:
           </div>
         }
-        <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={highlightCategories}/>
+        <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={hotel.match.personalized_data_points}/>
         <RelevantNow relevantNow={hotel.relevant_now} />
       </div>
       <div className="hotel-actions">
@@ -610,6 +623,8 @@ class SearchResults extends React.Component {
           onHotelClicked={this.props.onHotelClicked}
           hotel={hotel}
           isPersonalizedSearch={this.props.isPersonalizedSearch}
+          filterOccasions={this.props.filterOccasions}
+          filterCategories={this.props.filterCategories}
           randomIndex={getRandomImageIndex()}
         />)
       }
@@ -992,6 +1007,8 @@ class SearchPage extends React.Component {
         {(this.state.isLoadingMore || (!this.state.isLoadingHotel && !this.state.isLoadingCategories)) && !this.state.error &&
           <SearchResults
             hotels={this.state.hotels}
+            filterOccasions={this.state.filterOccasions}
+            filterCategories={this.state.filterCategories}
             isPersonalizedSearch={this.state.isPersonalizedSearch}
             onHotelClicked={this.handleHotelClicked}
             appendLoading={this.state.isLoadingMore}

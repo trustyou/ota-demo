@@ -17,7 +17,7 @@ class ClusterSearchResult(BaseModel):
     match_score: float
     categories: Dict[str, DataPoint]
     hotel_types: Dict[str, DataPoint]
-    personalized_match: bool
+    personalized_data_points: bool
     city: str
     country: str
     latitude: float

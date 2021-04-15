@@ -302,7 +302,7 @@ class SearchServiceDataFeed(object):
             trip_type=search_result.trip_type,
             categories=match_categories,
             hotel_types=match_hotel_types,
-            personalized_match=search_result.personalized_match
+            personalized_data_points=search_result.personalized_data_points
         )
 
     @classmethod

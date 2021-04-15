@@ -57,7 +57,7 @@ class SearchRepository:
         record_dict["match_score"] = round(record_dict["match_score"])
 
         if record_dict["data_points"] == ["oall"]:
-            record_dict["personalized_match"] = False
+            record_dict["personalized_data_points"] = False
             record_dict["hotel_types"] = {}
             record_dict["categories"] = {}
             return record_dict
@@ -67,7 +67,7 @@ class SearchRepository:
         categories_dps = [dps for dps in data_points if not dps[0].startswith("16")]
         record_dict["hotel_types"] = self._format_data_points(hotel_types_dps)
         record_dict["categories"] = self._format_data_points(categories_dps)
-        record_dict["personalized_match"] = True
+        record_dict["personalized_data_points"] = True
 
         return record_dict
 
