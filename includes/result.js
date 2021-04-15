@@ -27,7 +27,7 @@ function RelevantNow({relevantNow}) {
 
   if (relevantNow.overall_satisfaction && relevantNow.overall_satisfaction.score) {
     const recentRating = relevantNow.overall_satisfaction.score
-    scoreTrendItems.push(`<span><b>Recent Rating</b>: Score <span class="pill">${recentRating}</span>`);
+    scoreTrendItems.push(`<span>Recent rating: <span class="pill"><b>${recentRating}</b></span>`);
     if (relevantNow.overall_satisfaction.trend) {
       const recentTrend = relevantNow.overall_satisfaction.trend
       const recentTrendText = (recentTrend > 0) ? '+' + recentTrend : recentTrend
@@ -42,7 +42,7 @@ function RelevantNow({relevantNow}) {
   if (relevantNow.relevant_topics) {
     for (var key in relevantNow.relevant_topics) {
       const val = relevantNow.relevant_topics[key];
-      categoriesItems.push(`${val.name} <span class="pill">${val.score}</span>`)
+      categoriesItems.push(`${val.name}: <span class="pill"><b>${val.score}</b></span>`)
     }
 
     relevantNowCategoriesText = categoriesItems.join(', ')
@@ -504,7 +504,8 @@ function HotelCategories({hotelId, categories, highlightCategories}) {
             {category.category_name}: {category.score}
           </span>
           { category.review_count > 0 && <div className="tooltip">
-              Based on {category.review_count} {category.review_count === 1 ? "review" : "reviews"}
+            <div>Sentiment score <b>{category.score}</b></div>
+            <div>Based on {category.review_count} {category.review_count === 1 ? "review" : "reviews"}</div>
             </div>
           }
         </div>
@@ -583,12 +584,12 @@ class Hotel extends React.Component {
               { matchesTripType && <span>, {hotel.match.trip_type} traveler</span> }
               { occasions && occasions.length > 0 && <span>, {occasions.map(occasion => occasion.id)} </span> }
             </div>
-              {hotel.match.match_score}% match for you
+          <b>{hotel.match.match_score}% match for you</b>
           </span>
         }
         { matchesTripType &&
           <div>
-            Guest feedback from similar trips:
+            Guest feedback from {hotel.match.trip_type} trips:
           </div>
         }
         <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={hotel.match.personalized_data_points}/>
