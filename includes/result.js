@@ -587,11 +587,9 @@ class Hotel extends React.Component {
           <b>{hotel.match.match_score}% match for you</b>
           </span>
         }
-        { matchesTripType &&
-          <div>
-            Guest feedback from <b>{hotel.match.trip_type}</b> trips:
-          </div>
-        }
+        <div>
+          Guest feedback{ matchesTripType && <span> from <b>{hotel.match.trip_type}</b> trips</span> }:
+        </div>
         <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={hotel.match.personalized_data_points}/>
         <RelevantNow relevantNow={hotel.relevant_now} />
       </div>
