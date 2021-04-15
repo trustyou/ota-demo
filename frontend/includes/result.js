@@ -589,7 +589,7 @@ class Hotel extends React.Component {
         }
         { matchesTripType &&
           <div>
-            Guest feedback from {hotel.match.trip_type} trips:
+            Guest feedback from <b>{hotel.match.trip_type}</b> trips:
           </div>
         }
         <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={hotel.match.personalized_data_points}/>
