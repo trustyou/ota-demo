@@ -50,13 +50,15 @@ class MapContainer extends React.Component {
     render() {
         return (
             <div className={this.props.isMapFloating ? 'map-container-float' : 'map-container'}>
-                <section className="search-map" id="search-map"></section>
-                <div className="score-gradient">
-                    <div className="preference-match">Preference match</div>
-                    <img src="img/score-gradient.png" />
-                    <div className="match-legend">
-                        <span className="match-low">Low</span>
-                        <span className="match-high">High</span>
+                <div className="search-map-wrapper">
+                    <section className="search-map" id="search-map"></section>
+                    <div className="score-gradient">
+                        <div className="preference-match">Preference match</div>
+                        <img src="img/score-gradient.png" />
+                        <div className="match-legend">
+                            <span className="match-low">Low</span>
+                            <span className="match-high">High</span>
+                        </div>
                     </div>
                 </div>
             </div>
