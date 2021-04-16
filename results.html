@@ -751,46 +751,61 @@ class Hotel extends React.Component {
     return <article className="hotel" id={hotel.ty_id} onClick={() => this.props.onHotelClicked(hotel)}>
       <div className="hotel-image" style={hotelImageStyle}></div>
       <div className="hotel-details">
-        <div className="hotel-name">{hotel.name}</div>
-        { hotel.distance_from_center && <div className="hotel-location">
-            <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
+        <div className="hotel-result-header">
+          <div className="hotel-info">
+            <div className="hotel-name">
+              {hotel.name}</div>
+            { hotel.distance_from_center && <div className="hotel-location">
+              <i className="ty-icon ty-icon-map-marker"></i> {hotel.distance_from_center}
+            </div>
+            }
           </div>
-        }
-        { isPersonalizedSearch && <span className="hotel-match-score has-tooltip">
+          <div className="hotel-stats">
+            <div className="hotel-badge">
+              <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
+            </div>
+            <div className="hotel-trustscore">
+              <div className="trustscore">
+                <div className="score">{hotel.score}</div>
+                <div className="details">
+                  <div className="label">{hotel.score_description}</div>
+                  <div className="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="hotel-result-body">
+          { isPersonalizedSearch && <span className="hotel-match-score has-tooltip">
             <div className="tooltip">
               Matches {hotel.match.match_score}% to your preferences: overall review rating
-              { hotel.match.personalized_data_points && <span>
+                { hotel.match.personalized_data_points && <span>
                   , { matchFilterCategories.map(
                         category => {return JSON.parse(category).name.toLowerCase()}
                       ).join(', ')
                     }
-                </span>
-              }
-              { matchesTripType && <span>, {hotel.match.trip_type} traveler</span> }
-              { occasions && occasions.length > 0 && <span>, {occasions.map(occasion => occasion.id)} </span> }
-            </div>
-          <b>{hotel.match.match_score}% match for you</b>
-          </span>
-        }
-        <div>
-          Guest feedback
-          { matchesTripType && <span> from <b>{hotel.match.trip_type}</b> trips</span> }
-          {matchCategories && matchCategories.length > 0 && <span> on relevant topics</span>}:
+                  </span>
+                }
+                { matchesTripType && <span>, {hotel.match.trip_type} traveler</span> }
+                { occasions && occasions.length > 0 && <span>, {occasions.map(occasion => occasion.id)} </span> }
+              </div>
+            <b>{hotel.match.match_score}% match for you</b>
+            </span>
+          }
+          <div>
+            Guest feedback
+            { matchesTripType && <span> from <b>{hotel.match.trip_type}</b> trips</span> }
+            {matchCategories && matchCategories.length > 0 && <span> on relevant topics</span>}:
+          </div>
+          <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={hotel.match.personalized_data_points}/>
         </div>
-        <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={hotel.match.personalized_data_points}/>
-        <RelevantNow relevantNow={hotel.relevant_now} />
-      </div>
-      <div className="hotel-actions">
-        <div className="trustscore">
-          <div className="score">{hotel.score}</div>
-          <div className="details">
-            <div className="label">{hotel.score_description}</div>
-            <div className="caption">{hotel.reviews_count ? hotel.reviews_count.toLocaleString(undefined): 0} reviews</div>
+        <div className="hotel-result-footer">
+          <RelevantNow relevantNow={hotel.relevant_now} />
+          <div className="book-now">
+            <a className="action-primary btn btn-primary" href={`details.html?ty_id=${hotel.ty_id}`}>Book Now</a>
+            <a className="action-secondary btn btn-text" href={`details.html?ty_id=${hotel.ty_id}`}>More details</a>
           </div>
         </div>
-        <HotelBadges hotelId={hotel.ty_id} badges={hotel.badges} />
-        <a className="action-primary btn btn-primary" href={`details.html?ty_id=${hotel.ty_id}`}>Book Now</a>
-        <a className="action-secondary btn btn-text" href={`details.html?ty_id=${hotel.ty_id}`}>More details</a>
       </div>
     </article>
   }
