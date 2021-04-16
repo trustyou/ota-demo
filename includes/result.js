@@ -27,13 +27,12 @@ function RelevantNow({relevantNow}) {
 
   if (relevantNow.overall_satisfaction && relevantNow.overall_satisfaction.score) {
     const recentRating = relevantNow.overall_satisfaction.score
-    scoreTrendItems.push(`<span>Recent rating: <span class="pill"><b>${recentRating}</b></span>`);
+    scoreTrendItems.push(`<span class="recent-rating">Recent rating: <span class="pill"><b>${recentRating}</b></span>`);
     if (relevantNow.overall_satisfaction.trend) {
       const recentTrend = relevantNow.overall_satisfaction.trend
       const recentTrendText = (recentTrend > 0) ? '+' + recentTrend : recentTrend
       const trendClassName = (recentTrend > 0) ? 'text-positive': 'text-negative'
-      scoreTrendItems.push(`&nbsp`)
-      scoreTrendItems.push(`<span class=${trendClassName}>${recentTrendText}</span>`)
+      scoreTrendItems.push(`<span class="rating-trend ${trendClassName}">${recentTrendText}</span>`)
     }
 
     relevantNowScoreTrendText = scoreTrendItems.join('')
@@ -42,19 +41,15 @@ function RelevantNow({relevantNow}) {
   if (relevantNow.relevant_topics) {
     for (var key in relevantNow.relevant_topics) {
       const val = relevantNow.relevant_topics[key];
-      categoriesItems.push(`${val.name}: <span class="pill"><b>${val.score}</b></span>`)
+      categoriesItems.push(`<span class="relevant-topic">${val.name}: <span class="pill"><b>${val.score}</b></span></span>`)
     }
 
-    relevantNowCategoriesText = categoriesItems.join(', ')
+    relevantNowCategoriesText = categoriesItems.join('')
   }
 
-  return <div>
-    <div>
-      {relevantNowScoreTrendText && <span dangerouslySetInnerHTML={{ __html: relevantNowScoreTrendText }}></span>}
-    </div>
-    <div>
-      {relevantNowCategoriesText && <span dangerouslySetInnerHTML={{ __html: relevantNowCategoriesText }}></span>}
-    </div>
+  return <div className="relevant-now">
+    {relevantNowScoreTrendText && <span dangerouslySetInnerHTML={{ __html: relevantNowScoreTrendText }}></span>}
+    {relevantNowCategoriesText && <span dangerouslySetInnerHTML={{ __html: relevantNowCategoriesText }}></span>}
   </div>
 }
 
