@@ -497,7 +497,7 @@ function Loader({itemCount}) {
           <div className="placeholder-text"></div>
           <div className="placeholder-text"></div>
         </div>
-        <div className="hotel-actions">
+        <div className="hotel-actions-placeholder">
           <div className="placeholder-btn"></div>
           <div className="placeholder-text"></div>
         </div>
