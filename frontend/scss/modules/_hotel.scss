@@ -33,8 +33,57 @@
 	}
 
 	.hotel-details {
-		padding: $space-8;
-		flex: 1 1 auto;
+		padding: $space-4;
+		display: flex;
+		flex-direction: column;
+		height: auto;
+		width: 100%;
+
+		.hotel-result-header {
+			display: flex;
+			flex: 1 0 auto;
+
+			.hotel-info {
+				width: 50%;
+			}
+
+			.hotel-stats {
+				display: flex;
+				justify-content: flex-end;
+				width: 50%;
+
+				.hotel-badge, .hotel-trustscore {
+					padding: 0 $space-2;
+				}
+			}
+		}
+
+		.hotel-result-footer {
+			display: flex;
+			flex: 1 0 auto;
+			align-items: center;
+			justify-content: space-between;
+
+			.relevant-now {
+				width: auto;
+			}
+
+			.book-now {
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-end;
+				width: auto;
+			}
+		}
+
+		.hotel-result-body {
+			flex: 1 0 auto;
+		}
+
+		.hotel-trustscore, .hotel-badge {
+			align-items: flex-start;
+			justify-content: flex-end;
+		}
 
 		.hotel-name {
 			font-size: 1.4rem;
@@ -54,27 +103,27 @@
 		}
 	}
 
-	.hotel-actions {
-		padding: $space-8 $space-8 $space-8 $space-3;
-		margin: 0;
-		flex-direction: column;
-		display: flex;
-		align-items: flex-end;
-		justify-content: flex-end;
-
-		.action-primary {
-			// margin: auto auto 0;
-			margin: auto 10px 0 auto; // Attemp to fix button align with badge text
-		}
-
-		.action-secondary {
-			margin: 0;
-		}
-
-		.trustscore {
-			margin-bottom: $space-6;
-		}
-	}
+	//.hotel-actions {
+	//	padding: $space-4;
+	//	margin: 0;
+	//	flex-direction: column;
+	//	display: flex;
+	//	align-items: flex-end;
+	//	justify-content: flex-end;
+	//
+	//	.action-primary {
+	//		// margin: auto auto 0;
+	//		margin: auto 10px 0 auto; // Attemp to fix button align with badge text
+	//	}
+	//
+	//	.action-secondary {
+	//		margin: 0;
+	//	}
+	//
+	//	.trustscore {
+	//		margin-bottom: $space-6;
+	//	}
+	//}
 
 	.badges {
 		margin: auto;
@@ -108,7 +157,7 @@
 
 			span {
 				padding: 10px;
-				margin-right: 5px;
+				margin-right: $space-3;
 				margin-top: 5px;
 			}
 
