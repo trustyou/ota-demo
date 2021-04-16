@@ -572,7 +572,7 @@ class Hotel extends React.Component {
     })
 
     return <article className="hotel" id={hotel.ty_id} onClick={() => this.props.onHotelClicked(hotel)}>
-      <div className="hotel-image" style={hotelImageStyle}></div>
+      <div className="hotel-image" title="This picture doesn't belong to the hotel" style={hotelImageStyle}></div>
       <div className="hotel-details">
         <div className="hotel-result-header">
           <div className="hotel-info">
