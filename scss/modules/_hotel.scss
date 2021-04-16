@@ -103,27 +103,14 @@
 		}
 	}
 
-	//.hotel-actions {
-	//	padding: $space-4;
-	//	margin: 0;
-	//	flex-direction: column;
-	//	display: flex;
-	//	align-items: flex-end;
-	//	justify-content: flex-end;
-	//
-	//	.action-primary {
-	//		// margin: auto auto 0;
-	//		margin: auto 10px 0 auto; // Attemp to fix button align with badge text
-	//	}
-	//
-	//	.action-secondary {
-	//		margin: 0;
-	//	}
-	//
-	//	.trustscore {
-	//		margin-bottom: $space-6;
-	//	}
-	//}
+	.hotel-actions-placeholder {
+		padding: $space-4;
+		margin: 0;
+		flex-direction: column;
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-end;
+	}
 
 	.badges {
 		margin: auto;
