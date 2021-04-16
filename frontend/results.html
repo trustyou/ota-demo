@@ -204,7 +204,15 @@ function RelevantNow({relevantNow}) {
 
   if (relevantNow.overall_satisfaction && relevantNow.overall_satisfaction.score) {
     const recentRating = relevantNow.overall_satisfaction.score
-    scoreTrendItems.push(`<span class="recent-rating">Recent rating: <span class="pill"><b>${recentRating}</b></span>`);
+    const reviewsCount = relevantNow.overall_satisfaction.reviews_count
+    scoreTrendItems.push(
+      `<span class="recent-rating">Recent rating: <span class="pill has-tooltip">
+        <b>${recentRating}</b>
+        <div class="tooltip">
+          <div>Based on ${reviewsCount} ${reviewsCount === 1 ? "review" : "reviews"}</div>
+        </div>
+      </span>`
+    );
     if (relevantNow.overall_satisfaction.trend) {
       const recentTrend = relevantNow.overall_satisfaction.trend
       const recentTrendText = (recentTrend > 0) ? '+' + recentTrend : recentTrend
@@ -217,8 +225,16 @@ function RelevantNow({relevantNow}) {
 
   if (relevantNow.relevant_topics) {
     for (var key in relevantNow.relevant_topics) {
-      const val = relevantNow.relevant_topics[key];
-      categoriesItems.push(`<span class="relevant-topic">${val.name}: <span class="pill"><b>${val.score}</b></span></span>`)
+      const val = relevantNow.relevant_topics[key]
+      const reviewsCount = val.reviews_count
+      categoriesItems.push(
+        `<span class="relevant-topic">${val.name}: <span class="pill has-tooltip">
+          <b>${val.score}</b>
+          <div class="tooltip">
+            <div>Based on ${reviewsCount} ${reviewsCount === 1 ? "review" : "reviews"}</div>
+          </div>
+        </span></span>`
+      )
     }
 
     relevantNowCategoriesText = categoriesItems.join('')
@@ -676,7 +692,7 @@ function HotelCategories({hotelId, categories, highlightCategories}) {
             {category.category_name}: {category.score}
           </span>
           { category.review_count > 0 && <div className="tooltip">
-            <div>Based on {category.review_count} {category.review_count === 1 ? "review" : "reviews"}</div>
+              <div>Based on {category.review_count} {category.review_count === 1 ? "review" : "reviews"}</div>
             </div>
           }
         </div>
