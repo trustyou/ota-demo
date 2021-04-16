@@ -63,3 +63,18 @@ main {
 		display: none;
 	}
 }
+
+
+.hotel-details {
+	.relevant-now {
+		.recent-rating {
+			.rating-trend {
+				padding-left: $space-1;
+			}
+		}
+
+		.relevant-topic {
+			padding-left: $space-3;
+		}
+	}
+}

@@ -55,13 +55,12 @@
 	}
 
 	.hotel-actions {
-		padding: $space-8;
+		padding: $space-8 $space-8 $space-8 $space-3;
 		margin: 0;
 		flex-direction: column;
 		display: flex;
 		align-items: flex-end;
 		justify-content: flex-end;
-		min-width: 200px;
 
 		.action-primary {
 			// margin: auto auto 0;
