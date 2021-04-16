@@ -504,7 +504,6 @@ function HotelCategories({hotelId, categories, highlightCategories}) {
             {category.category_name}: {category.score}
           </span>
           { category.review_count > 0 && <div className="tooltip">
-            <div>Sentiment score <b>{category.score}</b></div>
             <div>Based on {category.review_count} {category.review_count === 1 ? "review" : "reviews"}</div>
             </div>
           }
@@ -588,7 +587,9 @@ class Hotel extends React.Component {
           </span>
         }
         <div>
-          Guest feedback{ matchesTripType && <span> from <b>{hotel.match.trip_type}</b> trips</span> }:
+          Guest feedback
+          { matchesTripType && <span> from <b>{hotel.match.trip_type}</b> trips</span> }
+          {matchCategories && matchCategories.length > 0 && <span> on relevant topics</span>}:
         </div>
         <HotelCategories hotelId={hotel.ty_id} categories={categories} highlightCategories={hotel.match.personalized_data_points}/>
         <RelevantNow relevantNow={hotel.relevant_now} />
