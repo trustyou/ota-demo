@@ -113,11 +113,9 @@ function parseCityCountry(cityStr) {
   return null;
 }
 
-
-function getRandomImageIndex() {
-  // Random image Index
-  var randomIndex = Math.floor(Math.random() * IMAGES_SIZE);
-  return randomIndex + 1;
+function getRandomImageIndex(hotel_id) {
+  // get random image index based on given hotel id
+  return parseInt(hotel_id.replace(/\D/g,'')) % IMAGES_SIZE + 1;
 }
 
 function scrollTo(tyId) {

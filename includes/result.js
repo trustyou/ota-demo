@@ -649,7 +649,7 @@ class SearchResults extends React.Component {
           isPersonalizedSearch={this.props.isPersonalizedSearch}
           filterOccasions={this.props.filterOccasions}
           filterCategories={this.props.filterCategories}
-          randomIndex={getRandomImageIndex()}
+          randomIndex={getRandomImageIndex(hotel.ty_id)}
         />)
       }
       {this.props.appendLoading && <Loader itemCount={2} />}
