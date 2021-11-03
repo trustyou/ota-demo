@@ -45,7 +45,7 @@ class HotelNameLocation extends React.Component{
     address: null,
     coordinates: null,
     name: null,
-    image: `img/hotels/h${getRandomImageIndex()}.jpg`,
+    image: `img/hotels/h${getRandomImageIndex(this.props.tyId)}.jpg`,
   }
 
   buildFullAddress = (addresses) => {
