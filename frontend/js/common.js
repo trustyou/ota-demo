@@ -71,7 +71,7 @@ const ALL_TRIPS_INDEX = ALL_TRIP_TYPES.reduce((a,x) => ({...a, [x.id]: x}), {})
 This is a demo API key, do not reuse it!
 Contact TrustYou to receive your own.
 */
-const TRUSTYOU_HOTEL_API_KEY = "a06294d3-4d58-45c8-97a1-5c905922e03a"
+const TRUSTYOU_HOTEL_API_KEY = "22222222-2222-2222-2222-222222222222"
 
 function capitalize(str) {
   if (!str) {

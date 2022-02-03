@@ -5,4 +5,4 @@ DATABASE_URL = "DATABASE_URL"
 
 # This is a demo API key, do not reuse it!
 # Contact TrustYou to receive your own.
-TRUSTYOU_HOTEL_API_KEY = "a06294d3-4d58-45c8-97a1-5c905922e03a"
+TRUSTYOU_HOTEL_API_KEY = "22222222-2222-2222-2222-222222222222"
