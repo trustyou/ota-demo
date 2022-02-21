@@ -55,7 +55,7 @@ class HotelNameLocation extends React.Component{
   componentDidMount() {
     axios({
         method: 'get',
-        url: `https://api.trustyou.com/hotels/${this.props.tyId}/location.json`
+        url: `https://api.trustyou.com/hotels/${this.props.tyId}/location.json?key=${apiKey}`
       })
       .then(response => response.data.response)
       .then(({ address, coordinates, name }) => {
