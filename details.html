@@ -46,6 +46,7 @@ class HotelNameLocation extends React.Component{
     coordinates: null,
     name: null,
     image: `img/hotels/h${getRandomImageIndex(this.props.tyId)}.jpg`,
+    apiKey: this.props.apiKey
   }
 
   buildFullAddress = (addresses) => {
@@ -53,6 +54,8 @@ class HotelNameLocation extends React.Component{
   }
 
   componentDidMount() {
+    const apiKey = this.state.apiKey
+
     axios({
         method: 'get',
         url: `https://api.trustyou.com/hotels/${this.props.tyId}/location.json?key=${apiKey}`
@@ -97,7 +100,7 @@ class DetailPage extends React.Component {
 
     return (
       <>
-        <HotelNameLocation tyId={tyId}/>
+        <HotelNameLocation tyId={tyId} apiKey={apiKey}/>
         <main>
           <RelevantNowWidget
             tyId={tyId}
