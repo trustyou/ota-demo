@@ -2,7 +2,7 @@ export PROJECT=ota_demo
 
 export SPARK_CONF_DIR=${HOME}/spark-conf
 
-export CONDA_HOME=${HOME}/miniconda3
+export CONDA_HOME=${HOME}/miniforge3
 export CONDA_SH=${CONDA_HOME}/etc/profile.d/conda.sh
 export CONDA_ENV=${PROJECT}_conda_env
 export CONDA_ENV_PATH=${CONDA_HOME}/envs/${CONDA_ENV}
